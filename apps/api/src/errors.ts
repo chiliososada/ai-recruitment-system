@@ -1,5 +1,5 @@
 import { ERROR_STATUS, type ApiErrorBody, type ErrorCode, type FieldIssue } from '@ars/shared';
-import { ZodError, type ZodSchema } from 'zod';
+import { z, ZodError } from 'zod';
 
 /** Application error carrying a machine code + optional i18n key + field details. */
 export class AppError extends Error {
@@ -56,7 +56,7 @@ export function zodToIssues(error: ZodError): FieldIssue[] {
 }
 
 /** Parse `data` with `schema`, throwing a VALIDATION AppError (field details) on failure. */
-export function parseOrThrow<T>(schema: ZodSchema<T>, data: unknown): T {
+export function parseOrThrow<S extends z.ZodTypeAny>(schema: S, data: unknown): z.infer<S> {
   const result = schema.safeParse(data);
   if (!result.success) throw validationError(zodToIssues(result.error));
   return result.data;
