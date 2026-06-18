@@ -7,7 +7,9 @@ async function main(): Promise<void> {
   const deps = await buildDeps(config);
   const app = await buildServer(deps);
   await app.listen({ port: config.API_PORT, host: config.API_HOST });
-  deps.log.info(`API listening on ${config.API_HOST}:${config.API_PORT} (runtime=${config.ARS_RUNTIME})`);
+  deps.log.info(
+    `API listening on ${config.API_HOST}:${config.API_PORT} (runtime=${config.ARS_RUNTIME})`,
+  );
 }
 
 main().catch((err) => {

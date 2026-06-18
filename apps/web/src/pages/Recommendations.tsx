@@ -47,7 +47,9 @@ export default function Recommendations(): JSX.Element {
                   {t('match.missing')}: {m.missingSkills.slice(0, 5).join(', ')}
                 </p>
               )}
-              <Badge>{t('match.score')}: {m.score}/100</Badge>
+              <Badge>
+                {t('match.score')}: {m.score}/100
+              </Badge>
             </article>
           ))}
         </div>

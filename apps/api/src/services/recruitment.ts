@@ -26,7 +26,11 @@ import { getCandidateIdForUser } from './candidate.js';
 import { computeMatchesForCandidate, computeMatchesForJob } from './matching.js';
 import { createNotification } from './messaging.js';
 
-const ctx = (p: Principal): RequestContext => ({ role: 'authenticated', userId: p.userId, email: p.email });
+const ctx = (p: Principal): RequestContext => ({
+  role: 'authenticated',
+  userId: p.userId,
+  email: p.email,
+});
 
 interface ApplicationRow {
   id: string;
@@ -80,9 +84,10 @@ export async function applyToJob(
 ): Promise<Application> {
   const candidateId = await getCandidateIdForUser(deps, principal.userId);
   const application = await deps.db.withContext(ctx(principal), async (c) => {
-    const jobOk = await c.query(`select 1 from jobs where id = $1 and status = 'open' and visibility = 'public'`, [
-      input.jobId,
-    ]);
+    const jobOk = await c.query(
+      `select 1 from jobs where id = $1 and status = 'open' and visibility = 'public'`,
+      [input.jobId],
+    );
     if (!jobOk.rows.length) throw notFound('Job not open for applications', 'job.notFound');
     let inserted;
     try {
@@ -116,11 +121,22 @@ export async function applyToJob(
       [input.jobId],
     );
     for (const m of members.rows) {
-      await createNotification(c, m.user_id, 'application_received', 'New application', m.title, `/console/jobs/${input.jobId}/applications`, {
-        jobId: input.jobId,
-        applicationId: application.id,
+      await createNotification(
+        c,
+        m.user_id,
+        'application_received',
+        'New application',
+        m.title,
+        `/console/jobs/${input.jobId}/applications`,
+        {
+          jobId: input.jobId,
+          applicationId: application.id,
+        },
+      );
+      deps.bus.publish(userChannel(m.user_id), {
+        type: 'notification',
+        payload: { kind: 'application_received' },
       });
-      deps.bus.publish(userChannel(m.user_id), { type: 'notification', payload: { kind: 'application_received' } });
     }
   });
 
@@ -172,10 +188,11 @@ export async function updateApplicationStage(
   note: string | undefined,
 ): Promise<Application> {
   const result = await deps.db.withContext(ctx(principal), async (c) => {
-    const current = await c.query<{ stage: RecruitmentStage; candidate_id: string; job_id: string }>(
-      `select stage, candidate_id, job_id from applications where id = $1`,
-      [applicationId],
-    );
+    const current = await c.query<{
+      stage: RecruitmentStage;
+      candidate_id: string;
+      job_id: string;
+    }>(`select stage, candidate_id, job_id from applications where id = $1`, [applicationId]);
     if (!current.rows.length) throw notFound('Application not found', 'application.notFound');
     const from = current.rows[0]!.stage;
     if (from === stage) throw badRequest('No stage change', 'application.sameStage');
@@ -210,10 +227,18 @@ export async function updateApplicationStage(
     );
     const userId = target.rows[0]?.user_id;
     if (userId) {
-      await notify(deps, userId, 'application_status_changed', 'Application update', `Stage: ${stage}`, `/applications`, {
-        applicationId,
-        stage,
-      });
+      await notify(
+        deps,
+        userId,
+        'application_status_changed',
+        'Application update',
+        `Stage: ${stage}`,
+        `/applications`,
+        {
+          applicationId,
+          stage,
+        },
+      );
     }
   }
   return mapApplication(result);
@@ -297,7 +322,16 @@ export async function addShortlist(
 
 export async function listShortlist(deps: Deps, principal: Principal): Promise<ShortlistEntry[]> {
   const res = await deps.db.withContext(ctx(principal), (c) =>
-    c.query<{ id: string; company_id: string; candidate_id: string; job_id: string | null; note: string | null; created_at: unknown; candidate_name: string; candidate_headline: string | null }>(
+    c.query<{
+      id: string;
+      company_id: string;
+      candidate_id: string;
+      job_id: string | null;
+      note: string | null;
+      created_at: unknown;
+      candidate_name: string;
+      candidate_headline: string | null;
+    }>(
       `select s.id, s.company_id, s.candidate_id, s.job_id, s.note, s.created_at,
               p.display_name as candidate_name, cd.headline as candidate_headline
        from shortlists s join candidates cd on cd.id = s.candidate_id join profiles p on p.id = cd.user_id
@@ -334,14 +368,25 @@ export async function compareCandidates(
   const candidates = await deps.db.withContext(ctx(principal), async (c) => {
     const out: ComparisonCandidate[] = [];
     for (const candidateId of input.candidateIds) {
-      const base = await c.query<{ id: string; display_name: string; headline: string | null; years_experience: string | number }>(
+      const base = await c.query<{
+        id: string;
+        display_name: string;
+        headline: string | null;
+        years_experience: string | number;
+      }>(
         `select cd.id, p.display_name, cd.headline, cd.years_experience
          from candidates cd join profiles p on p.id = cd.user_id where cd.id = $1`,
         [candidateId],
       );
       if (!base.rows.length) continue; // not readable to this company → omit (FR-10.5)
       const row = base.rows[0]!;
-      const skillsRes = await c.query<{ display_name: string; category: string | null; proficiency: ProficiencyLevel; years_experience: string | number; evidence_text: string | null }>(
+      const skillsRes = await c.query<{
+        display_name: string;
+        category: string | null;
+        proficiency: ProficiencyLevel;
+        years_experience: string | number;
+        evidence_text: string | null;
+      }>(
         `select s.display_name, s.category, cs.proficiency, cs.years_experience,
                 array_to_string(cs.evidence, '||') as evidence_text
          from candidate_skills cs join skills s on s.id = cs.skill_id
@@ -383,7 +428,12 @@ export async function compareCandidates(
     c.query(
       `insert into candidate_comparisons (company_id, job_id, candidate_ids, created_by)
        values ($1, $2, $3::uuid[], $4)`,
-      [companyId, input.jobId ?? null, pgArrayLiteral(candidates.map((x) => x.candidateId)), principal.userId],
+      [
+        companyId,
+        input.jobId ?? null,
+        pgArrayLiteral(candidates.map((x) => x.candidateId)),
+        principal.userId,
+      ],
     ),
   );
 
@@ -452,10 +502,18 @@ export async function proposeInterview(
     ),
   );
   if (target.rows[0]) {
-    await notify(deps, target.rows[0].user_id, 'interview_proposed', 'Interview proposed', input.mode, `/applications`, {
-      applicationId,
-      interviewId: interview.id,
-    });
+    await notify(
+      deps,
+      target.rows[0].user_id,
+      'interview_proposed',
+      'Interview proposed',
+      input.mode,
+      `/applications`,
+      {
+        applicationId,
+        interviewId: interview.id,
+      },
+    );
   }
   return mapInterview(interview);
 }
@@ -485,10 +543,18 @@ export async function respondInterview(
     return res.rows[0]!;
   });
 
-  await notify(deps, interview.proposed_by, 'interview_updated', 'Interview response', input.response, `/console`, {
-    interviewId,
-    status: input.response,
-  });
+  await notify(
+    deps,
+    interview.proposed_by,
+    'interview_updated',
+    'Interview response',
+    input.response,
+    `/console`,
+    {
+      interviewId,
+      status: input.response,
+    },
+  );
   return mapInterview(interview);
 }
 

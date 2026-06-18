@@ -74,7 +74,8 @@ describe('AI matching (FR-05)', () => {
       url: '/api/candidates/me/recommendations',
       headers: seeker.headers,
     });
-    const score = (r: typeof first) => r.json().find((m: { jobId: string }) => m.jobId === jobId).score;
+    const score = (r: typeof first) =>
+      r.json().find((m: { jobId: string }) => m.jobId === jobId).score;
     expect(score(first)).toBe(score(second));
   });
 
@@ -89,7 +90,7 @@ describe('AI matching (FR-05)', () => {
     expect(res.json()).toEqual([]);
   });
 
-  it('forbids another company from viewing a job\'s candidates (403)', async () => {
+  it("forbids another company from viewing a job's candidates (403)", async () => {
     const res = await t.app.inject({
       method: 'GET',
       url: `/api/jobs/${jobId}/candidates`,

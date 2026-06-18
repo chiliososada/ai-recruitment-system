@@ -160,14 +160,22 @@ export class MockLlmProvider implements LlmProvider {
     const titles = ROLE_TITLES[locale];
     const directions: { title: string; rationale: string }[] = [];
     const has = (c: SkillDef['category']) => categories.has(c);
-    if (has('Frontend') && has('Backend')) directions.push({ title: titles.fullstack!, rationale: rationaleText(locale, top) });
-    else if (has('Backend')) directions.push({ title: titles.backend!, rationale: rationaleText(locale, top) });
-    else if (has('Frontend')) directions.push({ title: titles.frontend!, rationale: rationaleText(locale, top) });
-    if (has('DevOps') || has('Cloud')) directions.push({ title: titles.platform!, rationale: rationaleText(locale, top) });
-    if (has('Data')) directions.push({ title: titles.data!, rationale: rationaleText(locale, top) });
-    if (has('Mobile')) directions.push({ title: titles.mobile!, rationale: rationaleText(locale, top) });
-    if (totalYears >= 5) directions.push({ title: titles.lead!, rationale: rationaleText(locale, top) });
-    if (directions.length === 0) directions.push({ title: titles.backend!, rationale: rationaleText(locale, top) });
+    if (has('Frontend') && has('Backend'))
+      directions.push({ title: titles.fullstack!, rationale: rationaleText(locale, top) });
+    else if (has('Backend'))
+      directions.push({ title: titles.backend!, rationale: rationaleText(locale, top) });
+    else if (has('Frontend'))
+      directions.push({ title: titles.frontend!, rationale: rationaleText(locale, top) });
+    if (has('DevOps') || has('Cloud'))
+      directions.push({ title: titles.platform!, rationale: rationaleText(locale, top) });
+    if (has('Data'))
+      directions.push({ title: titles.data!, rationale: rationaleText(locale, top) });
+    if (has('Mobile'))
+      directions.push({ title: titles.mobile!, rationale: rationaleText(locale, top) });
+    if (totalYears >= 5)
+      directions.push({ title: titles.lead!, rationale: rationaleText(locale, top) });
+    if (directions.length === 0)
+      directions.push({ title: titles.backend!, rationale: rationaleText(locale, top) });
 
     const detectedDisplay = new Set(skills.map((s) => s.name));
     const recommendedLearning = LEARNING_POOL.filter((a) => !detectedDisplay.has(a))

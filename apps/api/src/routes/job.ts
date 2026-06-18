@@ -29,12 +29,22 @@ export function registerJobRoutes(app: FastifyInstance, deps: Deps): void {
 
   app.post<{ Params: { companyId: string } }>('/companies/:companyId/jobs', async (req, reply) => {
     const principal = requireRole(req, 'company_member');
-    const job = await createJob(deps, principal, req.params.companyId, parseOrThrow(CreateJobSchema, req.body));
+    const job = await createJob(
+      deps,
+      principal,
+      req.params.companyId,
+      parseOrThrow(CreateJobSchema, req.body),
+    );
     return reply.code(201).send(job);
   });
 
   app.patch<{ Params: { id: string } }>('/jobs/:id', async (req) =>
-    updateJob(deps, requireRole(req, 'company_member'), req.params.id, parseOrThrow(UpdateJobSchema, req.body)),
+    updateJob(
+      deps,
+      requireRole(req, 'company_member'),
+      req.params.id,
+      parseOrThrow(UpdateJobSchema, req.body),
+    ),
   );
 
   app.delete<{ Params: { id: string } }>('/jobs/:id', async (req, reply) => {

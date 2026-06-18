@@ -29,7 +29,11 @@ interface CompanyRow {
   open_job_count?: number;
 }
 
-const ctx = (p: Principal): RequestContext => ({ role: 'authenticated', userId: p.userId, email: p.email });
+const ctx = (p: Principal): RequestContext => ({
+  role: 'authenticated',
+  userId: p.userId,
+  email: p.email,
+});
 
 function mapCompany(row: CompanyRow): Company {
   return {
@@ -148,7 +152,9 @@ export async function listCompanies(
   };
   if (query.q) {
     const p = ph(query.q);
-    conditions.push(`(name ilike '%' || ${p} || '%' or coalesce(description, '') ilike '%' || ${p} || '%')`);
+    conditions.push(
+      `(name ilike '%' || ${p} || '%' or coalesce(description, '') ilike '%' || ${p} || '%')`,
+    );
   }
   if (query.industry) conditions.push(`industry = ${ph(query.industry)}`);
   if (query.size) conditions.push(`size = ${ph(query.size)}::company_size`);

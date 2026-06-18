@@ -106,7 +106,12 @@ export default function SeekerProfile(): JSX.Element {
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <h2>{t('analysis.title')}</h2>
           {me.hasAnalysis ? (
-            <button type="button" className="secondary" onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => regenerate.mutate()}
+              disabled={regenerate.isPending}
+            >
               {t('analysis.regenerate')}
             </button>
           ) : null}
@@ -128,9 +133,12 @@ export default function SeekerProfile(): JSX.Element {
                 {a.skills.map((s) => (
                   <li key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
                     <span>
-                      {s.name} <span className="muted">· {t(`analysis.proficiency.${s.proficiency}`)}</span>
+                      {s.name}{' '}
+                      <span className="muted">· {t(`analysis.proficiency.${s.proficiency}`)}</span>
                     </span>
-                    <span className="muted">{t('analysis.years', { count: Math.round(s.yearsExperience) })}</span>
+                    <span className="muted">
+                      {t('analysis.years', { count: Math.round(s.yearsExperience) })}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -211,13 +219,25 @@ function ProfileForm({ me }: { me: CandidateProfile }): JSX.Element {
         <input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
       </Field>
       <Field label={t('profile.yearsExperience')} htmlFor="years">
-        <input id="years" type="number" min={0} max={60} value={years} onChange={(e) => setYears(e.target.value)} />
+        <input
+          id="years"
+          type="number"
+          min={0}
+          max={60}
+          value={years}
+          onChange={(e) => setYears(e.target.value)}
+        />
       </Field>
       <Field label={t('profile.languages')} htmlFor="languages">
         <input id="languages" value={languages} onChange={(e) => setLanguages(e.target.value)} />
       </Field>
       <label className="row">
-        <input type="checkbox" style={{ width: 'auto' }} checked={openToWork} onChange={(e) => setOpenToWork(e.target.checked)} />
+        <input
+          type="checkbox"
+          style={{ width: 'auto' }}
+          checked={openToWork}
+          onChange={(e) => setOpenToWork(e.target.checked)}
+        />
         {t('profile.openToWork')}
       </label>
       {error ? (

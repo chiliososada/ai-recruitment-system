@@ -20,8 +20,7 @@ export async function createDb(config: AppConfig): Promise<Db> {
     return PgPoolDb.create(config.DATABASE_URL);
   }
 
-  const dataDir =
-    config.NODE_ENV === 'test' ? undefined : path.join(process.cwd(), '.pglite');
+  const dataDir = config.NODE_ENV === 'test' ? undefined : path.join(process.cwd(), '.pglite');
   const db = await PgliteDb.create(dataDir);
   await applyMigrations(db, { bootstrap: true, seed: config.NODE_ENV !== 'test' });
   return db;

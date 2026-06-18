@@ -50,10 +50,14 @@ async function main(): Promise<void> {
 
   // Verify pgvector extension + an ivfflat index exist.
   const vector = await db.service((c) =>
-    c.query<{ count: number }>(`select count(*)::int as count from pg_extension where extname = 'vector'`),
+    c.query<{ count: number }>(
+      `select count(*)::int as count from pg_extension where extname = 'vector'`,
+    ),
   );
   const ivf = await db.service((c) =>
-    c.query<{ count: number }>(`select count(*)::int as count from pg_indexes where indexname like '%_ivf'`),
+    c.query<{ count: number }>(
+      `select count(*)::int as count from pg_indexes where indexname like '%_ivf'`,
+    ),
   );
   // Verify RLS is enabled on a representative protected table.
   const rls = await db.service((c) =>

@@ -26,13 +26,21 @@ const StartWithCompanySchema = z.object({
 export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void {
   app.post('/conversations', async (req, reply) => {
     const principal = requireAuth(req);
-    const convo = await createConversation(deps, principal, parseOrThrow(CreateConversationSchema, req.body));
+    const convo = await createConversation(
+      deps,
+      principal,
+      parseOrThrow(CreateConversationSchema, req.body),
+    );
     return reply.code(201).send(convo);
   });
 
   app.post('/conversations/with-company', async (req, reply) => {
     const principal = requireAuth(req);
-    const convo = await startConversationWithCompany(deps, principal, parseOrThrow(StartWithCompanySchema, req.body));
+    const convo = await startConversationWithCompany(
+      deps,
+      principal,
+      parseOrThrow(StartWithCompanySchema, req.body),
+    );
     return reply.code(201).send(convo);
   });
 
@@ -48,7 +56,12 @@ export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void 
 
   app.post<{ Params: { id: string } }>('/conversations/:id/messages', async (req, reply) => {
     const principal = requireAuth(req);
-    const msg = await sendMessage(deps, principal, req.params.id, parseOrThrow(SendMessageSchema, req.body));
+    const msg = await sendMessage(
+      deps,
+      principal,
+      req.params.id,
+      parseOrThrow(SendMessageSchema, req.body),
+    );
     return reply.code(201).send(msg);
   });
 

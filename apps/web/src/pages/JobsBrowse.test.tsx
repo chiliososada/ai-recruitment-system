@@ -34,7 +34,9 @@ describe('JobsBrowse filtering (FR-07)', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('renders filter controls and lists jobs from the API', async () => {
-    mockFetch([{ match: '/jobs', body: { items: [job], page: 1, pageSize: 20, total: 1, totalPages: 1 } }]);
+    mockFetch([
+      { match: '/jobs', body: { items: [job], page: 1, pageSize: 20, total: 1, totalPages: 1 } },
+    ]);
     renderWithProviders(<JobsBrowse />);
     expect(screen.getByLabelText('Search')).toBeInTheDocument();
     expect(screen.getByLabelText('Work style')).toBeInTheDocument();
@@ -45,7 +47,9 @@ describe('JobsBrowse filtering (FR-07)', () => {
   });
 
   it('shows an empty state when there are no jobs', async () => {
-    mockFetch([{ match: '/jobs', body: { items: [], page: 1, pageSize: 20, total: 0, totalPages: 1 } }]);
+    mockFetch([
+      { match: '/jobs', body: { items: [], page: 1, pageSize: 20, total: 0, totalPages: 1 } },
+    ]);
     renderWithProviders(<JobsBrowse />);
     await waitFor(() => {
       expect(screen.getByText('No jobs found')).toBeInTheDocument();

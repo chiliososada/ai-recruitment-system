@@ -28,10 +28,16 @@ export async function runAnalysis(
       const parsed = SkillAnalysisResultSchema.safeParse(raw);
       if (parsed.success) return parsed.data;
       lastError = new Error('schema validation failed');
-      deps.log.warn({ attempt, provider: deps.llm.providerName }, 'AI analysis schema invalid; retrying');
+      deps.log.warn(
+        { attempt, provider: deps.llm.providerName },
+        'AI analysis schema invalid; retrying',
+      );
     } catch (err) {
       lastError = err;
-      deps.log.warn({ attempt, provider: deps.llm.providerName }, 'AI analysis call failed; retrying');
+      deps.log.warn(
+        { attempt, provider: deps.llm.providerName },
+        'AI analysis call failed; retrying',
+      );
     }
   }
   throw upstreamAiError(

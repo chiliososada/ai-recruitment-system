@@ -228,7 +228,10 @@ const en = {
     reason: 'Why',
     matched: 'Matched skills',
     missing: 'Skill gaps',
-    recommendations: { title: 'Recommended jobs', empty: 'No recommendations yet — upload a resume first' },
+    recommendations: {
+      title: 'Recommended jobs',
+      empty: 'No recommendations yet — upload a resume first',
+    },
     candidates: { title: 'Ranked candidates', empty: 'No matching candidates yet' },
   },
   talent: {

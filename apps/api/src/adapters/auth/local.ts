@@ -57,7 +57,11 @@ export class LocalAuthAdapter implements AuthAdapter {
     if (!identity) throw unauthorized('Invalid credentials', 'auth.invalidCredentials');
     const ok = await bcrypt.compare(password, identity.password_hash);
     if (!ok) throw unauthorized('Invalid credentials', 'auth.invalidCredentials');
-    return { userId: identity.user_id, email: identity.email, emailVerified: identity.email_verified };
+    return {
+      userId: identity.user_id,
+      email: identity.email,
+      emailVerified: identity.email_verified,
+    };
   }
 
   async verifyEmail(token: string): Promise<AuthIdentity> {

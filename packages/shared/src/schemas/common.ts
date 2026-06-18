@@ -5,8 +5,7 @@ export const uuidSchema = z.string().uuid();
 export const isoTimestampSchema = z.string();
 
 /** Trimmed, non-empty bounded text helper. */
-export const boundedText = (min: number, max: number) =>
-  z.string().trim().min(min).max(max);
+export const boundedText = (min: number, max: number) => z.string().trim().min(min).max(max);
 
 /** Optional bounded text that normalizes '' to undefined. */
 export const optionalText = (max: number) =>

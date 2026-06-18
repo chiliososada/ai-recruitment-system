@@ -42,7 +42,11 @@ export default function AccountSettings(): JSX.Element {
       </p>
       <form onSubmit={submit} noValidate>
         <Field label={t('auth.displayName')} htmlFor="displayName">
-          <input id="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          <input
+            id="displayName"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
         </Field>
         <Field label={t('locale.label')} htmlFor="locale">
           <select id="locale" value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
@@ -54,14 +58,24 @@ export default function AccountSettings(): JSX.Element {
           </select>
         </Field>
         <Field label={t('auth.newPassword')} htmlFor="password" hint={t('common.optional')}>
-          <input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Field>
         {error ? (
           <div className="field-error" role="alert">
             {localizeError(t, error)}
           </div>
         ) : null}
-        {done ? <div role="status" className="muted">{t('common.save')} ✓</div> : null}
+        {done ? (
+          <div role="status" className="muted">
+            {t('common.save')} ✓
+          </div>
+        ) : null}
         <button type="submit" disabled={busy}>
           {busy ? t('common.saving') : t('auth.updateAccount')}
         </button>

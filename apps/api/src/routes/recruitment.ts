@@ -28,7 +28,11 @@ import {
 export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): void {
   // Applications (FR-10.2)
   app.post('/applications', async (req, reply) => {
-    const app_ = await applyToJob(deps, requireRole(req, 'job_seeker'), parseOrThrow(CreateApplicationSchema, req.body));
+    const app_ = await applyToJob(
+      deps,
+      requireRole(req, 'job_seeker'),
+      parseOrThrow(CreateApplicationSchema, req.body),
+    );
     return reply.code(201).send(app_);
   });
   app.get('/applications', async (req) => listMyApplications(deps, requireRole(req, 'job_seeker')));
@@ -48,7 +52,11 @@ export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): voi
 
   // Shortlist + comparison (FR-10.1)
   app.post('/shortlists', async (req, reply) => {
-    const entry = await addShortlist(deps, requireRole(req, 'company_member'), parseOrThrow(AddShortlistSchema, req.body));
+    const entry = await addShortlist(
+      deps,
+      requireRole(req, 'company_member'),
+      parseOrThrow(AddShortlistSchema, req.body),
+    );
     return reply.code(201).send(entry);
   });
   app.get('/shortlists', async (req) => listShortlist(deps, requireRole(req, 'company_member')));
@@ -57,7 +65,11 @@ export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): voi
     return reply.code(204).send();
   });
   app.post('/compare', async (req) =>
-    compareCandidates(deps, requireRole(req, 'company_member'), parseOrThrow(CompareRequestSchema, req.body)),
+    compareCandidates(
+      deps,
+      requireRole(req, 'company_member'),
+      parseOrThrow(CompareRequestSchema, req.body),
+    ),
   );
 
   // Interviews (FR-10.4)
@@ -74,6 +86,11 @@ export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): voi
     listInterviews(deps, requireAuth(req), req.params.id),
   );
   app.post<{ Params: { id: string } }>('/interviews/:id/respond', async (req) =>
-    respondInterview(deps, requireRole(req, 'job_seeker'), req.params.id, parseOrThrow(RespondInterviewSchema, req.body)),
+    respondInterview(
+      deps,
+      requireRole(req, 'job_seeker'),
+      req.params.id,
+      parseOrThrow(RespondInterviewSchema, req.body),
+    ),
   );
 }

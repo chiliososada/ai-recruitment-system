@@ -20,7 +20,11 @@ beforeAll(async () => {
   await uploadSampleResume(t, seeker);
   company = await createUser(t, { role: 'company_member' });
   ({ jobId } = await createCompanyAndJob(t, company));
-  const me = await t.app.inject({ method: 'GET', url: '/api/candidates/me', headers: seeker.headers });
+  const me = await t.app.inject({
+    method: 'GET',
+    url: '/api/candidates/me',
+    headers: seeker.headers,
+  });
   candidateId = me.json().id;
 });
 afterAll(async () => {
@@ -33,13 +37,25 @@ describe('talent search + detail (FR-06)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.json().items.some((c: { id: string }) => c.id === candidateId)).toBe(true);
 
-    const ts = await t.app.inject({ method: 'GET', url: '/api/talent?skills=typescript', headers: company.headers });
+    const ts = await t.app.inject({
+      method: 'GET',
+      url: '/api/talent?skills=typescript',
+      headers: company.headers,
+    });
     expect(ts.json().items.some((c: { id: string }) => c.id === candidateId)).toBe(true);
 
-    const none = await t.app.inject({ method: 'GET', url: '/api/talent?skills=cobol', headers: company.headers });
+    const none = await t.app.inject({
+      method: 'GET',
+      url: '/api/talent?skills=cobol',
+      headers: company.headers,
+    });
     expect(none.json().items.some((c: { id: string }) => c.id === candidateId)).toBe(false);
 
-    const exp = await t.app.inject({ method: 'GET', url: '/api/talent?minYears=20', headers: company.headers });
+    const exp = await t.app.inject({
+      method: 'GET',
+      url: '/api/talent?minYears=20',
+      headers: company.headers,
+    });
     expect(exp.json().items.some((c: { id: string }) => c.id === candidateId)).toBe(false);
   });
 
@@ -74,7 +90,7 @@ describe('talent search + detail (FR-06)', () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it('forbids using another company\'s job for recommendations (403)', async () => {
+  it("forbids using another company's job for recommendations (403)", async () => {
     const otherCompany = await createUser(t, { role: 'company_member' });
     const res = await t.app.inject({
       method: 'GET',

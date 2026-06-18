@@ -15,7 +15,10 @@ export default function CompanyDetail(): JSX.Element {
   const navigate = useNavigate();
   const [msg, setMsg] = useState('');
 
-  const company = useQuery({ queryKey: ['company', id], queryFn: () => api.get<Company>(`/companies/${id}`) });
+  const company = useQuery({
+    queryKey: ['company', id],
+    queryFn: () => api.get<Company>(`/companies/${id}`),
+  });
   const jobs = useQuery({
     queryKey: ['company-jobs', id],
     queryFn: () => api.get<Paginated<Job>>(`/companies/${id}/jobs`),
@@ -59,7 +62,12 @@ export default function CompanyDetail(): JSX.Element {
             <label htmlFor="msg" className="visually-hidden">
               {t('messaging.newMessage')}
             </label>
-            <input id="msg" placeholder={t('messaging.newMessage')} value={msg} onChange={(e) => setMsg(e.target.value)} />
+            <input
+              id="msg"
+              placeholder={t('messaging.newMessage')}
+              value={msg}
+              onChange={(e) => setMsg(e.target.value)}
+            />
             <button type="submit" disabled={contact.isPending}>
               {t('messaging.start')}
             </button>

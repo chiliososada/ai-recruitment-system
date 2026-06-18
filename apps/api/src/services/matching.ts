@@ -29,7 +29,10 @@ interface CandidateScoringRow {
   desired_salary_max: number | null;
 }
 
-async function buildScoringCandidate(c: DbClient, candidateId: string): Promise<ScoringCandidate | null> {
+async function buildScoringCandidate(
+  c: DbClient,
+  candidateId: string,
+): Promise<ScoringCandidate | null> {
   const base = await c.query<CandidateScoringRow>(
     `select years_experience, location, array_to_string(languages, ',') as languages_text,
             desired_salary_min, desired_salary_max
@@ -38,7 +41,11 @@ async function buildScoringCandidate(c: DbClient, candidateId: string): Promise<
   );
   const row = base.rows[0];
   if (!row) return null;
-  const skills = await c.query<{ display_name: string; proficiency: ProficiencyLevel; years_experience: string | number }>(
+  const skills = await c.query<{
+    display_name: string;
+    proficiency: ProficiencyLevel;
+    years_experience: string | number;
+  }>(
     `select s.display_name, cs.proficiency, cs.years_experience
      from candidate_skills cs join skills s on s.id = cs.skill_id where cs.candidate_id = $1`,
     [candidateId],
@@ -152,7 +159,10 @@ export async function computeMatchesForCandidate(deps: Deps, candidateId: string
       [candidateId, RECALL_LIMIT],
     );
     if (recall.rows.length === 0) return 0;
-    const jobs = await buildScoringJobs(c, recall.rows.map((r) => r.job_id));
+    const jobs = await buildScoringJobs(
+      c,
+      recall.rows.map((r) => r.job_id),
+    );
     for (const r of recall.rows) {
       const job = jobs.get(r.job_id);
       if (job) await upsertMatch(c, r.job_id, candidateId, Number(r.similarity), candidate, job);
@@ -180,7 +190,8 @@ export async function computeMatchesForJob(deps: Deps, jobId: string): Promise<n
     if (!job) return 0;
     for (const r of recall.rows) {
       const candidate = await buildScoringCandidate(c, r.candidate_id);
-      if (candidate) await upsertMatch(c, jobId, r.candidate_id, Number(r.similarity), candidate, job);
+      if (candidate)
+        await upsertMatch(c, jobId, r.candidate_id, Number(r.similarity), candidate, job);
     }
     return recall.rows.length;
   });
@@ -263,7 +274,7 @@ export async function getCandidatesForJob(
       [jobId, principal.userId],
     ),
   );
-  if (!member.rows[0]?.ok) throw forbidden('Not a member of this job\'s company', 'error.forbidden');
+  if (!member.rows[0]?.ok) throw forbidden("Not a member of this job's company", 'error.forbidden');
 
   await computeMatchesForJob(deps, jobId);
   const res = await deps.db.withContext(contextFor(principal), (c) =>

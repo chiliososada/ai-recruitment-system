@@ -1,6 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { MAX_UPLOAD_BYTES } from '@ars/shared';
-import { createTestApp, createUser, uploadResumeFile, type TestApp, type TestUser } from '../src/testing/harness.js';
+import {
+  createTestApp,
+  createUser,
+  uploadResumeFile,
+  type TestApp,
+  type TestUser,
+} from '../src/testing/harness.js';
 import {
   SAMPLE_RESUME_TEXT,
   eicarFile,

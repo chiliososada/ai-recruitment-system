@@ -9,7 +9,10 @@ const EnvSchema = z.object({
   API_HOST: z.string().default('127.0.0.1'),
   WEB_ORIGIN: z.string().default('http://localhost:5173'),
   LOCAL_JWT_SECRET: z.string().default('dev-only-insecure-secret-change-me'),
-  MAX_UPLOAD_BYTES: z.coerce.number().int().default(10 * 1024 * 1024),
+  MAX_UPLOAD_BYTES: z.coerce
+    .number()
+    .int()
+    .default(10 * 1024 * 1024),
 
   DATABASE_URL: z.string().optional(),
   LOCAL_STORAGE_DIR: z.string().default('.storage'),

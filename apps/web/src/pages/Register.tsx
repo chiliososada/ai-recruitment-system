@@ -24,7 +24,13 @@ export default function Register(): JSX.Element {
     setBusy(true);
     setError(null);
     try {
-      const session = await register({ email, password, displayName, role, locale: i18n.language as Locale });
+      const session = await register({
+        email,
+        password,
+        displayName,
+        role,
+        locale: i18n.language as Locale,
+      });
       navigate('/verify', { state: { token: session.devEmailVerificationToken, role } });
     } catch (err) {
       setError(err);
@@ -47,13 +53,32 @@ export default function Register(): JSX.Element {
           </select>
         </Field>
         <Field label={t('auth.displayName')} htmlFor="displayName">
-          <input id="displayName" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+          <input
+            id="displayName"
+            required
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
         </Field>
         <Field label={t('auth.email')} htmlFor="email" error={fieldErrors.email}>
-          <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </Field>
         <Field label={t('auth.passwordLabel')} htmlFor="password" error={fieldErrors.password}>
-          <input id="password" type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Field>
         {error && Object.keys(fieldErrors).length === 0 ? (
           <div className="field-error" role="alert">

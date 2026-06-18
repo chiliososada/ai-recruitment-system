@@ -15,7 +15,11 @@ import type { Principal } from '../http/context.js';
 import { conversationChannel, userChannel } from '../realtime.js';
 import { toIso } from '../util.js';
 
-const ctx = (p: Principal): RequestContext => ({ role: 'authenticated', userId: p.userId, email: p.email });
+const ctx = (p: Principal): RequestContext => ({
+  role: 'authenticated',
+  userId: p.userId,
+  email: p.email,
+});
 
 interface MessageRow {
   id: string;
@@ -43,7 +47,12 @@ async function loadMembers(
 ): Promise<Map<string, ConversationMember[]>> {
   const map = new Map<string, ConversationMember[]>();
   if (!conversationIds.length) return map;
-  const res = await c.query<{ conversation_id: string; user_id: string; display_name: string; role: UserRole }>(
+  const res = await c.query<{
+    conversation_id: string;
+    user_id: string;
+    display_name: string;
+    role: UserRole;
+  }>(
     `select cm.conversation_id, cm.user_id, p.display_name, p.role
      from conversation_members cm join profiles p on p.id = cm.user_id
      where cm.conversation_id = any($1::uuid[])`,
@@ -127,7 +136,15 @@ export async function getConversation(
   conversationId: string,
 ): Promise<Conversation> {
   return deps.db.withContext(ctx(principal), async (c) => {
-    const res = await c.query<{ id: string; job_id: string | null; subject: string | null; created_at: unknown; last_message_at: unknown; last_preview: string | null; unread: number }>(
+    const res = await c.query<{
+      id: string;
+      job_id: string | null;
+      subject: string | null;
+      created_at: unknown;
+      last_message_at: unknown;
+      last_preview: string | null;
+      unread: number;
+    }>(
       `select c.id, c.job_id, c.subject, c.created_at,
               (select created_at from messages m where m.conversation_id = c.id order by created_at desc limit 1) as last_message_at,
               (select left(body, 120) from messages m where m.conversation_id = c.id order by created_at desc limit 1) as last_preview,
@@ -156,7 +173,15 @@ export async function getConversation(
 
 export async function listConversations(deps: Deps, principal: Principal): Promise<Conversation[]> {
   return deps.db.withContext(ctx(principal), async (c) => {
-    const res = await c.query<{ id: string; job_id: string | null; subject: string | null; created_at: unknown; last_message_at: unknown; last_preview: string | null; unread: number }>(
+    const res = await c.query<{
+      id: string;
+      job_id: string | null;
+      subject: string | null;
+      created_at: unknown;
+      last_message_at: unknown;
+      last_preview: string | null;
+      unread: number;
+    }>(
       `select c.id, c.job_id, c.subject, c.created_at,
               (select created_at from messages m where m.conversation_id = c.id order by created_at desc limit 1) as last_message_at,
               (select left(body, 120) from messages m where m.conversation_id = c.id order by created_at desc limit 1) as last_preview,
@@ -167,7 +192,10 @@ export async function listConversations(deps: Deps, principal: Principal): Promi
        order by last_message_at desc nulls last, c.created_at desc`,
       [principal.userId],
     );
-    const members = await loadMembers(c, res.rows.map((r) => r.id));
+    const members = await loadMembers(
+      c,
+      res.rows.map((r) => r.id),
+    );
     return res.rows.map((row) => ({
       id: row.id,
       jobId: row.job_id,
@@ -187,11 +215,12 @@ export async function listMessages(
   conversationId: string,
 ): Promise<Message[]> {
   const messages = await deps.db.withContext(ctx(principal), async (c) => {
-    const member = await c.query(`select 1 from conversation_members where conversation_id = $1 and user_id = $2`, [
-      conversationId,
-      principal.userId,
-    ]);
-    if (!member.rows.length) throw notFound('Conversation not found', 'message.conversation.notFound');
+    const member = await c.query(
+      `select 1 from conversation_members where conversation_id = $1 and user_id = $2`,
+      [conversationId, principal.userId],
+    );
+    if (!member.rows.length)
+      throw notFound('Conversation not found', 'message.conversation.notFound');
     const res = await c.query<MessageRow>(
       `select m.id, m.conversation_id, m.sender_user_id, p.display_name as sender_name, m.body, m.created_at
        from messages m join profiles p on p.id = m.sender_user_id
@@ -214,11 +243,12 @@ export async function sendMessage(
   input: SendMessageInput,
 ): Promise<Message> {
   const message = await deps.db.withContext(ctx(principal), async (c) => {
-    const member = await c.query(`select 1 from conversation_members where conversation_id = $1 and user_id = $2`, [
-      conversationId,
-      principal.userId,
-    ]);
-    if (!member.rows.length) throw forbidden('Not a member of this conversation', 'error.forbidden');
+    const member = await c.query(
+      `select 1 from conversation_members where conversation_id = $1 and user_id = $2`,
+      [conversationId, principal.userId],
+    );
+    if (!member.rows.length)
+      throw forbidden('Not a member of this conversation', 'error.forbidden');
 
     const inserted = await c.query<MessageRow>(
       `insert into messages (conversation_id, sender_user_id, body, client_token)
@@ -229,9 +259,10 @@ export async function sendMessage(
     );
     if (inserted.rows.length) {
       const row = inserted.rows[0]!;
-      const name = await c.query<{ display_name: string }>(`select display_name from profiles where id = $1`, [
-        principal.userId,
-      ]);
+      const name = await c.query<{ display_name: string }>(
+        `select display_name from profiles where id = $1`,
+        [principal.userId],
+      );
       return mapMessage({ ...row, sender_name: name.rows[0]?.display_name ?? 'User' });
     }
     // Duplicate (same client token) — return the original message.
@@ -246,17 +277,30 @@ export async function sendMessage(
 
   // Update conversation + notify the other members (trusted server writes).
   await deps.db.service(async (c) => {
-    await c.query(`update conversations set last_message_at = now() where id = $1`, [conversationId]);
+    await c.query(`update conversations set last_message_at = now() where id = $1`, [
+      conversationId,
+    ]);
     const others = await c.query<{ user_id: string }>(
       `select user_id from conversation_members where conversation_id = $1 and user_id <> $2`,
       [conversationId, principal.userId],
     );
     for (const o of others.rows) {
-      await createNotification(c, o.user_id, 'message', message.senderName, message.body.slice(0, 120), `/messages/${conversationId}`, {
-        conversationId,
-        senderName: message.senderName,
+      await createNotification(
+        c,
+        o.user_id,
+        'message',
+        message.senderName,
+        message.body.slice(0, 120),
+        `/messages/${conversationId}`,
+        {
+          conversationId,
+          senderName: message.senderName,
+        },
+      );
+      deps.bus.publish(userChannel(o.user_id), {
+        type: 'notification',
+        payload: { conversationId },
       });
-      deps.bus.publish(userChannel(o.user_id), { type: 'notification', payload: { conversationId } });
     }
   });
   deps.bus.publish(conversationChannel(conversationId), { type: 'message', payload: message });

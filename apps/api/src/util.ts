@@ -2,7 +2,9 @@
 export function toIso(value: unknown): string {
   if (value instanceof Date) return value.toISOString();
   if (typeof value === 'string' && value.length > 0) {
-    const d = new Date(value.includes(' ') && !value.includes('T') ? value.replace(' ', 'T') : value);
+    const d = new Date(
+      value.includes(' ') && !value.includes('T') ? value.replace(' ', 'T') : value,
+    );
     return Number.isNaN(d.getTime()) ? value : d.toISOString();
   }
   return new Date(0).toISOString();

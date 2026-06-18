@@ -32,7 +32,9 @@ export default function Home(): JSX.Element {
         <div className="card">
           <h2>{t('home.companyCta')}</h2>
           <p className="muted">{t('match.candidates.empty')}</p>
-          <Link to={user?.role === 'company_member' ? '/console' : '/register'}>{t('nav.console')} →</Link>
+          <Link to={user?.role === 'company_member' ? '/console' : '/register'}>
+            {t('nav.console')} →
+          </Link>
         </div>
       </div>
     </section>

@@ -46,7 +46,12 @@ export function Layout({ children }: { children: React.ReactNode }): JSX.Element
           {user && (
             <Link to="/notifications">
               {t('nav.notifications')}
-              {unread > 0 && <span className="badge" aria-label={t('messaging.unread', { count: unread })}> {unread}</span>}
+              {unread > 0 && (
+                <span className="badge" aria-label={t('messaging.unread', { count: unread })}>
+                  {' '}
+                  {unread}
+                </span>
+              )}
             </Link>
           )}
         </nav>

@@ -35,7 +35,11 @@ export default function JobsBrowse(): JSX.Element {
           <input id="q" value={q} onChange={(e) => setQ(e.target.value)} />
         </Field>
         <Field label={t('job.workStyle')} htmlFor="ws">
-          <select id="ws" value={workStyle} onChange={(e) => setWorkStyle(e.target.value as WorkStyle | '')}>
+          <select
+            id="ws"
+            value={workStyle}
+            onChange={(e) => setWorkStyle(e.target.value as WorkStyle | '')}
+          >
             <option value="">{t('common.all')}</option>
             {WORK_STYLES.map((w) => (
               <option key={w} value={w}>
@@ -97,7 +101,12 @@ export function Pagination<T>({
   const { t } = useTranslation();
   return (
     <div className="row" style={{ justifyContent: 'center' }}>
-      <button type="button" className="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+      <button
+        type="button"
+        className="secondary"
+        disabled={page <= 1}
+        onClick={() => setPage(page - 1)}
+      >
         {t('common.back')}
       </button>
       <span>{t('common.page', { page: data.page, total: data.totalPages })}</span>

@@ -43,7 +43,12 @@ export async function regenerateCandidateEmbedding(deps: Deps, candidateId: stri
       [candidateId],
     );
     const row = cand.rows[0];
-    const parts: string[] = [row?.headline ?? '', row?.summary ?? '', analysis.rows[0]?.summary ?? '', row?.languages_text ?? ''];
+    const parts: string[] = [
+      row?.headline ?? '',
+      row?.summary ?? '',
+      analysis.rows[0]?.summary ?? '',
+      row?.languages_text ?? '',
+    ];
     for (const sk of skills.rows) {
       const reps = PROFICIENCY_REPEAT[sk.proficiency] ?? 1;
       for (let i = 0; i < reps; i++) parts.push(sk.display_name);
@@ -51,7 +56,13 @@ export async function regenerateCandidateEmbedding(deps: Deps, candidateId: stri
     return parts.filter(Boolean).join(' ').trim();
   });
 
-  await upsertEmbedding(deps, 'candidate_embeddings', 'candidate_id', candidateId, text || 'candidate');
+  await upsertEmbedding(
+    deps,
+    'candidate_embeddings',
+    'candidate_id',
+    candidateId,
+    text || 'candidate',
+  );
 }
 
 interface JobComposeRow {

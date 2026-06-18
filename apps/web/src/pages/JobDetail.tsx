@@ -61,7 +61,11 @@ export default function JobDetail(): JSX.Element {
       )}
       {user?.role === 'job_seeker' && (
         <div className="stack">
-          <button type="button" disabled={apply.isPending || applied} onClick={() => apply.mutate()}>
+          <button
+            type="button"
+            disabled={apply.isPending || applied}
+            onClick={() => apply.mutate()}
+          >
             {applied ? t('job.applied') : t('application.apply')}
           </button>
           {apply.error && !(apply.error instanceof ApiError && apply.error.code === 'CONFLICT') ? (

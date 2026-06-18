@@ -3,7 +3,11 @@ import { GenerateAnalysisSchema, UpdateCandidateProfileSchema } from '@ars/share
 import type { Deps } from '../deps.js';
 import { badRequest, notFound, parseOrThrow } from '../errors.js';
 import { requireAuth, requireRole } from '../http/context.js';
-import { generateAndStoreAnalysis, getLatestAnalysis, getLatestResumeText } from '../services/analysis.js';
+import {
+  generateAndStoreAnalysis,
+  getLatestAnalysis,
+  getLatestResumeText,
+} from '../services/analysis.js';
 import {
   getCandidateIdForUser,
   getMyProfile,
@@ -22,7 +26,11 @@ export function registerCandidateRoutes(app: FastifyInstance, deps: Deps): void 
   app.get('/candidates/me', async (req) => getMyProfile(deps, requireRole(req, 'job_seeker')));
 
   app.patch('/candidates/me', async (req) =>
-    updateMyProfile(deps, requireRole(req, 'job_seeker'), parseOrThrow(UpdateCandidateProfileSchema, req.body)),
+    updateMyProfile(
+      deps,
+      requireRole(req, 'job_seeker'),
+      parseOrThrow(UpdateCandidateProfileSchema, req.body),
+    ),
   );
 
   app.post('/candidates/me/resume', async (req, reply) => {

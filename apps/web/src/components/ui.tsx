@@ -16,7 +16,13 @@ export function EmptyState({ message }: { message?: string }): JSX.Element {
   return <div className="state">{message ?? t('common.empty')}</div>;
 }
 
-export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }): JSX.Element {
+export function ErrorState({
+  error,
+  onRetry,
+}: {
+  error: unknown;
+  onRetry?: () => void;
+}): JSX.Element {
   const { t } = useTranslation();
   return (
     <div className="state" role="alert">
@@ -43,7 +49,11 @@ export function Field({ label, htmlFor, error, children, hint }: FieldProps): JS
     <div className="field">
       <label htmlFor={htmlFor}>{label}</label>
       {children}
-      {hint && <div className="muted" style={{ fontSize: '0.8rem' }}>{hint}</div>}
+      {hint && (
+        <div className="muted" style={{ fontSize: '0.8rem' }}>
+          {hint}
+        </div>
+      )}
       {error && (
         <div className="field-error" id={`${htmlFor}-error`} role="alert">
           {error}
@@ -53,6 +63,12 @@ export function Field({ label, htmlFor, error, children, hint }: FieldProps): JS
   );
 }
 
-export function Badge({ children, variant }: { children: ReactNode; variant?: 'rec' }): JSX.Element {
+export function Badge({
+  children,
+  variant,
+}: {
+  children: ReactNode;
+  variant?: 'rec';
+}): JSX.Element {
   return <span className={variant === 'rec' ? 'badge rec' : 'badge'}>{children}</span>;
 }

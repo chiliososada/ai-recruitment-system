@@ -8,7 +8,11 @@ import { getCandidateDetail, searchTalent } from '../services/talent.js';
 export function registerTalentRoutes(app: FastifyInstance, deps: Deps): void {
   // Company talent search with DB-side filter/sort/pagination (FR-06.1/06.4).
   app.get('/talent', async (req) =>
-    searchTalent(deps, requireRole(req, 'company_member'), parseOrThrow(TalentSearchQuerySchema, req.query)),
+    searchTalent(
+      deps,
+      requireRole(req, 'company_member'),
+      parseOrThrow(TalentSearchQuerySchema, req.query),
+    ),
   );
 
   // Candidate detail; sensitive fields gated inside the service (FR-06.3).

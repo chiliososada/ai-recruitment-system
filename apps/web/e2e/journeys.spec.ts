@@ -5,7 +5,11 @@ const RESUME = fileURLToPath(new URL('./fixtures/resume.pdf', import.meta.url));
 const stamp = Date.now();
 const company = { email: `company-${stamp}@e2e.test`, password: 'passw0rd1', name: 'E2E Robotics' };
 const seeker = { email: `seeker-${stamp}@e2e.test`, password: 'passw0rd1', name: 'E2E Seeker' };
-const seeker2 = { email: `seeker2-${stamp}@e2e.test`, password: 'passw0rd1', name: 'E2E Seeker Two' };
+const seeker2 = {
+  email: `seeker2-${stamp}@e2e.test`,
+  password: 'passw0rd1',
+  name: 'E2E Seeker Two',
+};
 const JOB_TITLE = `Full-Stack Engineer ${stamp}`;
 
 test.use({ locale: 'en-US' });
@@ -53,7 +57,9 @@ test.describe.serial('Two-sided recruitment journeys (E2E main paths)', () => {
     await expect(page).toHaveURL(/\/console\/companies\//);
 
     await page.getByLabel('Job title').fill(JOB_TITLE);
-    await page.getByLabel('Description').fill('Build TypeScript, React and Node.js apps on PostgreSQL and AWS.');
+    await page
+      .getByLabel('Description')
+      .fill('Build TypeScript, React and Node.js apps on PostgreSQL and AWS.');
     await page.getByLabel('Required skills (comma-separated)').fill('TypeScript, React, Node.js');
     await page.getByRole('button', { name: 'Create job' }).click();
     await expect(page.getByText(JOB_TITLE)).toBeVisible();
@@ -121,11 +127,7 @@ test.describe.serial('Two-sided recruitment journeys (E2E main paths)', () => {
 
     // Advance the application stage and propose an interview.
     await expect(page.getByRole('cell', { name: seeker.name, exact: true })).toBeVisible();
-    await page
-      .locator('select')
-      .filter({ hasText: 'Applied' })
-      .first()
-      .selectOption('screening');
+    await page.locator('select').filter({ hasText: 'Applied' }).first().selectOption('screening');
     await page.getByRole('button', { name: 'Propose interview' }).first().click();
     await page.locator('input[type="datetime-local"]').first().fill('2030-01-15T09:00');
     await page.getByRole('button', { name: 'Confirm' }).first().click();

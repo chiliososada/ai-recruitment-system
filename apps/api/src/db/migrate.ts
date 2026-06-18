@@ -47,7 +47,9 @@ export async function applyMigrations(db: Db, opts: MigrateOptions = {}): Promis
     if (applied.has(file)) continue;
     const sql = await readFile(path.join(MIGRATIONS_DIR, file), 'utf8');
     await db.exec(sql);
-    await db.exec(`insert into ars_schema_migrations (name) values ('${file}') on conflict do nothing;`);
+    await db.exec(
+      `insert into ars_schema_migrations (name) values ('${file}') on conflict do nothing;`,
+    );
     ran.push(file);
     log(`applied ${file}`);
   }

@@ -10,7 +10,10 @@ import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
 export default function CompanyConsole(): JSX.Element {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const companies = useQuery({ queryKey: ['my-companies'], queryFn: () => api.get<Company[]>('/companies/mine') });
+  const companies = useQuery({
+    queryKey: ['my-companies'],
+    queryFn: () => api.get<Company[]>('/companies/mine'),
+  });
 
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('');
@@ -72,7 +75,11 @@ export default function CompanyConsole(): JSX.Element {
           <input id="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} />
         </Field>
         <Field label={t('company.size')} htmlFor="size">
-          <select id="size" value={size} onChange={(e) => setSize(e.target.value as CompanySize | '')}>
+          <select
+            id="size"
+            value={size}
+            onChange={(e) => setSize(e.target.value as CompanySize | '')}
+          >
             <option value="">{t('common.none')}</option>
             {COMPANY_SIZES.map((s) => (
               <option key={s} value={s}>

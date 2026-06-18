@@ -29,7 +29,11 @@ function ctx(principal: Principal): RequestContext {
   return { role: 'authenticated', userId: principal.userId, email: principal.email };
 }
 
-async function topSkills(deps: Deps, context: RequestContext, candidateId: string): Promise<string[]> {
+async function topSkills(
+  deps: Deps,
+  context: RequestContext,
+  candidateId: string,
+): Promise<string[]> {
   const res = await deps.db.withContext(context, (c) =>
     c.query<{ display_name: string }>(
       `select s.display_name

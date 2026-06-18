@@ -40,10 +40,7 @@ interface TalentRow {
   match_score: number | null;
 }
 
-async function skillsForCandidates(
-  c: DbClient,
-  ids: string[],
-): Promise<Map<string, string[]>> {
+async function skillsForCandidates(c: DbClient, ids: string[]): Promise<Map<string, string[]>> {
   const map = new Map<string, string[]>();
   if (!ids.length) return map;
   const res = await c.query<{ candidate_id: string; display_name: string }>(
@@ -99,7 +96,8 @@ export async function searchTalent(
         [query.recommendedForJobId, principal.userId],
       ),
     );
-    if (!member.rows[0]?.ok) throw forbidden('Not a member of this job\'s company', 'error.forbidden');
+    if (!member.rows[0]?.ok)
+      throw forbidden("Not a member of this job's company", 'error.forbidden');
     await computeMatchesForJob(deps, query.recommendedForJobId);
     jobScoped = true;
   }
@@ -161,7 +159,10 @@ export async function searchTalent(
        ${where} order by ${orderBy} limit ${limit} offset ${offset}`,
       params,
     );
-    const skills = await skillsForCandidates(c, rows.rows.map((r) => r.id));
+    const skills = await skillsForCandidates(
+      c,
+      rows.rows.map((r) => r.id),
+    );
     const items = rows.rows.map((r) => mapSummary(r, skills.get(r.id) ?? [], jobScoped));
     return buildPaginated(items, total.rows[0]?.count ?? 0, query);
   });
@@ -231,7 +232,11 @@ export async function getCandidateDetail(
     evidence: s.evidence_text ? s.evidence_text.split('||').filter(Boolean) : [],
   }));
 
-  const { recommended: _recommended, matchScore: _matchScore, ...profile } = mapSummary(
+  const {
+    recommended: _recommended,
+    matchScore: _matchScore,
+    ...profile
+  } = mapSummary(
     detail.row,
     skills.slice(0, 8).map((s) => s.name),
     false,

@@ -60,7 +60,13 @@ export default function TalentSearch(): JSX.Element {
           <input id="q" value={q} onChange={(e) => setQ(e.target.value)} />
         </Field>
         <Field label={t('talent.minYears')} htmlFor="minYears">
-          <input id="minYears" type="number" min={0} value={minYears} onChange={(e) => setMinYears(e.target.value)} />
+          <input
+            id="minYears"
+            type="number"
+            min={0}
+            value={minYears}
+            onChange={(e) => setMinYears(e.target.value)}
+          />
         </Field>
         <Field label={t('talent.skills')} htmlFor="skills">
           <input id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
@@ -93,7 +99,8 @@ export default function TalentSearch(): JSX.Element {
                   {c.recommended ? <Badge variant="rec">{t('talent.recommended')}</Badge> : null}
                 </div>
                 <p className="muted">
-                  {c.headline ?? ''} · {c.yearsExperience} {t('analysis.years', { count: c.yearsExperience })}
+                  {c.headline ?? ''} · {c.yearsExperience}{' '}
+                  {t('analysis.years', { count: c.yearsExperience })}
                   {c.matchScore != null ? ` · ${t('match.score')} ${c.matchScore}` : ''}
                 </p>
                 <div>
@@ -114,7 +121,11 @@ export default function TalentSearch(): JSX.Element {
                     />
                     {t('shortlist.compare')}
                   </label>
-                  <button type="button" className="secondary" onClick={() => shortlist.mutate(c.id)}>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => shortlist.mutate(c.id)}
+                  >
                     {t('shortlist.add')}
                   </button>
                 </div>

@@ -53,7 +53,11 @@ interface ParseRow {
   updated_at: unknown;
 }
 
-const ctx = (p: Principal): RequestContext => ({ role: 'authenticated', userId: p.userId, email: p.email });
+const ctx = (p: Principal): RequestContext => ({
+  role: 'authenticated',
+  userId: p.userId,
+  email: p.email,
+});
 
 function mapResume(r: ResumeRow): ResumeFile {
   return {
@@ -93,7 +97,11 @@ export async function uploadResume(
   const candidateId = await getCandidateIdForUser(deps, principal.userId);
 
   // Server-side validation (FR-02.3) — mirrors the shared client validation.
-  const failure = validateUpload({ filename: file.filename, mime: file.mime, sizeBytes: file.buffer.length });
+  const failure = validateUpload({
+    filename: file.filename,
+    mime: file.mime,
+    sizeBytes: file.buffer.length,
+  });
   if (failure === 'resume.upload.empty') throw badRequest('Empty file', failure);
   if (failure === 'resume.upload.tooLarge') throw payloadTooLarge('File too large', failure);
   if (failure === 'resume.upload.badExtension') throw unsupportedMedia('Bad extension', failure);
@@ -113,7 +121,14 @@ export async function uploadResume(
       `insert into resume_files (candidate_id, filename, mime, size_bytes, storage_path, scan_result)
        values ($1, $2, $3, $4, $5, $6)
        returning id, candidate_id, filename, mime, size_bytes, scan_result, created_at`,
-      [candidateId, sanitizeFilename(file.filename), file.mime, file.buffer.length, storagePath, verdict],
+      [
+        candidateId,
+        sanitizeFilename(file.filename),
+        file.mime,
+        file.buffer.length,
+        storagePath,
+        verdict,
+      ],
     );
     const pj = await c.query<ParseRow>(
       `insert into parse_jobs (resume_file_id, candidate_id, status)
@@ -146,7 +161,13 @@ export async function runParse(deps: Deps, parseJobId: string): Promise<ParseRow
 
   try {
     const job = await deps.db.service((c) =>
-      c.query<{ candidate_id: string; storage_path: string; mime: string; resume_file_id: string; locale: Locale }>(
+      c.query<{
+        candidate_id: string;
+        storage_path: string;
+        mime: string;
+        resume_file_id: string;
+        locale: Locale;
+      }>(
         `select pj.candidate_id, rf.storage_path, rf.mime, pj.resume_file_id, p.locale
          from parse_jobs pj
          join resume_files rf on rf.id = pj.resume_file_id
@@ -167,7 +188,10 @@ export async function runParse(deps: Deps, parseJobId: string): Promise<ParseRow
     }
 
     await deps.db.service((c) =>
-      c.query(`update resume_files set extracted_text = $2 where id = $1`, [row.resume_file_id, text]),
+      c.query(`update resume_files set extracted_text = $2 where id = $1`, [
+        row.resume_file_id,
+        text,
+      ]),
     );
 
     await generateAndStoreAnalysis(deps, row.candidate_id, text, row.locale);
@@ -176,7 +200,10 @@ export async function runParse(deps: Deps, parseJobId: string): Promise<ParseRow
     return ok.rows[0]!;
   } catch (err) {
     const key = err instanceof AppError && err.messageKey ? err.messageKey : 'resume.parse.failed';
-    deps.log.warn({ parseJobId, code: err instanceof AppError ? err.code : 'unknown' }, 'parse pipeline failed');
+    deps.log.warn(
+      { parseJobId, code: err instanceof AppError ? err.code : 'unknown' },
+      'parse pipeline failed',
+    );
     const failed = await setStatus('failed', key, false);
     return failed.rows[0]!;
   }
@@ -257,7 +284,13 @@ export async function downloadResume(
   resumeFileId: string,
 ): Promise<ResumeDownload> {
   const res = await deps.db.service((c) =>
-    c.query<{ storage_path: string; filename: string; mime: string; candidate_id: string; user_id: string }>(
+    c.query<{
+      storage_path: string;
+      filename: string;
+      mime: string;
+      candidate_id: string;
+      user_id: string;
+    }>(
       `select rf.storage_path, rf.filename, rf.mime, rf.candidate_id, c.user_id
        from resume_files rf join candidates c on c.id = rf.candidate_id
        where rf.id = $1`,

@@ -108,7 +108,9 @@ describe('company + job management (FR-04)', () => {
     const res = await t.app.inject({ method: 'GET', url: '/api/companies?industry=Manufacturing' });
     const body = res.json();
     expect(body.items.some((c: { id: string }) => c.id === companyAId)).toBe(true);
-    expect(body.items.every((c: { industry: string }) => c.industry === 'Manufacturing')).toBe(true);
+    expect(body.items.every((c: { industry: string }) => c.industry === 'Manufacturing')).toBe(
+      true,
+    );
     expect(body.total).toBeGreaterThanOrEqual(1);
   });
 

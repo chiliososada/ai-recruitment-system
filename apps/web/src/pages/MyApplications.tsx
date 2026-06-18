@@ -13,7 +13,8 @@ export default function MyApplications(): JSX.Element {
     queryFn: () => api.get<Application[]>('/applications'),
   });
   const withdraw = useMutation({
-    mutationFn: (id: string) => api.patch<Application>(`/applications/${id}/stage`, { stage: 'withdrawn' }),
+    mutationFn: (id: string) =>
+      api.patch<Application>(`/applications/${id}/stage`, { stage: 'withdrawn' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['my-applications'] }),
   });
 

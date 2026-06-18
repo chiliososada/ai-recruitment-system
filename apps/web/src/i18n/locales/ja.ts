@@ -224,7 +224,10 @@ const ja: Dict = {
     reason: '理由',
     matched: '一致したスキル',
     missing: '不足しているスキル',
-    recommendations: { title: 'おすすめの求人', empty: 'まだおすすめがありません。まず履歴書をアップロードしてください' },
+    recommendations: {
+      title: 'おすすめの求人',
+      empty: 'まだおすすめがありません。まず履歴書をアップロードしてください',
+    },
     candidates: { title: '候補者ランキング', empty: '該当する候補者がまだいません' },
   },
   talent: {

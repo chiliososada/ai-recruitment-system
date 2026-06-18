@@ -56,7 +56,9 @@ export default function VerifyEmail(): JSX.Element {
           <button
             type="button"
             className="secondary"
-            onClick={() => navigate((state.role ?? user?.role) === 'company_member' ? '/console' : '/me')}
+            onClick={() =>
+              navigate((state.role ?? user?.role) === 'company_member' ? '/console' : '/me')
+            }
           >
             {t('common.back')}
           </button>

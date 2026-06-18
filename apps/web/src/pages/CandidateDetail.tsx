@@ -45,7 +45,8 @@ export default function CandidateDetail(): JSX.Element {
       <div className="card">
         <h1>{c.displayName}</h1>
         <p className="muted">
-          {c.headline ?? ''} · {c.yearsExperience} {t('analysis.years', { count: c.yearsExperience })}
+          {c.headline ?? ''} · {c.yearsExperience}{' '}
+          {t('analysis.years', { count: c.yearsExperience })}
           {c.location ? ` · ${c.location}` : ''}
         </p>
         <div className="row">
@@ -53,7 +54,11 @@ export default function CandidateDetail(): JSX.Element {
             {t('shortlist.add')}
           </button>
           {c.resumeDownloadUrl ? (
-            <button type="button" className="secondary" onClick={() => void download(c.resumeDownloadUrl!)}>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => void download(c.resumeDownloadUrl!)}
+            >
               {t('talent.downloadResume')}
             </button>
           ) : (
@@ -83,9 +88,12 @@ export default function CandidateDetail(): JSX.Element {
           {c.skills.map((s) => (
             <li key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
               <span>
-                {s.name} <span className="muted">· {t(`analysis.proficiency.${s.proficiency}`)}</span>
+                {s.name}{' '}
+                <span className="muted">· {t(`analysis.proficiency.${s.proficiency}`)}</span>
               </span>
-              <span className="muted">{t('analysis.years', { count: Math.round(s.yearsExperience) })}</span>
+              <span className="muted">
+                {t('analysis.years', { count: Math.round(s.yearsExperience) })}
+              </span>
             </li>
           ))}
         </ul>

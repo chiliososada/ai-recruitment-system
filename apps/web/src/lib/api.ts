@@ -34,7 +34,8 @@ export class ApiError extends Error {
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
   if (token) headers.authorization = `Bearer ${token}`;
-  const locale = typeof localStorage !== 'undefined' ? localStorage.getItem(LOCALE_STORAGE_KEY) : null;
+  const locale =
+    typeof localStorage !== 'undefined' ? localStorage.getItem(LOCALE_STORAGE_KEY) : null;
   if (locale) headers['accept-language'] = locale;
   return headers;
 }

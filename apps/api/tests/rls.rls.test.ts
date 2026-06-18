@@ -142,19 +142,23 @@ describe('RLS: resume_files (owner-only, FR-02.3)', () => {
   });
 
   it('another user sees 0 rows for it', async () => {
-    const asOtherSeeker = await asRole(authed(seeker2), `select id from resume_files where id = $1`, [
-      seekerResumeFileId,
-    ]);
+    const asOtherSeeker = await asRole(
+      authed(seeker2),
+      `select id from resume_files where id = $1`,
+      [seekerResumeFileId],
+    );
     expect(asOtherSeeker.rows).toHaveLength(0);
 
     // Even a recruiter cannot read resume_files directly (download is mediated by the API+service).
-    const asRecruiter = await asRole(authed(companyA), `select id from resume_files where id = $1`, [
-      seekerResumeFileId,
-    ]);
+    const asRecruiter = await asRole(
+      authed(companyA),
+      `select id from resume_files where id = $1`,
+      [seekerResumeFileId],
+    );
     expect(asRecruiter.rows).toHaveLength(0);
   });
 
-  it('the second seeker only sees their own resume, never the first seeker\'s', async () => {
+  it("the second seeker only sees their own resume, never the first seeker's", async () => {
     const res = await asRole(authed(seeker2), `select id, candidate_id from resume_files`);
     expect(res.rows).toHaveLength(1);
     expect(res.rows[0]!.id).toBe(seeker2ResumeFileId);
@@ -166,7 +170,9 @@ describe('RLS: jobs (visibility/status gate)', () => {
     const asAnon = await asRole(anon, `select id from jobs where id = $1`, [draftJobId]);
     expect(asAnon.rows).toHaveLength(0);
 
-    const asNonMember = await asRole(authed(companyB), `select id from jobs where id = $1`, [draftJobId]);
+    const asNonMember = await asRole(authed(companyB), `select id from jobs where id = $1`, [
+      draftJobId,
+    ]);
     expect(asNonMember.rows).toHaveLength(0);
   });
 
@@ -198,33 +204,43 @@ describe('RLS: conversations + messages (members only, FR-08)', () => {
       conversationId,
     ]);
     expect(conv.rows).toHaveLength(0);
-    const msgs = await asRole(authed(seeker2), `select id from messages where conversation_id = $1`, [
-      conversationId,
-    ]);
+    const msgs = await asRole(
+      authed(seeker2),
+      `select id from messages where conversation_id = $1`,
+      [conversationId],
+    );
     expect(msgs.rows).toHaveLength(0);
   });
 
   it('a member CAN read the messages', async () => {
-    const msgs = await asRole(authed(seeker), `select id from messages where conversation_id = $1`, [
-      conversationId,
-    ]);
+    const msgs = await asRole(
+      authed(seeker),
+      `select id from messages where conversation_id = $1`,
+      [conversationId],
+    );
     expect(msgs.rows.length).toBeGreaterThan(0);
   });
 });
 
 describe('RLS: applications (candidate + owning company)', () => {
   it('the owning candidate CAN SELECT the application', async () => {
-    const res = await asRole(authed(seeker), `select id from applications where id = $1`, [applicationId]);
+    const res = await asRole(authed(seeker), `select id from applications where id = $1`, [
+      applicationId,
+    ]);
     expect(res.rows).toHaveLength(1);
   });
 
   it('the owning company member CAN SELECT the application', async () => {
-    const res = await asRole(authed(companyA), `select id from applications where id = $1`, [applicationId]);
+    const res = await asRole(authed(companyA), `select id from applications where id = $1`, [
+      applicationId,
+    ]);
     expect(res.rows).toHaveLength(1);
   });
 
   it('a different company sees 0 rows', async () => {
-    const res = await asRole(authed(companyB), `select id from applications where id = $1`, [applicationId]);
+    const res = await asRole(authed(companyB), `select id from applications where id = $1`, [
+      applicationId,
+    ]);
     expect(res.rows).toHaveLength(0);
   });
 });
@@ -235,7 +251,9 @@ describe('RLS: notifications (owner only)', () => {
     expect(companyANotifId).not.toBe('');
 
     // Seeker can see their own notification but not company A's.
-    const own = await asRole(authed(seeker), `select id from notifications where id = $1`, [seekerNotifId]);
+    const own = await asRole(authed(seeker), `select id from notifications where id = $1`, [
+      seekerNotifId,
+    ]);
     expect(own.rows).toHaveLength(1);
     const foreign = await asRole(authed(seeker), `select id from notifications where id = $1`, [
       companyANotifId,
@@ -243,7 +261,10 @@ describe('RLS: notifications (owner only)', () => {
     expect(foreign.rows).toHaveLength(0);
 
     // Every row a user can see belongs to them.
-    const all = await asRole<{ user_id: string }>(authed(seeker), `select user_id from notifications`);
+    const all = await asRole<{ user_id: string }>(
+      authed(seeker),
+      `select user_id from notifications`,
+    );
     expect(all.rows.every((r) => r.user_id === seeker.user.id)).toBe(true);
   });
 });

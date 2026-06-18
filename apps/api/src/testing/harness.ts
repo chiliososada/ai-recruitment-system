@@ -51,7 +51,13 @@ let userCounter = 0;
 /** Register a user via the real API and return the session + auth headers. */
 export async function createUser(
   t: TestApp,
-  opts: { role: UserRole; email?: string; displayName?: string; password?: string; locale?: Locale } = {
+  opts: {
+    role: UserRole;
+    email?: string;
+    displayName?: string;
+    password?: string;
+    locale?: Locale;
+  } = {
     role: 'job_seeker',
   },
 ): Promise<TestUser> {
@@ -116,7 +122,8 @@ export async function uploadSampleResume(
     mime: 'application/pdf',
     buffer: pdf,
   });
-  if (res.statusCode !== 201) throw new Error(`resume upload failed (${res.statusCode}): ${res.body}`);
+  if (res.statusCode !== 201)
+    throw new Error(`resume upload failed (${res.statusCode}): ${res.body}`);
 }
 
 /** Create a company + an open public job for a company member. */
@@ -129,7 +136,12 @@ export async function createCompanyAndJob(
     method: 'POST',
     url: '/api/companies',
     headers: companyUser.headers,
-    payload: { name: `Acme ${randomUUID().slice(0, 6)}`, industry: 'Tech', size: '11-50', location: 'Tokyo' },
+    payload: {
+      name: `Acme ${randomUUID().slice(0, 6)}`,
+      industry: 'Tech',
+      size: '11-50',
+      location: 'Tokyo',
+    },
   });
   if (comp.statusCode !== 201) throw new Error(`company create failed: ${comp.body}`);
   const companyId = comp.json().id;
@@ -152,6 +164,7 @@ export async function createCompanyAndJob(
       ...jobOverrides,
     },
   });
-  if (jres.statusCode !== 201) throw new Error(`job create failed (${jres.statusCode}): ${jres.body}`);
+  if (jres.statusCode !== 201)
+    throw new Error(`job create failed (${jres.statusCode}): ${jres.body}`);
   return { companyId, jobId: jres.json().id, job: jres.json() };
 }

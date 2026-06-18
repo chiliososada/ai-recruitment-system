@@ -33,10 +33,24 @@ export default function Login(): JSX.Element {
       <h1>{t('auth.loginTitle')}</h1>
       <form onSubmit={submit} noValidate>
         <Field label={t('auth.email')} htmlFor="email">
-          <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </Field>
         <Field label={t('auth.passwordLabel')} htmlFor="password">
-          <input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Field>
         {error ? (
           <div className="field-error" role="alert">

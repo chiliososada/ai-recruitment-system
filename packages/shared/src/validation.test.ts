@@ -54,18 +54,22 @@ describe('RegisterSchema (FR-01.1)', () => {
     expect(r.email).toBe('user@example.com');
   });
   it('rejects weak passwords', () => {
-    expect(RegisterSchema.safeParse({
-      email: 'a@b.co',
-      password: 'short',
-      role: 'job_seeker',
-      displayName: 'X',
-    }).success).toBe(false);
-    expect(RegisterSchema.safeParse({
-      email: 'a@b.co',
-      password: 'alllettersbutnodigits',
-      role: 'job_seeker',
-      displayName: 'X',
-    }).success).toBe(false);
+    expect(
+      RegisterSchema.safeParse({
+        email: 'a@b.co',
+        password: 'short',
+        role: 'job_seeker',
+        displayName: 'X',
+      }).success,
+    ).toBe(false);
+    expect(
+      RegisterSchema.safeParse({
+        email: 'a@b.co',
+        password: 'alllettersbutnodigits',
+        role: 'job_seeker',
+        displayName: 'X',
+      }).success,
+    ).toBe(false);
   });
   it('rejects unknown roles', () => {
     expect(
@@ -108,7 +112,9 @@ describe('SkillAnalysisResultSchema (FR-03.2)', () => {
   const valid = {
     summary: 'Experienced full-stack engineer.',
     totalYearsExperience: 6,
-    skills: [{ name: 'TypeScript', proficiency: 'expert', yearsExperience: 6, evidence: ['Led X'] }],
+    skills: [
+      { name: 'TypeScript', proficiency: 'expert', yearsExperience: 6, evidence: ['Led X'] },
+    ],
     strengths: ['Leadership'],
     careerDirections: [{ title: 'Staff Engineer', rationale: 'Deep technical breadth.' }],
     recommendedLearning: [{ area: 'Distributed systems', reason: 'Scale roles.' }],

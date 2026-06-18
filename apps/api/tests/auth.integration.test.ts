@@ -23,7 +23,11 @@ describe('auth (FR-01)', () => {
     });
     expect(res.statusCode).toBe(201);
     const body = res.json();
-    expect(body.user).toMatchObject({ email: 'seeker1@example.com', role: 'job_seeker', locale: 'ja' });
+    expect(body.user).toMatchObject({
+      email: 'seeker1@example.com',
+      role: 'job_seeker',
+      locale: 'ja',
+    });
     expect(body.accessToken).toBeTruthy();
     expect(body.user.emailVerified).toBe(false);
     expect(body.devEmailVerificationToken).toBeTruthy();
@@ -42,7 +46,12 @@ describe('auth (FR-01)', () => {
   });
 
   it('rejects a duplicate email with 409', async () => {
-    await register({ email: 'dup@example.com', password: 'passw0rd1', role: 'job_seeker', displayName: 'A' });
+    await register({
+      email: 'dup@example.com',
+      password: 'passw0rd1',
+      role: 'job_seeker',
+      displayName: 'A',
+    });
     const dup = await register({
       email: 'dup@example.com',
       password: 'passw0rd1',
@@ -67,7 +76,12 @@ describe('auth (FR-01)', () => {
   });
 
   it('logs in with valid credentials and reads /auth/me', async () => {
-    await register({ email: 'login@example.com', password: 'passw0rd1', role: 'job_seeker', displayName: 'Lo' });
+    await register({
+      email: 'login@example.com',
+      password: 'passw0rd1',
+      role: 'job_seeker',
+      displayName: 'Lo',
+    });
     const login = await t.app.inject({
       method: 'POST',
       url: '/api/auth/login',

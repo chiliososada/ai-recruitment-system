@@ -104,12 +104,26 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
     if (httpErr.statusCode === 413 || httpErr.code === 'FST_REQ_FILE_TOO_LARGE') {
       return reply
         .code(413)
-        .send(errorBody('PAYLOAD_TOO_LARGE', 'Payload too large', 'resume.upload.tooLarge', correlationId));
+        .send(
+          errorBody(
+            'PAYLOAD_TOO_LARGE',
+            'Payload too large',
+            'resume.upload.tooLarge',
+            correlationId,
+          ),
+        );
     }
     if (httpErr.statusCode === 400) {
       return reply
         .code(400)
-        .send(errorBody('BAD_REQUEST', httpErr.message ?? 'Bad request', 'error.badRequest', correlationId));
+        .send(
+          errorBody(
+            'BAD_REQUEST',
+            httpErr.message ?? 'Bad request',
+            'error.badRequest',
+            correlationId,
+          ),
+        );
     }
     req.log.error({ err }, 'unhandled error');
     return reply
@@ -118,9 +132,7 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
   });
 
   app.setNotFoundHandler((req, reply) => {
-    reply
-      .code(404)
-      .send(errorBody('NOT_FOUND', 'Route not found', 'error.notFound', req.id));
+    reply.code(404).send(errorBody('NOT_FOUND', 'Route not found', 'error.notFound', req.id));
   });
 
   app.get('/health', async () => ({ status: 'ok', runtime: deps.config.ARS_RUNTIME }));

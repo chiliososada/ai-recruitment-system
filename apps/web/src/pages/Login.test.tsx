@@ -24,7 +24,13 @@ describe('Login form + error state (FR-01)', () => {
       {
         match: '/auth/login',
         status: 401,
-        body: { error: { code: 'UNAUTHORIZED', messageKey: 'auth.invalidCredentials', correlationId: 'x' } },
+        body: {
+          error: {
+            code: 'UNAUTHORIZED',
+            messageKey: 'auth.invalidCredentials',
+            correlationId: 'x',
+          },
+        },
       },
     ]);
     renderWithProviders(<Login />);

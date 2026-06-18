@@ -1,10 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import {
-  LoginSchema,
-  RegisterSchema,
-  UpdateAccountSchema,
-  VerifyEmailSchema,
-} from '@ars/shared';
+import { LoginSchema, RegisterSchema, UpdateAccountSchema, VerifyEmailSchema } from '@ars/shared';
 import type { Deps } from '../deps.js';
 import { parseOrThrow } from '../errors.js';
 import { requireAuth } from '../http/context.js';

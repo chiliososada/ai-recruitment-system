@@ -1,10 +1,5 @@
 import { z } from 'zod';
-import {
-  CurrencySchema,
-  JobStatusSchema,
-  JobVisibilitySchema,
-  WorkStyleSchema,
-} from '../enums.js';
+import { CurrencySchema, JobStatusSchema, JobVisibilitySchema, WorkStyleSchema } from '../enums.js';
 import { boundedText, optionalText } from './common.js';
 
 const skillList = z

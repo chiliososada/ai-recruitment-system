@@ -18,7 +18,11 @@ beforeAll(async () => {
     method: 'POST',
     url: '/api/conversations',
     headers: company.headers,
-    payload: { participantUserId: seeker.user.id, subject: 'Opportunity', initialMessage: 'Hello!' },
+    payload: {
+      participantUserId: seeker.user.id,
+      subject: 'Opportunity',
+      initialMessage: 'Hello!',
+    },
   });
   conversationId = res.json().id;
 });
@@ -28,7 +32,11 @@ afterAll(async () => {
 
 describe('messaging + notifications (FR-08)', () => {
   it('creates a conversation visible to both members with the initial message', async () => {
-    const list = await t.app.inject({ method: 'GET', url: '/api/conversations', headers: seeker.headers });
+    const list = await t.app.inject({
+      method: 'GET',
+      url: '/api/conversations',
+      headers: seeker.headers,
+    });
     expect(list.json().some((c: { id: string }) => c.id === conversationId)).toBe(true);
     const msgs = await t.app.inject({
       method: 'GET',
@@ -40,14 +48,22 @@ describe('messaging + notifications (FR-08)', () => {
 
   it('tracks unread counts and clears them on read', async () => {
     // company already sent the initial message → seeker has 1 unread.
-    const before = await t.app.inject({ method: 'GET', url: '/api/conversations', headers: seeker.headers });
+    const before = await t.app.inject({
+      method: 'GET',
+      url: '/api/conversations',
+      headers: seeker.headers,
+    });
     expect(before.json().find((c: { id: string }) => c.id === conversationId).unreadCount).toBe(1);
     await t.app.inject({
       method: 'GET',
       url: `/api/conversations/${conversationId}/messages`,
       headers: seeker.headers,
     });
-    const after = await t.app.inject({ method: 'GET', url: '/api/conversations', headers: seeker.headers });
+    const after = await t.app.inject({
+      method: 'GET',
+      url: '/api/conversations',
+      headers: seeker.headers,
+    });
     expect(after.json().find((c: { id: string }) => c.id === conversationId).unreadCount).toBe(0);
   });
 
@@ -58,7 +74,11 @@ describe('messaging + notifications (FR-08)', () => {
       headers: seeker.headers,
       payload: { body: 'Thanks for reaching out.' },
     });
-    const notifs = await t.app.inject({ method: 'GET', url: '/api/notifications', headers: company.headers });
+    const notifs = await t.app.inject({
+      method: 'GET',
+      url: '/api/notifications',
+      headers: company.headers,
+    });
     expect(notifs.json().some((n: { type: string }) => n.type === 'message')).toBe(true);
   });
 

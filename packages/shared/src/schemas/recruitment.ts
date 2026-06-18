@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  InterviewModeSchema,
-  InterviewStatusSchema,
-  RecruitmentStageSchema,
-} from '../enums.js';
+import { InterviewModeSchema, InterviewStatusSchema, RecruitmentStageSchema } from '../enums.js';
 import { CandidateSkillSchema } from './profile.js';
 
 export const ApplicationSchema = z.object({

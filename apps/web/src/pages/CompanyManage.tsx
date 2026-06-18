@@ -28,7 +28,10 @@ export default function CompanyManage(): JSX.Element {
   const { id = '' } = useParams();
   const qc = useQueryClient();
 
-  const company = useQuery({ queryKey: ['company', id], queryFn: () => api.get<Company>(`/companies/${id}`) });
+  const company = useQuery({
+    queryKey: ['company', id],
+    queryFn: () => api.get<Company>(`/companies/${id}`),
+  });
   const jobs = useQuery({
     queryKey: ['manage-jobs', id],
     queryFn: () => api.get<Job[]>(`/companies/${id}/manage/jobs`),
@@ -117,10 +120,21 @@ export default function CompanyManage(): JSX.Element {
           <input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
         </Field>
         <Field label={t('job.category')} htmlFor="category">
-          <input id="category" required value={category} onChange={(e) => setCategory(e.target.value)} />
+          <input
+            id="category"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
         </Field>
         <Field label={t('job.description')} htmlFor="description" error={fieldErrors.description}>
-          <textarea id="description" required rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <textarea
+            id="description"
+            required
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </Field>
         <Field label={t('job.requiredSkills')} htmlFor="required">
           <input id="required" value={required} onChange={(e) => setRequired(e.target.value)} />
@@ -130,18 +144,38 @@ export default function CompanyManage(): JSX.Element {
         </Field>
         <div className="row">
           <Field label={t('job.minYears')} htmlFor="minYears">
-            <input id="minYears" type="number" min={0} value={minYears} onChange={(e) => setMinYears(e.target.value)} />
+            <input
+              id="minYears"
+              type="number"
+              min={0}
+              value={minYears}
+              onChange={(e) => setMinYears(e.target.value)}
+            />
           </Field>
           <Field label={t('job.salaryMin')} htmlFor="salaryMin">
-            <input id="salaryMin" type="number" value={salaryMin} onChange={(e) => setSalaryMin(e.target.value)} />
+            <input
+              id="salaryMin"
+              type="number"
+              value={salaryMin}
+              onChange={(e) => setSalaryMin(e.target.value)}
+            />
           </Field>
           <Field label={t('job.salaryMax')} htmlFor="salaryMax" error={fieldErrors.salaryMax}>
-            <input id="salaryMax" type="number" value={salaryMax} onChange={(e) => setSalaryMax(e.target.value)} />
+            <input
+              id="salaryMax"
+              type="number"
+              value={salaryMax}
+              onChange={(e) => setSalaryMax(e.target.value)}
+            />
           </Field>
         </div>
         <div className="row">
           <Field label={t('job.workStyle')} htmlFor="ws">
-            <select id="ws" value={workStyle} onChange={(e) => setWorkStyle(e.target.value as WorkStyle)}>
+            <select
+              id="ws"
+              value={workStyle}
+              onChange={(e) => setWorkStyle(e.target.value as WorkStyle)}
+            >
               {WORK_STYLES.map((w) => (
                 <option key={w} value={w}>
                   {t(`job.workStyleValue.${w}`)}
@@ -159,7 +193,11 @@ export default function CompanyManage(): JSX.Element {
             </select>
           </Field>
           <Field label={t('job.visibility')} htmlFor="vis">
-            <select id="vis" value={visibility} onChange={(e) => setVisibility(e.target.value as JobVisibility)}>
+            <select
+              id="vis"
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as JobVisibility)}
+            >
               {JOB_VISIBILITIES.map((v) => (
                 <option key={v} value={v}>
                   {t(`job.visibilityValue.${v}`)}

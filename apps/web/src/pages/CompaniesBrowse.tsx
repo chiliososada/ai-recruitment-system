@@ -18,7 +18,9 @@ export default function CompaniesBrowse(): JSX.Element {
   const query = useQuery({
     queryKey: ['companies', q, industry, size, page],
     queryFn: () =>
-      api.get<Paginated<Company>>(`/companies${qs({ q, industry, size: size || undefined, page })}`),
+      api.get<Paginated<Company>>(
+        `/companies${qs({ q, industry, size: size || undefined, page })}`,
+      ),
   });
 
   return (
@@ -39,7 +41,11 @@ export default function CompaniesBrowse(): JSX.Element {
           <input id="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} />
         </Field>
         <Field label={t('company.size')} htmlFor="size">
-          <select id="size" value={size} onChange={(e) => setSize(e.target.value as CompanySize | '')}>
+          <select
+            id="size"
+            value={size}
+            onChange={(e) => setSize(e.target.value as CompanySize | '')}
+          >
             <option value="">{t('common.all')}</option>
             {COMPANY_SIZES.map((s) => (
               <option key={s} value={s}>
@@ -66,7 +72,8 @@ export default function CompaniesBrowse(): JSX.Element {
                   <Link to={`/companies/${c.id}`}>{c.name}</Link>
                 </h2>
                 <p className="muted">
-                  {c.industry ?? ''} {c.size ? `· ${c.size}` : ''} {c.location ? `· ${c.location}` : ''}
+                  {c.industry ?? ''} {c.size ? `· ${c.size}` : ''}{' '}
+                  {c.location ? `· ${c.location}` : ''}
                 </p>
                 <span className="badge">
                   {t('company.openJobs')}: {c.openJobCount ?? 0}

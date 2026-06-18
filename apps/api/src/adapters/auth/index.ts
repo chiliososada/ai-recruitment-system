@@ -25,4 +25,10 @@ export function createTokenService(config: AppConfig): TokenService {
 }
 
 export { TokenService } from './token.js';
-export type { AuthAdapter, AuthIdentity, RegisterResult, TokenPayload, IssuedToken } from './types.js';
+export type {
+  AuthAdapter,
+  AuthIdentity,
+  RegisterResult,
+  TokenPayload,
+  IssuedToken,
+} from './types.js';

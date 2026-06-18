@@ -58,7 +58,12 @@ export default function JobManage(): JSX.Element {
         ) : (
           <ul className="list-reset stack">
             {candidates.data!.map((c) => (
-              <li key={c.id} className="row" style={{ justifyContent: 'space-between' }} data-testid="ranked-candidate">
+              <li
+                key={c.id}
+                className="row"
+                style={{ justifyContent: 'space-between' }}
+                data-testid="ranked-candidate"
+              >
                 <span>
                   <Link to={`/talent/${c.candidateId}`}>{c.candidateName}</Link>
                   <span className="muted"> — {c.reason}</span>
@@ -98,7 +103,12 @@ export default function JobManage(): JSX.Element {
                     <select
                       id={`stage-${app.id}`}
                       value={app.stage}
-                      onChange={(e) => setStage.mutate({ appId: app.id, stage: e.target.value as RecruitmentStage })}
+                      onChange={(e) =>
+                        setStage.mutate({
+                          appId: app.id,
+                          stage: e.target.value as RecruitmentStage,
+                        })
+                      }
                     >
                       {RECRUITMENT_STAGES.map((s) => (
                         <option key={s} value={s}>
@@ -165,7 +175,11 @@ function InterviewForm({ applicationId }: { applicationId: string }): JSX.Elemen
         onChange={(e) => setWhen(e.target.value)}
         required
       />
-      <select aria-label={t('interview.mode')} value={mode} onChange={(e) => setMode(e.target.value as InterviewMode)}>
+      <select
+        aria-label={t('interview.mode')}
+        value={mode}
+        onChange={(e) => setMode(e.target.value as InterviewMode)}
+      >
         {INTERVIEW_MODES.map((m) => (
           <option key={m} value={m}>
             {t(`interview.modeValue.${m}`)}

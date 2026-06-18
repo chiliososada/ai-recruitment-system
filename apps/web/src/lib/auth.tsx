@@ -1,18 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
-import type {
-  AuthUser,
-  LoginInput,
-  RegisterInput,
-  Session,
-  UpdateAccountInput,
-} from '@ars/shared';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { AuthUser, LoginInput, RegisterInput, Session, UpdateAccountInput } from '@ars/shared';
 import { api, getToken, setToken } from './api';
 
 interface AuthContextValue {

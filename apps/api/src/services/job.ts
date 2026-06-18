@@ -40,7 +40,11 @@ interface JobRow {
   updated_at: unknown;
 }
 
-const ctx = (p: Principal): RequestContext => ({ role: 'authenticated', userId: p.userId, email: p.email });
+const ctx = (p: Principal): RequestContext => ({
+  role: 'authenticated',
+  userId: p.userId,
+  email: p.email,
+});
 
 const JOB_COLS = `j.id, j.company_id, j.title, j.category, j.description, j.min_years, j.max_years,
   j.salary_min, j.salary_max, j.currency, j.location, j.work_style,
@@ -104,7 +108,8 @@ async function writeJobSkills(
   await c.query(`delete from job_skills where job_id = $1`, [jobId]);
   const requiredNames = new Set(requiredSkills.map(normalizeSkill));
   const rows: { name: string; display: string; required: boolean }[] = [];
-  for (const display of requiredSkills) rows.push({ name: normalizeSkill(display), display, required: true });
+  for (const display of requiredSkills)
+    rows.push({ name: normalizeSkill(display), display, required: true });
   for (const display of preferredSkills) {
     const name = normalizeSkill(display);
     if (!requiredNames.has(name)) rows.push({ name, display, required: false });
@@ -248,7 +253,10 @@ export async function listCompanyJobs(
        where j.company_id = $1 order by j.created_at desc`,
       [companyId],
     );
-    const skills = await loadSkillsForJobs(c, res.rows.map((r) => r.id));
+    const skills = await loadSkillsForJobs(
+      c,
+      res.rows.map((r) => r.id),
+    );
     return res.rows.map((r) => {
       const s = skills.get(r.id) ?? { required: [], preferred: [] };
       return mapJob(r, s.required, s.preferred);
@@ -302,7 +310,10 @@ export async function listPublicJobs(
        ${where} order by ${orderBy} limit ${limit} offset ${offset}`,
       params,
     );
-    const skills = await loadSkillsForJobs(c, rows.rows.map((r) => r.id));
+    const skills = await loadSkillsForJobs(
+      c,
+      rows.rows.map((r) => r.id),
+    );
     const items = rows.rows.map((r) => {
       const s = skills.get(r.id) ?? { required: [], preferred: [] };
       return mapJob(r, s.required, s.preferred);

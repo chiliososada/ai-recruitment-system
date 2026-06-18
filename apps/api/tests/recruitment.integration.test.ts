@@ -60,23 +60,34 @@ describe('applications + pipeline (FR-10.2/10.3)', () => {
   });
 
   it('advances the stage with audit history and enforces valid transitions', async () => {
-    const s1 = await patch(`/api/applications/${applicationId}/stage`, company, { stage: 'screening' });
+    const s1 = await patch(`/api/applications/${applicationId}/stage`, company, {
+      stage: 'screening',
+    });
     expect(s1.statusCode).toBe(200);
     expect(s1.json().stage).toBe('screening');
-    const bad = await patch(`/api/applications/${applicationId}/stage`, company, { stage: 'hired' });
+    const bad = await patch(`/api/applications/${applicationId}/stage`, company, {
+      stage: 'hired',
+    });
     expect(bad.statusCode).toBe(409); // screening -> hired not allowed
     const hist = await get(`/api/applications/${applicationId}/history`, company);
-    expect(hist.json().map((h: { toStage: string }) => h.toStage)).toEqual(['applied', 'screening']);
+    expect(hist.json().map((h: { toStage: string }) => h.toStage)).toEqual([
+      'applied',
+      'screening',
+    ]);
   });
 
   it('forbids another company from changing the stage (cross-tenant IDOR)', async () => {
-    const res = await patch(`/api/applications/${applicationId}/stage`, companyB, { stage: 'interview' });
+    const res = await patch(`/api/applications/${applicationId}/stage`, companyB, {
+      stage: 'interview',
+    });
     // 404 hides existence from a non-owning company (IDOR-safe); 403 also acceptable.
     expect([403, 404]).toContain(res.statusCode);
   });
 
   it('forbids a seeker from advancing the stage (only withdraw)', async () => {
-    const res = await patch(`/api/applications/${applicationId}/stage`, seeker, { stage: 'interview' });
+    const res = await patch(`/api/applications/${applicationId}/stage`, seeker, {
+      stage: 'interview',
+    });
     expect(res.statusCode).toBe(403);
   });
 
@@ -92,7 +103,9 @@ describe('shortlist + comparison (FR-10.1)', () => {
     const res = await post('/api/shortlists', company, { candidateId: seekerCandidateId, jobId });
     expect(res.statusCode).toBe(201);
     const list = await get('/api/shortlists', company);
-    expect(list.json().some((s: { candidateId: string }) => s.candidateId === seekerCandidateId)).toBe(true);
+    expect(
+      list.json().some((s: { candidateId: string }) => s.candidateId === seekerCandidateId),
+    ).toBe(true);
   });
 
   it('compares candidates side by side with skills, summary and match score', async () => {
@@ -123,7 +136,9 @@ describe('interviews (FR-10.4)', () => {
     const interviewId = propose.json().id;
     expect(propose.json().status).toBe('proposed');
 
-    const respond = await post(`/api/interviews/${interviewId}/respond`, seeker, { response: 'confirmed' });
+    const respond = await post(`/api/interviews/${interviewId}/respond`, seeker, {
+      response: 'confirmed',
+    });
     expect(respond.statusCode).toBe(200);
     expect(respond.json().status).toBe('confirmed');
 
@@ -140,7 +155,9 @@ describe('interviews (FR-10.4)', () => {
   });
 
   it('lets the seeker withdraw their own application', async () => {
-    const res = await patch(`/api/applications/${applicationId}/stage`, seeker, { stage: 'withdrawn' });
+    const res = await patch(`/api/applications/${applicationId}/stage`, seeker, {
+      stage: 'withdrawn',
+    });
     expect(res.statusCode).toBe(200);
     expect(res.json().stage).toBe('withdrawn');
   });

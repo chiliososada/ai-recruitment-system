@@ -13,7 +13,10 @@ export default function Shortlist(): JSX.Element {
   const [selected, setSelected] = useState<string[]>([]);
   const [comparison, setComparison] = useState<ComparisonResult | null>(null);
 
-  const list = useQuery({ queryKey: ['shortlist'], queryFn: () => api.get<ShortlistEntry[]>('/shortlists') });
+  const list = useQuery({
+    queryKey: ['shortlist'],
+    queryFn: () => api.get<ShortlistEntry[]>('/shortlists'),
+  });
   const remove = useMutation({
     mutationFn: (id: string) => api.del(`/shortlists/${id}`),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['shortlist'] }),
@@ -58,7 +61,9 @@ export default function Shortlist(): JSX.Element {
                   aria-label={`${t('shortlist.compare')} ${s.candidateName ?? ''}`}
                 />
                 <Link to={`/talent/${s.candidateId}`}>{s.candidateName ?? s.candidateId}</Link>
-                {s.candidateHeadline ? <span className="muted"> — {s.candidateHeadline}</span> : null}
+                {s.candidateHeadline ? (
+                  <span className="muted"> — {s.candidateHeadline}</span>
+                ) : null}
               </label>
               <button type="button" className="danger" onClick={() => remove.mutate(s.id)}>
                 {t('common.remove')}
