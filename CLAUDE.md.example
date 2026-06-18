@@ -1,0 +1,8 @@
+# Project execution rules
+
+@CLAUDE_CODE_TASK.md
+
+- Treat `docs/implementation/TASKS.md` as the durable task ledger.
+- Continue implementation until every completion condition in the imported task is proven.
+- Preserve unrelated user changes and never use destructive git operations.
+- Do not claim completion without fresh test/build evidence.

@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Test / coverage artifacts
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+.vitest/
+
+# Local databases / pglite data
+.pglite/
+*.pglite
+pgdata/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Uploaded files (local storage adapter)
+.storage/

@@ -1,0 +1,43 @@
+{
+  "name": "ai-recruitment-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI talent recruitment matching system (MVP) — React SPA + Node API + Supabase/pgvector",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @ars/shared && npm run build --workspace @ars/api && npm run build --workspace @ars/web",
+    "build:shared": "npm run build --workspace @ars/shared",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "test:integration": "npm run test:integration --workspace @ars/api",
+    "test:rls": "npm run test:rls --workspace @ars/api",
+    "test:e2e": "npm run test:e2e --workspace @ars/web",
+    "db:migrate:check": "npm run db:migrate:check --workspace @ars/api",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.7"
+  }
+}
