@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { CreateConversationSchema, SendMessageSchema } from '@ars/shared';
+import { z } from 'zod';
 import type { Deps } from '../deps.js';
 import { parseOrThrow } from '../errors.js';
 import { requireAuth } from '../http/context.js';
@@ -13,12 +14,25 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   sendMessage,
+  startConversationWithCompany,
 } from '../services/messaging.js';
+
+const StartWithCompanySchema = z.object({
+  companyId: z.string().uuid(),
+  subject: z.string().trim().max(200).optional(),
+  initialMessage: z.string().trim().min(1).max(4000).optional(),
+});
 
 export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void {
   app.post('/conversations', async (req, reply) => {
     const principal = requireAuth(req);
     const convo = await createConversation(deps, principal, parseOrThrow(CreateConversationSchema, req.body));
+    return reply.code(201).send(convo);
+  });
+
+  app.post('/conversations/with-company', async (req, reply) => {
+    const principal = requireAuth(req);
+    const convo = await startConversationWithCompany(deps, principal, parseOrThrow(StartWithCompanySchema, req.body));
     return reply.code(201).send(convo);
   });
 

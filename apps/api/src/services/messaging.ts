@@ -99,6 +99,28 @@ export async function createConversation(
   return getConversation(deps, principal, conversationId);
 }
 
+/** Start (or reuse) a conversation with a company's primary contact (FR-08.1). */
+export async function startConversationWithCompany(
+  deps: Deps,
+  principal: Principal,
+  input: { companyId: string; subject?: string; initialMessage?: string },
+): Promise<Conversation> {
+  const contact = await deps.db.service((c) =>
+    c.query<{ user_id: string }>(
+      `select user_id from company_members where company_id = $1
+       order by case when role = 'owner' then 0 else 1 end, created_at asc limit 1`,
+      [input.companyId],
+    ),
+  );
+  const participant = contact.rows[0]?.user_id;
+  if (!participant) throw notFound('Company has no contact', 'company.notFound');
+  return createConversation(deps, principal, {
+    participantUserId: participant,
+    ...(input.subject ? { subject: input.subject } : {}),
+    ...(input.initialMessage ? { initialMessage: input.initialMessage } : {}),
+  });
+}
+
 export async function getConversation(
   deps: Deps,
   principal: Principal,
