@@ -75,9 +75,9 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 ## Phase 5 — Documentation (NFR-DOC)
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
-| T-090 | README (architecture, prereqs, install, env, supabase, dev, test, build, deploy) | most | TODO | reviewer can run from zero |
-| T-091 | API doc (endpoints, auth, req/resp, errors, pagination) + OpenAPI | T-030 | TODO | doc + /openapi.json |
-| T-092 | AI doc (providers, schema, embeddings, scoring weights, versions, fallback, privacy) | T-034,T-037 | TODO | doc exists |
-| T-093 | DB doc (tables, relations, RLS, Storage policy) + deploy doc | T-018,T-019 | TODO | doc exists |
+| T-090 | README (architecture, prereqs, install, env, supabase, dev, test, build, deploy) | most | DONE | reviewer can run from zero |
+| T-091 | API doc (endpoints, auth, req/resp, errors, pagination) + OpenAPI | T-030 | DONE | doc + /openapi.json |
+| T-092 | AI doc (providers, schema, embeddings, scoring weights, versions, fallback, privacy) | T-034,T-037 | DONE | doc exists |
+| T-093 | DB doc (tables, relations, RLS, Storage policy) + deploy doc | T-018,T-019 | DONE | doc exists |
 
 > Update statuses only with real evidence. Current round: see `PROGRESS.md`.
