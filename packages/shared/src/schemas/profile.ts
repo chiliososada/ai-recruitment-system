@@ -65,6 +65,14 @@ export const CandidateDetailSchema = CandidateProfileSchema.extend({
 });
 export type CandidateDetail = z.infer<typeof CandidateDetailSchema>;
 
+/** A candidate row in the talent search list (FR-06.1/06.2). */
+export const TalentSummarySchema = CandidateProfileSchema.extend({
+  /** Highlighted when AI-recommended for the queried job (FR-06.2). */
+  recommended: z.boolean(),
+  matchScore: z.number().int().min(0).max(100).nullable(),
+});
+export type TalentSummary = z.infer<typeof TalentSummarySchema>;
+
 export const TalentSearchQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),

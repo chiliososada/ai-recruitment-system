@@ -17,6 +17,9 @@ import { getCandidateIdForUser } from './candidate.js';
 import { toIso } from '../util.js';
 
 const RECALL_LIMIT = 50;
+// ivfflat is approximate; probe all lists (= the migration's `lists`) so recall is exact
+// at MVP data sizes. Tune down for very large datasets in production.
+const IVFFLAT_PROBES = 10;
 
 interface CandidateScoringRow {
   years_experience: string | number;
@@ -135,6 +138,7 @@ async function upsertMatch(
 /** Recompute + persist matches for one candidate against open public jobs (FR-05.4). */
 export async function computeMatchesForCandidate(deps: Deps, candidateId: string): Promise<number> {
   return deps.db.service(async (c) => {
+    await c.query(`set local ivfflat.probes = ${IVFFLAT_PROBES}`);
     const candidate = await buildScoringCandidate(c, candidateId);
     if (!candidate) return 0;
     const recall = await c.query<{ job_id: string; similarity: number }>(
@@ -160,6 +164,7 @@ export async function computeMatchesForCandidate(deps: Deps, candidateId: string
 /** Recompute + persist matches for one job against open-to-work candidates (FR-05.4/05.5). */
 export async function computeMatchesForJob(deps: Deps, jobId: string): Promise<number> {
   return deps.db.service(async (c) => {
+    await c.query(`set local ivfflat.probes = ${IVFFLAT_PROBES}`);
     const recall = await c.query<{ candidate_id: string; similarity: number }>(
       `with j as (select embedding from job_embeddings where job_id = $1)
        select ce.candidate_id, 1 - (ce.embedding <=> (select embedding from j)) as similarity

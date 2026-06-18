@@ -75,6 +75,16 @@ const PROFILE_SELECT = `
          c.updated_at
   from candidates c join profiles p on p.id = c.user_id`;
 
+/** Resolve a user's email across runtimes (local credential table / Supabase auth.users). */
+export async function getUserEmail(deps: Deps, userId: string): Promise<string | null> {
+  const table = deps.config.ARS_RUNTIME === 'supabase' ? 'auth.users' : 'auth.local_identities';
+  const col = deps.config.ARS_RUNTIME === 'supabase' ? 'id' : 'user_id';
+  const res = await deps.db.service((c) =>
+    c.query<{ email: string }>(`select email from ${table} where ${col} = $1`, [userId]),
+  );
+  return res.rows[0]?.email ?? null;
+}
+
 export async function getUserLocale(deps: Deps, userId: string): Promise<Locale> {
   const res = await deps.db.service((c) =>
     c.query<{ locale: Locale }>(`select locale from profiles where id = $1`, [userId]),

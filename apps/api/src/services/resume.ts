@@ -230,7 +230,7 @@ export interface ResumeDownload {
   mime: string;
 }
 
-async function companyCanAccessCandidate(
+export async function companyCanAccessCandidate(
   deps: Deps,
   userId: string,
   candidateId: string,
