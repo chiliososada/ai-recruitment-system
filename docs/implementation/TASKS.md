@@ -10,24 +10,24 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | T-001 | git init, root scaffold (workspaces, tsconfig, prettier, eslint, .env.example, .gitignore) | — | DONE | files exist; `git` initialized |
 | T-002 | implementation docs (REQUIREMENTS/TASKS/PROGRESS/DECISIONS/VERIFICATION) | — | IN_PROGRESS | files exist & updated each round |
 | T-003 | `packages/shared`: enums, Zod DTO/schema, error shape, pagination, scoring core | T-001 | DONE | builds; 28 unit tests green (scoring + validation) |
-| T-004 | DB adapter (PGlite local + `pg` prod) + per-request role/JWT tx for RLS | T-001 | TODO | integration harness boots |
-| T-005 | Local test bootstrap SQL (auth shim, roles, storage shim) — local only | T-004 | TODO | migrations apply on PGlite |
+| T-004 | DB adapter (PGlite local + `pg` prod) + per-request role/JWT tx for RLS | T-001 | DONE | `Db` iface + both impls; migrate-check boots |
+| T-005 | Local test bootstrap SQL (auth shim, roles, storage shim) — local only | T-004 | DONE | bootstrap.sql applies on PGlite |
 | T-006 | Root verify script orchestrating all gates | T-001 | TODO | `node scripts/verify.mjs` runs |
 
 ## Phase 1 — Database & migrations (NFR-DB, data model §7)
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
-| T-010 | Migration: extensions (pgvector), enums, profiles + roles | T-004 | TODO | applies; tables present |
-| T-011 | Migration: candidates, resume_files, parse_jobs, skills, candidate_skills | T-010 | TODO | applies; FKs/indexes |
-| T-012 | Migration: companies, company_members | T-010 | TODO | applies |
-| T-013 | Migration: jobs, job_skills | T-012 | TODO | applies |
-| T-014 | Migration: embeddings (+ivfflat index), algorithm_versions | T-011,T-013 | TODO | vector index built |
-| T-015 | Migration: match_results (score+explanation) | T-014 | TODO | applies |
-| T-016 | Migration: conversations, conversation_members, messages, notifications | T-010 | TODO | applies |
-| T-017 | Migration: applications, shortlists, candidate_comparisons, interviews, recruitment_stage_history | T-013 | TODO | applies |
-| T-018 | RLS policies for all tables (role + ownership + tenant) | T-010..T-017 | TODO | RLS tests |
-| T-019 | Storage bucket + Storage policies (resumes) | T-011 | TODO | policy SQL + adapter authz |
-| T-020 | seed.sql — non-sensitive demo data for both E2E paths | T-010..T-017 | TODO | seed applies; E2E uses it |
+| T-010 | Migration: extensions (pgvector), enums, profiles + roles | T-004 | DONE | applies; migrate-check verifies |
+| T-011 | Migration: candidates, resume_files, parse_jobs, skills, candidate_skills, skill_analyses | T-010 | DONE | applies; FKs/indexes |
+| T-012 | Migration: companies, company_members | T-010 | DONE | applies |
+| T-013 | Migration: jobs, job_skills | T-012 | DONE | applies; range checks |
+| T-014 | Migration: embeddings (+ivfflat index), algorithm_versions | T-011,T-013 | DONE | ivfflat verified |
+| T-015 | Migration: match_results (score+explanation) | T-014 | DONE | applies |
+| T-016 | Migration: conversations, conversation_members, messages, notifications | T-010 | DONE | applies |
+| T-017 | Migration: applications, shortlists, candidate_comparisons, interviews, stage_history | T-013 | DONE | applies |
+| T-018 | RLS policies for all tables (role + ownership + tenant) | T-010..T-017 | IN_PROGRESS | policies written + apply; RLS tests pending (T-071) |
+| T-019 | Storage bucket + Storage policies (resumes) | T-011 | DONE | policy SQL applies on shim + Supabase |
+| T-020 | seed.sql reference data + programmatic demo seed | T-010..T-017 | IN_PROGRESS | seed.sql applies; programmatic seed pending |
 
 ## Phase 2 — API (Node + Fastify + adapters)
 | ID | Task | Deps | Status | Acceptance / test |

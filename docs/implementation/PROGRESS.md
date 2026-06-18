@@ -18,3 +18,11 @@ Newest round first. Each entry: what was done, files changed, commands run, resu
   - `npm run test --workspace @ars/shared` → exit 0, **28/28 tests pass** (10 scoring incl. boundary/ordering/reproducibility, 18 validation incl. upload boundaries + analysis-schema guards).
   - `npm run build --workspace @ars/shared` → exit 0, emits `dist/`.
 - **Next:** DB adapter (PGlite/`pg`) + per-request role/JWT tx (T-004), local bootstrap SQL (T-005), and the versioned migrations with pgvector/RLS/Storage (Phase 1).
+
+## Round 3 — DB layer + full migrations + RLS
+- **Done:** Created `@ars/api` package skeleton (Fastify deps, tsconfig with `@ars/shared` path alias, vitest forks config). Built the `Db` abstraction (`withContext`/`service`/`exec`) with PGlite (local/test) + `pg` Pool (prod) implementations enforcing RLS per-request via `SET LOCAL ROLE` + `request.jwt.claims`. Wrote local bootstrap shim (auth/storage schemas, roles, local credential store) and **10 canonical migrations** covering every §7 entity, with FKs/unique/indexes/timestamps/range-checks, pgvector embeddings + ivfflat indexes, comprehensive RLS (SECURITY DEFINER helpers + per-table role/ownership/tenant policies), and Storage policies. Added migration runner (idempotent, tracker table) + `migrate-check` validator.
+- **Files:** `apps/api/{package.json,tsconfig*.json,vitest.config.ts}`, `apps/api/src/{config.ts,logger.ts}`, `apps/api/src/db/{types,pglite,pg,migrate,index,migrate-check}.ts`, `supabase/local/bootstrap.sql`, `supabase/migrations/0001..0010_*.sql`, `supabase/seed.sql`. Removed pglite from root deps.
+- **Commands & results:**
+  - `npm install` (api workspace) → exit 0.
+  - `npm run db:migrate:check -w @ars/api` → exit 0: **10 migrations + bootstrap + seed apply to a fresh PGlite; 25 public tables; pgvector + ivfflat + RLS verified.**
+- **Next:** API skeleton (Fastify app, error mapping, correlation id, rate limit, OpenAPI, auth context) + adapters (auth/storage/virusscan/ai/embedding), then FR route groups with integration + RLS tests.
