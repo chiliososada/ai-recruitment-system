@@ -8,7 +8,7 @@ let seeker: TestUser;
 let companyAId: string;
 let jobId: string;
 
-const post = (url: string, headers: Record<string, string>, payload: unknown) =>
+const post = (url: string, headers: Record<string, string>, payload: Record<string, unknown>) =>
   t.app.inject({ method: 'POST', url, headers, payload });
 
 beforeAll(async () => {

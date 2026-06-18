@@ -6,6 +6,7 @@ import { loadConfig } from '../config.js';
 import { applyMigrations } from '../db/migrate.js';
 import { PgliteDb } from '../db/pglite.js';
 import { buildDeps, type Deps } from '../deps.js';
+import { SAMPLE_RESUME_TEXT, makeResumePdf } from './fixtures.js';
 
 export interface TestApp {
   app: FastifyInstance;
@@ -101,4 +102,56 @@ export function uploadResumeFile(
     headers: { ...headers, 'content-type': `multipart/form-data; boundary=${boundary}` },
     payload: body,
   });
+}
+
+/** Upload a sample PDF resume for a seeker (drives the full parse + analysis pipeline). */
+export async function uploadSampleResume(
+  t: TestApp,
+  user: TestUser,
+  text: string = SAMPLE_RESUME_TEXT,
+): Promise<void> {
+  const pdf = await makeResumePdf(text);
+  const res = await uploadResumeFile(t, user.headers, {
+    filename: 'cv.pdf',
+    mime: 'application/pdf',
+    buffer: pdf,
+  });
+  if (res.statusCode !== 201) throw new Error(`resume upload failed (${res.statusCode}): ${res.body}`);
+}
+
+/** Create a company + an open public job for a company member. */
+export async function createCompanyAndJob(
+  t: TestApp,
+  companyUser: TestUser,
+  jobOverrides: Record<string, unknown> = {},
+): Promise<{ companyId: string; jobId: string; job: Record<string, unknown> }> {
+  const comp = await t.app.inject({
+    method: 'POST',
+    url: '/api/companies',
+    headers: companyUser.headers,
+    payload: { name: `Acme ${randomUUID().slice(0, 6)}`, industry: 'Tech', size: '11-50', location: 'Tokyo' },
+  });
+  if (comp.statusCode !== 201) throw new Error(`company create failed: ${comp.body}`);
+  const companyId = comp.json().id;
+  const jres = await t.app.inject({
+    method: 'POST',
+    url: `/api/companies/${companyId}/jobs`,
+    headers: companyUser.headers,
+    payload: {
+      title: 'Full-Stack Engineer',
+      category: 'Engineering',
+      description: 'Build TypeScript, React and Node.js apps backed by PostgreSQL on AWS.',
+      requiredSkills: ['TypeScript', 'React', 'Node.js'],
+      preferredSkills: ['PostgreSQL', 'AWS'],
+      minYears: 3,
+      salaryMin: 6000000,
+      salaryMax: 10000000,
+      workStyle: 'hybrid',
+      status: 'open',
+      visibility: 'public',
+      ...jobOverrides,
+    },
+  });
+  if (jres.statusCode !== 201) throw new Error(`job create failed (${jres.statusCode}): ${jres.body}`);
+  return { companyId, jobId: jres.json().id, job: jres.json() };
 }

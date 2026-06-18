@@ -39,7 +39,7 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | T-034 | AI provider (mock + anthropic) + embedding provider (mock + openai) [FR-03/05] | T-003 | DONE | mock used by analysis; unit tests pending |
 | T-035 | Skill analysis + career advice route + persistence [FR-03] | T-033,T-034 | DONE | analysis schema-validated + persisted + locale |
 | T-036 | Company CRUD + job CRUD routes [FR-04] | T-031 | DONE | 10 integration+authz tests green |
-| T-037 | Matching engine (vector recall + rule score + rerank) + routes [FR-05] | T-034,T-013,T-014 | TODO | unit + integration |
+| T-037 | Matching engine (vector recall + rule score + rerank) + routes [FR-05] | T-034,T-013,T-014 | DONE | 6 integration tests (recall, rank, reproducible, no-cand, 403) |
 | T-038 | Talent search + candidate detail routes [FR-06] | T-036,T-037 | TODO | integration + authz |
 | T-039 | Company/job browse routes [FR-07] | T-036 | DONE | public browse + filters + non-leak tested |
 | T-040 | Messaging + notifications routes (+ realtime channel) [FR-08] | T-031 | TODO | integration + negative |
