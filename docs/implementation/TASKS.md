@@ -32,9 +32,9 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 ## Phase 2 — API (Node + Fastify + adapters)
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
-| T-030 | API skeleton: Fastify, config, error mapping, correlation ID, rate limit, OpenAPI | T-003,T-004 | TODO | server boots; healthcheck |
-| T-031 | Auth adapter (local JWT + supabase) + auth routes (register/login/verify/logout/me) [FR-01] | T-030 | TODO | integration + unit |
-| T-032 | Storage adapter (fs + supabase) + virus-scan adapter [FR-02] | T-030 | TODO | unit + boundary tests |
+| T-030 | API skeleton: Fastify, config, error mapping, correlation ID, rate limit, OpenAPI | T-003,T-004 | DONE | boots; /health + /openapi.json; 10 auth integ tests |
+| T-031 | Auth adapter (local JWT + supabase) + auth routes (register/login/verify/logout/me) [FR-01] | T-030 | DONE | 10 integration tests green |
+| T-032 | Storage adapter (fs + supabase) + virus-scan adapter [FR-02] | T-030 | DONE | adapters written; boundary tests pending |
 | T-033 | Resume upload + parse-job pipeline routes [FR-02] | T-031,T-032 | TODO | integration + boundary |
 | T-034 | AI provider (mock + anthropic) + embedding provider (mock + openai) [FR-03/05] | T-003 | TODO | unit (schema, determinism) |
 | T-035 | Skill analysis + career advice route + persistence [FR-03] | T-033,T-034 | TODO | integration |

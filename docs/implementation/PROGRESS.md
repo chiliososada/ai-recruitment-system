@@ -26,3 +26,12 @@ Newest round first. Each entry: what was done, files changed, commands run, resu
   - `npm install` (api workspace) → exit 0.
   - `npm run db:migrate:check -w @ars/api` → exit 0: **10 migrations + bootstrap + seed apply to a fresh PGlite; 25 public tables; pgvector + ivfflat + RLS verified.**
 - **Next:** API skeleton (Fastify app, error mapping, correlation id, rate limit, OpenAPI, auth context) + adapters (auth/storage/virusscan/ai/embedding), then FR route groups with integration + RLS tests.
+
+## Round 4 — API skeleton + all adapters + FR-01 vertical slice
+- **Done:** Built every adapter behind clean interfaces: auth (local bcrypt+credential table / Supabase GoTrue) + app-owned `TokenService`; storage (fs / Supabase Storage); virus scanner (mock EICAR / clamd); LLM (deterministic locale-aware mock / Anthropic) + embeddings (hashed deterministic mock / OpenAI); resume text extraction (unpdf + mammoth, spike-verified for PDF+DOCX). Built the Fastify app factory (helmet, CORS, rate-limit, multipart, swagger/OpenAPI, correlation-id, bearer→principal hook, unified error envelope mapping AppError/Zod/429/413/404/500), the `Deps` container, request-context helpers, server entry, and a test harness (`createTestApp` over fresh PGlite + mocks). Implemented the full FR-01 auth slice (register/login/verify-email/logout/me/account).
+- **Files:** `apps/api/src/{errors,deps,app,server,util,logger}.ts`, `src/http/context.ts`, `src/adapters/{auth,storage,virusscan,ai}/**`, `src/adapters/extract.ts`, `src/services/auth.ts`, `src/routes/{auth,index}.ts`, `src/testing/{harness,fixtures}.ts`, `tests/auth.integration.test.ts`.
+- **Commands & results:**
+  - extraction spike (PDF+DOCX round-trip) → PASS.
+  - `npm run typecheck -w @ars/api` → exit 0.
+  - `npm run test:integration -w @ars/api` → exit 0, **10/10 auth integration tests** (register, dup-email 409, weak-pw 422, login, /me, verify-email, 401, account update, health, openapi).
+- **Next:** FR-02 resume upload+parse pipeline, FR-03 analysis, then company/job (FR-04), matching (FR-05), search/browse (FR-06/07), messaging (FR-08), recruitment (FR-10); RLS + boundary + negative tests alongside.
