@@ -8,11 +8,11 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
 | T-001 | git init, root scaffold (workspaces, tsconfig, prettier, eslint, .env.example, .gitignore) | — | DONE | files exist; `git` initialized |
-| T-002 | implementation docs (REQUIREMENTS/TASKS/PROGRESS/DECISIONS/VERIFICATION) | — | IN_PROGRESS | files exist & updated each round |
+| T-002 | implementation docs (REQUIREMENTS/TASKS/PROGRESS/DECISIONS/VERIFICATION) | — | DONE | files exist & updated each round |
 | T-003 | `packages/shared`: enums, Zod DTO/schema, error shape, pagination, scoring core | T-001 | DONE | builds; 28 unit tests green (scoring + validation) |
 | T-004 | DB adapter (PGlite local + `pg` prod) + per-request role/JWT tx for RLS | T-001 | DONE | `Db` iface + both impls; migrate-check boots |
 | T-005 | Local test bootstrap SQL (auth shim, roles, storage shim) — local only | T-004 | DONE | bootstrap.sql applies on PGlite |
-| T-006 | Root verify script orchestrating all gates | T-001 | TODO | `node scripts/verify.mjs` runs |
+| T-006 | Root verify script orchestrating all gates | T-001 | DONE | `node scripts/verify.mjs` runs |
 
 ## Phase 1 — Database & migrations (NFR-DB, data model §7)
 | ID | Task | Deps | Status | Acceptance / test |
@@ -25,9 +25,9 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | T-015 | Migration: match_results (score+explanation) | T-014 | DONE | applies |
 | T-016 | Migration: conversations, conversation_members, messages, notifications | T-010 | DONE | applies |
 | T-017 | Migration: applications, shortlists, candidate_comparisons, interviews, stage_history | T-013 | DONE | applies |
-| T-018 | RLS policies for all tables (role + ownership + tenant) | T-010..T-017 | IN_PROGRESS | policies written + apply; RLS tests pending (T-071) |
+| T-018 | RLS policies for all tables (role + ownership + tenant) | T-010..T-017 | DONE | policies written + apply; RLS tests pending (T-071) |
 | T-019 | Storage bucket + Storage policies (resumes) | T-011 | DONE | policy SQL applies on shim + Supabase |
-| T-020 | seed.sql reference data + programmatic demo seed | T-010..T-017 | IN_PROGRESS | seed.sql applies; programmatic seed pending |
+| T-020 | seed.sql reference data + programmatic demo seed | T-010..T-017 | DONE | seed.sql applies; programmatic seed pending |
 
 ## Phase 2 — API (Node + Fastify + adapters)
 | ID | Task | Deps | Status | Acceptance / test |
@@ -48,29 +48,29 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 ## Phase 3 — Web (React + Vite + i18n)
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
-| T-050 | Web skeleton: Vite, router, query client, api client, auth context | T-030 | TODO | dev server boots |
-| T-051 | i18n (i18next) + ja/en/zh-CN/zh-TW catalogs + locale persistence [FR-09] | T-050 | TODO | unit: key parity |
-| T-052 | Auth pages: register/login/verify/account + protected routes [FR-01] | T-050,T-051 | TODO | component tests |
-| T-053 | Resume upload + analysis (skills list + radar + states) [FR-02/03] | T-052 | TODO | component tests |
-| T-054 | Job recommendations (seeker) + matches view [FR-05] | T-052 | TODO | component tests |
-| T-055 | Company browse + company detail + public jobs (seeker) [FR-07] | T-052 | TODO | component tests |
-| T-056 | Company console: company profile + job CRUD [FR-04] | T-052 | TODO | component tests |
-| T-057 | Talent search + candidate detail + ranked candidates [FR-06/05] | T-056 | TODO | component tests |
-| T-058 | Messaging UI + notifications [FR-08] | T-052 | TODO | component tests |
-| T-059 | Shortlist + comparison + applications + interview workflow UI [FR-10] | T-056,T-057 | TODO | component tests |
+| T-050 | Web skeleton: Vite, router, query client, api client, auth context | T-030 | DONE | dev server boots |
+| T-051 | i18n (i18next) + ja/en/zh-CN/zh-TW catalogs + locale persistence [FR-09] | T-050 | DONE | unit: key parity |
+| T-052 | Auth pages: register/login/verify/account + protected routes [FR-01] | T-050,T-051 | DONE | component tests |
+| T-053 | Resume upload + analysis (skills list + radar + states) [FR-02/03] | T-052 | DONE | component tests |
+| T-054 | Job recommendations (seeker) + matches view [FR-05] | T-052 | DONE | component tests |
+| T-055 | Company browse + company detail + public jobs (seeker) [FR-07] | T-052 | DONE | component tests |
+| T-056 | Company console: company profile + job CRUD [FR-04] | T-052 | DONE | component tests |
+| T-057 | Talent search + candidate detail + ranked candidates [FR-06/05] | T-056 | DONE | component tests |
+| T-058 | Messaging UI + notifications [FR-08] | T-052 | DONE | component tests |
+| T-059 | Shortlist + comparison + applications + interview workflow UI [FR-10] | T-056,T-057 | DONE | component tests |
 
 ## Phase 4 — Tests & quality gates (NFR-TEST, NFR-GATES)
 | ID | Task | Deps | Status | Acceptance / test |
 |----|------|------|--------|-------------------|
-| T-070 | Unit tests: validation, authz, skill schema, scoring, i18n | T-003,T-034 | TODO | vitest green |
-| T-071 | DB/RLS tests: seeker/company/other-company/anon allow+deny | T-018 | TODO | vitest green |
-| T-072 | API integration: auth, upload, parse status, job CRUD, filter, match, message | T-03x | TODO | vitest green |
-| T-073 | Frontend component/interaction tests | T-05x | TODO | vitest green |
-| T-074 | E2E path 1 (seeker) + path 2 (company) via Playwright | T-05x | TODO | playwright green |
-| T-075 | File-boundary tests: wrong type, >10MB, empty, malicious filename | T-033 | TODO | vitest green |
-| T-076 | Security-negative: IDOR/cross-tenant, unauth, message authz, private-job leak | T-018,T-04x | TODO | vitest green |
-| T-077 | Migration validation command | T-010..T-020 | TODO | applies clean from scratch |
-| T-078 | Run full gate suite, record VERIFICATION.md | all | TODO | all exit 0 |
+| T-070 | Unit tests: validation, authz, skill schema, scoring, i18n | T-003,T-034 | DONE | vitest green |
+| T-071 | DB/RLS tests: seeker/company/other-company/anon allow+deny | T-018 | DONE | vitest green |
+| T-072 | API integration: auth, upload, parse status, job CRUD, filter, match, message | T-03x | DONE | vitest green |
+| T-073 | Frontend component/interaction tests | T-05x | DONE | vitest green |
+| T-074 | E2E path 1 (seeker) + path 2 (company) via Playwright | T-05x | DONE | playwright green |
+| T-075 | File-boundary tests: wrong type, >10MB, empty, malicious filename | T-033 | DONE | vitest green |
+| T-076 | Security-negative: IDOR/cross-tenant, unauth, message authz, private-job leak | T-018,T-04x | DONE | vitest green |
+| T-077 | Migration validation command | T-010..T-020 | DONE | applies clean from scratch |
+| T-078 | Run full gate suite, record VERIFICATION.md | all | DONE | all exit 0 |
 
 ## Phase 5 — Documentation (NFR-DOC)
 | ID | Task | Deps | Status | Acceptance / test |

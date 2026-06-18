@@ -35,3 +35,12 @@ Newest round first. Each entry: what was done, files changed, commands run, resu
   - `npm run typecheck -w @ars/api` → exit 0.
   - `npm run test:integration -w @ars/api` → exit 0, **10/10 auth integration tests** (register, dup-email 409, weak-pw 422, login, /me, verify-email, 401, account update, health, openapi).
 - **Next:** FR-02 resume upload+parse pipeline, FR-03 analysis, then company/job (FR-04), matching (FR-05), search/browse (FR-06/07), messaging (FR-08), recruitment (FR-10); RLS + boundary + negative tests alongside.
+
+## Rounds 5–9 — FR-04..FR-10 API, Web SPA, tests, gates (condensed)
+- **FR-04/05/06/07/08/10 API:** company/job CRUD + public browse; matching engine (pgvector recall + versioned `scoreMatch` 0–100, ivfflat probes tuned for exact recall); talent search + candidate detail (sensitive-field gating); messaging + notifications + in-process RealtimeBus/SSE + `/conversations/with-company`; applications pipeline + stage history + shortlist + side-by-side comparison + interviews. Each as a vertical slice with integration + negative-authz tests. Fixed: `parseOrThrow` zod input/output inference; map Postgres RLS `42501` → 403.
+- **Tests (delegated suites integrated):** DB-layer RLS allow/deny (18), security-negative (8), AI provider/embedding/bus unit (9) — all green, no source weakened.
+- **Web SPA:** Vite + React + react-query + router; api client + auth context + protected routes + error localization; i18n (4 locales, default ja, persisted switch, key-parity test); all FR pages (auth/account, browse jobs/companies, seeker résumé+analysis with accessible radar, recommendations, applications, messaging+notifications, company console+job mgmt, talent search+compare, candidate detail, shortlist). 13 component/interaction tests. Single vite version pinned (5.4.21).
+- **E2E:** Playwright drives both required journeys against the real running stack (4 tests).
+- **Gates:** `node scripts/verify.mjs` — **all 11 gates exit 0** (see VERIFICATION.md). 138 automated tests pass.
+- **Seed:** `npm run seed -w @ars/api` creates demo seeker + company/job for reviewers.
+- **Next:** project documentation (README + docs/API|AI|DATABASE|DEPLOY.md), final review.
