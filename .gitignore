@@ -44,3 +44,4 @@ supabase/.temp/
 
 # Uploaded files (local storage adapter)
 .storage/
+.storage-test/
