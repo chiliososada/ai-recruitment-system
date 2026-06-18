@@ -42,7 +42,7 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | T-037 | Matching engine (vector recall + rule score + rerank) + routes [FR-05] | T-034,T-013,T-014 | DONE | 6 integration tests (recall, rank, reproducible, no-cand, 403) |
 | T-038 | Talent search + candidate detail routes [FR-06] | T-036,T-037 | DONE | 5 tests: filters, recommended highlight, gated fields, 403 |
 | T-039 | Company/job browse routes [FR-07] | T-036 | DONE | public browse + filters + non-leak tested |
-| T-040 | Messaging + notifications routes (+ realtime channel) [FR-08] | T-031 | TODO | integration + negative |
+| T-040 | Messaging + notifications routes (+ realtime channel) [FR-08] | T-031 | DONE | 8 tests: convo, unread, notif, dedupe, XSS, negative authz |
 | T-041 | Applications, shortlist, comparison, interviews, stage history routes [FR-10] | T-036,T-037 | TODO | integration + negative |
 
 ## Phase 3 — Web (React + Vite + i18n)

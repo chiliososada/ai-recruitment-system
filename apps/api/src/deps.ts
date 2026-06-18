@@ -11,6 +11,7 @@ import type { AppConfig } from './config.js';
 import { createDb } from './db/index.js';
 import type { Db } from './db/types.js';
 import { createLogger } from './logger.js';
+import { RealtimeBus } from './realtime.js';
 
 /** Everything the services + routes need. Swappable for deterministic tests. */
 export interface Deps {
@@ -23,6 +24,7 @@ export interface Deps {
   scanner: VirusScanner;
   llm: LlmProvider;
   embeddings: EmbeddingProvider;
+  bus: RealtimeBus;
 }
 
 export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}): Promise<Deps> {
@@ -38,5 +40,6 @@ export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}
     scanner: overrides.scanner ?? createVirusScanner(config),
     llm: overrides.llm ?? createLlmProvider(config),
     embeddings: overrides.embeddings ?? createEmbeddingProvider(config),
+    bus: overrides.bus ?? new RealtimeBus(),
   };
 }

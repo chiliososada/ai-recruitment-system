@@ -213,7 +213,7 @@ create policy match_results_select on match_results for select to authenticated
 
 -- ---- conversations / members / messages -----------------------------------
 create policy conversations_select on conversations for select to authenticated
-  using (public.is_conversation_member(id));
+  using (public.is_conversation_member(id) or created_by = auth.uid());
 create policy conversations_insert on conversations for insert to authenticated
   with check (created_by = auth.uid());
 create policy conversations_update on conversations for update to authenticated
