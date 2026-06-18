@@ -6,6 +6,7 @@ import { registerCompanyRoutes } from './company.js';
 import { registerJobRoutes } from './job.js';
 import { registerMatchRoutes } from './match.js';
 import { registerMessagingRoutes } from './messaging.js';
+import { registerRecruitmentRoutes } from './recruitment.js';
 import { registerTalentRoutes } from './talent.js';
 
 /** Register every API route group under the /api prefix. */
@@ -17,4 +18,5 @@ export async function registerRoutes(app: FastifyInstance, deps: Deps): Promise<
   registerMatchRoutes(app, deps);
   registerTalentRoutes(app, deps);
   registerMessagingRoutes(app, deps);
+  registerRecruitmentRoutes(app, deps);
 }

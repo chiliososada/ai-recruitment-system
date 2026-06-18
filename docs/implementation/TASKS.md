@@ -43,7 +43,7 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 | T-038 | Talent search + candidate detail routes [FR-06] | T-036,T-037 | DONE | 5 tests: filters, recommended highlight, gated fields, 403 |
 | T-039 | Company/job browse routes [FR-07] | T-036 | DONE | public browse + filters + non-leak tested |
 | T-040 | Messaging + notifications routes (+ realtime channel) [FR-08] | T-031 | DONE | 8 tests: convo, unread, notif, dedupe, XSS, negative authz |
-| T-041 | Applications, shortlist, comparison, interviews, stage history routes [FR-10] | T-036,T-037 | TODO | integration + negative |
+| T-041 | Applications, shortlist, comparison, interviews, stage history routes [FR-10] | T-036,T-037 | DONE | 11 tests: pipeline, compare, interview, cross-tenant negatives |
 
 ## Phase 3 — Web (React + Vite + i18n)
 | ID | Task | Deps | Status | Acceptance / test |

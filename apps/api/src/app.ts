@@ -90,6 +90,12 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
       return reply.code(mapped.status).send(mapped.toBody(correlationId));
     }
     const httpErr = err as FastifyHttpError;
+    // Postgres RLS WITH CHECK violation (e.g. cross-tenant INSERT) → forbidden.
+    if (httpErr.code === '42501') {
+      return reply
+        .code(403)
+        .send(errorBody('FORBIDDEN', 'Forbidden', 'error.forbidden', correlationId));
+    }
     if (httpErr.statusCode === 429) {
       return reply
         .code(429)
