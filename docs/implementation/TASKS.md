@@ -34,10 +34,10 @@ passed, and evidence is recorded in `PROGRESS.md` / `VERIFICATION.md`.
 |----|------|------|--------|-------------------|
 | T-030 | API skeleton: Fastify, config, error mapping, correlation ID, rate limit, OpenAPI | T-003,T-004 | DONE | boots; /health + /openapi.json; 10 auth integ tests |
 | T-031 | Auth adapter (local JWT + supabase) + auth routes (register/login/verify/logout/me) [FR-01] | T-030 | DONE | 10 integration tests green |
-| T-032 | Storage adapter (fs + supabase) + virus-scan adapter [FR-02] | T-030 | DONE | adapters written; boundary tests pending |
-| T-033 | Resume upload + parse-job pipeline routes [FR-02] | T-031,T-032 | TODO | integration + boundary |
-| T-034 | AI provider (mock + anthropic) + embedding provider (mock + openai) [FR-03/05] | T-003 | TODO | unit (schema, determinism) |
-| T-035 | Skill analysis + career advice route + persistence [FR-03] | T-033,T-034 | TODO | integration |
+| T-032 | Storage adapter (fs + supabase) + virus-scan adapter [FR-02] | T-030 | DONE | boundary tests green (415/400/422/413) |
+| T-033 | Resume upload + parse-job pipeline routes [FR-02] | T-031,T-032 | DONE | 8 integration+boundary tests green |
+| T-034 | AI provider (mock + anthropic) + embedding provider (mock + openai) [FR-03/05] | T-003 | DONE | mock used by analysis; unit tests pending |
+| T-035 | Skill analysis + career advice route + persistence [FR-03] | T-033,T-034 | DONE | analysis schema-validated + persisted + locale |
 | T-036 | Company CRUD + job CRUD routes [FR-04] | T-031 | TODO | integration + authz |
 | T-037 | Matching engine (vector recall + rule score + rerank) + routes [FR-05] | T-034,T-013,T-014 | TODO | unit + integration |
 | T-038 | Talent search + candidate detail routes [FR-06] | T-036,T-037 | TODO | integration + authz |

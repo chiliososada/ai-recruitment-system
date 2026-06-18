@@ -81,3 +81,24 @@ export async function createUser(
 export const authHeader = (token: string): { authorization: string } => ({
   authorization: `Bearer ${token}`,
 });
+
+/** Build a multipart/form-data body for a single `file` field and POST it. */
+export function uploadResumeFile(
+  t: TestApp,
+  headers: Record<string, string>,
+  file: { filename: string; mime: string; buffer: Buffer },
+) {
+  const boundary = `----ars${randomUUID().replace(/-/g, '')}`;
+  const head = Buffer.from(
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${file.filename}"\r\n` +
+      `Content-Type: ${file.mime}\r\n\r\n`,
+  );
+  const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+  const body = Buffer.concat([head, file.buffer, tail]);
+  return t.app.inject({
+    method: 'POST',
+    url: '/api/candidates/me/resume',
+    headers: { ...headers, 'content-type': `multipart/form-data; boundary=${boundary}` },
+    payload: body,
+  });
+}
