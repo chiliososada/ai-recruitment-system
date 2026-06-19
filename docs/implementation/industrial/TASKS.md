@@ -75,14 +75,14 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase DB — Database lifecycle (§8)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| DB-1 | Index review for hot queries (jobs list, talent search, messages, pipeline, match recall) — additive | TODO | migrate-check + benchmark |
+| DB-1 | Index review for hot queries (jobs list, talent search, messages, pipeline, match recall) — additive | DONE | migrate-check + benchmark |
 | DB-2 | Retention/deletion + account-deletion ops doc (no fictional UI) | TODO | doc in OPERATIONS |
 
 ## Phase PERF — Performance (§11)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| PERF-1 | Frontend bundle budget + Lighthouse CI (public + auth pages) | IN_PROGRESS | gate green |
-| PERF-2 | API/DB benchmark script (p50/p95) on seed data → `docs/PERFORMANCE.md` | TODO | repeatable script + doc |
+| PERF-1 | Frontend bundle budget + Lighthouse CI (public + auth pages) | DONE | gate green |
+| PERF-2 | API/DB benchmark script (p50/p95) on seed data → `docs/PERFORMANCE.md` | DONE | repeatable script + doc |
 
 ## Phase VIS — Visual regression (§13.7)
 | ID | Task | Status | Acceptance |

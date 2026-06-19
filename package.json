@@ -29,6 +29,8 @@
     "test:visual": "npm run test:visual --workspace @ars/web",
     "scan:security": "node scripts/scan-security.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
+    "bench": "tsx apps/api/scripts/benchmark.ts",
+    "lighthouse": "node scripts/check-lighthouse.mjs",
     "verify": "node scripts/verify.mjs"
   },
   "devDependencies": {
