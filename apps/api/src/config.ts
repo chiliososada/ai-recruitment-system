@@ -13,6 +13,10 @@ const EnvSchema = z.object({
     .number()
     .int()
     .default(10 * 1024 * 1024),
+  // Global rate-limit ceiling (requests / minute / IP). Overridable for tuning and tests; the
+  // NODE_ENV==='test' default stays high (see RATE_LIMIT_MAX_EFFECTIVE) so existing suites are
+  // unaffected unless a test sets this explicitly (BE-3).
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
 
   DATABASE_URL: z.string().optional(),
   LOCAL_STORAGE_DIR: z.string().default('.storage'),
@@ -46,6 +50,8 @@ export type AppConfig = z.infer<typeof EnvSchema> & {
   isProduction: boolean;
   corsOrigins: string[];
   jobsInline: boolean;
+  /** Effective global rate-limit ceiling after applying the test default + explicit overrides. */
+  rateLimitMax: number;
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -67,6 +73,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     }
   }
 
+  // Tests run with a deliberately huge ceiling so unrelated suites never trip the limiter; a test
+  // that wants to exercise throttling sets RATE_LIMIT_MAX explicitly, which takes precedence.
+  const explicitRateLimit = env.RATE_LIMIT_MAX !== undefined;
+  const rateLimitMax =
+    parsed.NODE_ENV === 'test' && !explicitRateLimit ? 100000 : parsed.RATE_LIMIT_MAX;
+
   return {
     ...parsed,
     isProduction,
@@ -77,5 +89,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       parsed.JOBS_INLINE !== undefined
         ? parsed.JOBS_INLINE === 'true'
         : parsed.ARS_RUNTIME === 'local',
+    rateLimitMax,
   };
 }

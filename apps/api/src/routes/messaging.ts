@@ -24,6 +24,11 @@ const StartWithCompanySchema = z.object({
 });
 
 export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void {
+  // Throttle message sends to curb spam/abuse (BE-3); test default stays high.
+  const sendLimit = {
+    rateLimit: { max: deps.config.NODE_ENV === 'test' ? 100000 : 60, timeWindow: '1 minute' },
+  };
+
   app.post('/conversations', async (req, reply) => {
     const principal = requireAuth(req);
     const convo = await createConversation(
@@ -54,16 +59,20 @@ export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void 
     listMessages(deps, requireAuth(req), req.params.id),
   );
 
-  app.post<{ Params: { id: string } }>('/conversations/:id/messages', async (req, reply) => {
-    const principal = requireAuth(req);
-    const msg = await sendMessage(
-      deps,
-      principal,
-      req.params.id,
-      parseOrThrow(SendMessageSchema, req.body),
-    );
-    return reply.code(201).send(msg);
-  });
+  app.post<{ Params: { id: string } }>(
+    '/conversations/:id/messages',
+    { config: sendLimit },
+    async (req, reply) => {
+      const principal = requireAuth(req);
+      const msg = await sendMessage(
+        deps,
+        principal,
+        req.params.id,
+        parseOrThrow(SendMessageSchema, req.body),
+      );
+      return reply.code(201).send(msg);
+    },
+  );
 
   // Realtime stream of new messages (SSE) — the local equivalent of Supabase Realtime.
   app.get<{ Params: { id: string } }>('/conversations/:id/events', async (req, reply) => {

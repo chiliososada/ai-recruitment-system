@@ -26,8 +26,14 @@ import {
 } from '../services/recruitment.js';
 
 export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): void {
+  // Stricter per-route limits on sensitive writes (BE-3); test default stays high so existing
+  // suites are unaffected.
+  const writeLimit = {
+    rateLimit: { max: deps.config.NODE_ENV === 'test' ? 100000 : 30, timeWindow: '1 minute' },
+  };
+
   // Applications (FR-10.2)
-  app.post('/applications', async (req, reply) => {
+  app.post('/applications', { config: writeLimit }, async (req, reply) => {
     const app_ = await applyToJob(
       deps,
       requireRole(req, 'job_seeker'),
@@ -73,15 +79,19 @@ export function registerRecruitmentRoutes(app: FastifyInstance, deps: Deps): voi
   );
 
   // Interviews (FR-10.4)
-  app.post<{ Params: { id: string } }>('/applications/:id/interviews', async (req, reply) => {
-    const interview = await proposeInterview(
-      deps,
-      requireRole(req, 'company_member'),
-      req.params.id,
-      parseOrThrow(ProposeInterviewSchema, req.body),
-    );
-    return reply.code(201).send(interview);
-  });
+  app.post<{ Params: { id: string } }>(
+    '/applications/:id/interviews',
+    { config: writeLimit },
+    async (req, reply) => {
+      const interview = await proposeInterview(
+        deps,
+        requireRole(req, 'company_member'),
+        req.params.id,
+        parseOrThrow(ProposeInterviewSchema, req.body),
+      );
+      return reply.code(201).send(interview);
+    },
+  );
   app.get<{ Params: { id: string } }>('/applications/:id/interviews', async (req) =>
     listInterviews(deps, requireAuth(req), req.params.id),
   );

@@ -1,3 +1,4 @@
+import type { DestinationStream } from 'pino';
 import { pino, type Logger } from 'pino';
 import type { AppConfig } from './config.js';
 
@@ -6,31 +7,37 @@ import type { AppConfig } from './config.js';
  * tokens, full resumes or LLM prompts (FR-03.5, §8). The free-text message of a log
  * line should also be passed through `logPreview`/`redactForLog` from @ars/shared
  * before logging untrusted content.
+ *
+ * `destination` lets callers (e.g. tests) capture output to an in-memory stream; production
+ * leaves it undefined so pino writes to stdout as before.
  */
-export function createLogger(config: AppConfig): Logger {
-  return pino({
-    level: config.LOG_LEVEL,
-    redact: {
-      paths: [
-        'password',
-        '*.password',
-        'req.headers.authorization',
-        'headers.authorization',
-        'token',
-        '*.token',
-        'accessToken',
-        '*.accessToken',
-        'resumeText',
-        '*.resumeText',
-        'prompt',
-        '*.prompt',
-        'apiKey',
-        '*.apiKey',
-      ],
-      censor: '[redacted]',
+export function createLogger(config: AppConfig, destination?: DestinationStream): Logger {
+  return pino(
+    {
+      level: config.LOG_LEVEL,
+      redact: {
+        paths: [
+          'password',
+          '*.password',
+          'req.headers.authorization',
+          'headers.authorization',
+          'token',
+          '*.token',
+          'accessToken',
+          '*.accessToken',
+          'resumeText',
+          '*.resumeText',
+          'prompt',
+          '*.prompt',
+          'apiKey',
+          '*.apiKey',
+        ],
+        censor: '[redacted]',
+      },
+      base: { service: 'ars-api' },
     },
-    base: { service: 'ars-api' },
-  });
+    destination,
+  );
 }
 
 export type { Logger };

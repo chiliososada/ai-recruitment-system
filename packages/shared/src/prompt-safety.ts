@@ -50,11 +50,23 @@ export function wrapUntrustedDocument(text: string): string {
   return `${DOC_OPEN}\n${body}\n${DOC_CLOSE}`;
 }
 
-/** Mask emails and long token-like strings so logs never contain PII/secrets (FR-03.5). */
+/**
+ * Mask PII/secrets so logs never contain them (FR-03.5): emails, phone numbers, and long
+ * token-like strings. Emails are masked first so the local-part is never mistaken for a token;
+ * phones next (they would otherwise survive the token pass), then long opaque tokens.
+ */
 export function redactForLog(text: string): string {
-  return text
-    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[email]')
-    .replace(/\b[A-Za-z0-9_-]{24,}\b/g, '[redacted]');
+  return (
+    text
+      .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[email]')
+      // Phone numbers: optional +country code, then 7+ digits with spaces/dashes/dots/parens.
+      // Requires at least one separator or a leading + so plain long digit IDs aren't over-masked
+      // by this pass (long opaque numbers are still caught by the token pass below).
+      .replace(/(?<![\w@.])\+?\d[\d\s().-]{6,}\d(?![\w@])/g, (m) =>
+        /[\s().-]/.test(m) || m.startsWith('+') ? '[phone]' : m,
+      )
+      .replace(/\b[A-Za-z0-9_-]{24,}\b/g, '[redacted]')
+  );
 }
 
 /** Truncate a string for safe log previews. */

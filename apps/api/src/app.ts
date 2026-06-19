@@ -57,7 +57,7 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
   });
   await app.register(cors, { origin: deps.config.corsOrigins, credentials: true });
   await app.register(rateLimit, {
-    max: deps.config.NODE_ENV === 'test' ? 100000 : 300,
+    max: deps.config.rateLimitMax,
     timeWindow: '1 minute',
   });
   await app.register(multipart, {

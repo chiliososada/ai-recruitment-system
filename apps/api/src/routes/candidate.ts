@@ -23,6 +23,12 @@ import {
 } from '../services/resume.js';
 
 export function registerCandidateRoutes(app: FastifyInstance, deps: Deps): void {
+  // Stricter per-route limit on the expensive upload+parse pipeline (BE-3). Test default stays
+  // high so existing suites are unaffected.
+  const uploadLimit = {
+    rateLimit: { max: deps.config.NODE_ENV === 'test' ? 100000 : 10, timeWindow: '1 minute' },
+  };
+
   app.get('/candidates/me', async (req) => getMyProfile(deps, requireRole(req, 'job_seeker')));
 
   app.patch('/candidates/me', async (req) =>
@@ -33,7 +39,7 @@ export function registerCandidateRoutes(app: FastifyInstance, deps: Deps): void 
     ),
   );
 
-  app.post('/candidates/me/resume', async (req, reply) => {
+  app.post('/candidates/me/resume', { config: uploadLimit }, async (req, reply) => {
     const principal = requireRole(req, 'job_seeker');
     const file = await req.file();
     if (!file) throw badRequest('No file uploaded', 'resume.upload.empty');

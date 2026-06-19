@@ -14,8 +14,17 @@ export interface TestApp {
   close(): Promise<void>;
 }
 
-/** Boot the real server against a fresh in-process Postgres + deterministic mocks. */
-export async function createTestApp(overrides: Partial<Deps> = {}): Promise<TestApp> {
+/**
+ * Boot the real server against a fresh in-process Postgres + deterministic mocks.
+ *
+ * `envOverrides` is merged into the test env before config parsing, so a test can opt into
+ * production-like behaviour (e.g. a low `RATE_LIMIT_MAX` to exercise throttling — BE-3) without
+ * affecting the defaults every other suite relies on.
+ */
+export async function createTestApp(
+  overrides: Partial<Deps> = {},
+  envOverrides: Record<string, string> = {},
+): Promise<TestApp> {
   const config = loadConfig({
     NODE_ENV: 'test',
     ARS_RUNTIME: 'local',
@@ -24,6 +33,7 @@ export async function createTestApp(overrides: Partial<Deps> = {}): Promise<Test
     VIRUS_SCANNER: 'mock',
     LOCAL_JWT_SECRET: 'test-secret-key',
     LOCAL_STORAGE_DIR: `.storage-test/${randomUUID()}`,
+    ...envOverrides,
   });
   const db = overrides.db ?? (await PgliteDb.create());
   await applyMigrations(db, { bootstrap: true, seed: false });
