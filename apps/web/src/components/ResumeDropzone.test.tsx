@@ -21,7 +21,7 @@ describe('ResumeDropzone (FR-02 upload interaction)', () => {
   it('supports drag-and-drop', () => {
     const onSelect = vi.fn();
     render(<ResumeDropzone onSelect={onSelect} />);
-    const zone = screen.getByRole('button', { name: /drag/i });
+    const zone = screen.getByTestId('resume-dropzone');
     const file = new File(['hello'], 'cv.docx', {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     });

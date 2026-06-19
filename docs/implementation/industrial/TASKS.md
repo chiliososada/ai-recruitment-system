@@ -34,8 +34,8 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase A11Y — Accessibility (§6)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| A11Y-1 | axe (Playwright) scans on key pages — 0 critical/serious | TODO | a11y gate green |
-| A11Y-2 | Keyboard-only completion of core flows; focus-visible; dialog focus trap | TODO | e2e keyboard test |
+| A11Y-1 | axe (Playwright) scans on key pages — 0 critical/serious | DONE | a11y gate green |
+| A11Y-2 | Keyboard-only completion of core flows; focus-visible; dialog focus trap | DONE | e2e keyboard test |
 
 ## Phase BE — Backend/API industrialization (§7)
 | ID | Task | Status | Acceptance |
@@ -87,7 +87,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase VIS — Visual regression (§13.7)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| VIS-1 | Playwright screenshot harness: key pages @1440×900 + 390×844, 4 locales, seeded/clock-fixed | TODO | screenshots + assertions |
+| VIS-1 | Playwright screenshot harness: key pages @1440×900 + 390×844, 4 locales, seeded/clock-fixed | DONE | screenshots + assertions |
 
 ## Phase CICD — CI/CD + Docker + supply chain (§12)
 | ID | Task | Status | Acceptance |

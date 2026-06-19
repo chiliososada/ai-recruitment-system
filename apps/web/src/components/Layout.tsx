@@ -144,7 +144,7 @@ export function Layout({ children }: { children: ReactNode }): JSX.Element {
           <span className="brand" style={{ padding: 0 }}>
             {brand}
           </span>
-          <nav className="row" aria-label="primary">
+          <nav className="row app-public-nav" aria-label="primary">
             <Link to="/jobs" className="app-nav-link">
               {t('nav.jobs')}
             </Link>

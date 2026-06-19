@@ -1,17 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 import { webServer } from './e2e/webserver';
 
-// E2E main journeys. Visual + a11y suites have their own configs (playwright.{visual,a11y}.config.ts).
 export default defineConfig({
   testDir: './e2e',
-  testMatch: 'journeys.spec.ts',
-  timeout: 90_000,
+  testMatch: 'visual.spec.ts',
+  timeout: 180_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,
   retries: 0,
   reporter: [['list']],
-  use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' },
+  use: { baseURL: 'http://localhost:5173' },
   webServer,
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

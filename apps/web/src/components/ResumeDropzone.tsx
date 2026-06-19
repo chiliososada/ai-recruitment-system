@@ -15,17 +15,8 @@ export function ResumeDropzone({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
       aria-label={t('resume.dropHere')}
-      aria-disabled={disabled}
-      onClick={() => !disabled && inputRef.current?.click()}
-      onKeyDown={(e) => {
-        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          inputRef.current?.click();
-        }
-      }}
+      data-testid="resume-dropzone"
       onDragOver={(e) => {
         e.preventDefault();
         setOver(true);
@@ -41,12 +32,16 @@ export function ResumeDropzone({
       style={{
         textAlign: 'center',
         borderStyle: 'dashed',
-        background: over ? '#eef4ff' : undefined,
-        cursor: disabled ? 'not-allowed' : 'pointer',
+        background: over ? 'var(--color-primary-soft)' : undefined,
       }}
     >
       <p>{t('resume.dropHere')}</p>
-      <button type="button" className="secondary" disabled={disabled} tabIndex={-1}>
+      <button
+        type="button"
+        className="secondary"
+        disabled={disabled}
+        onClick={() => !disabled && inputRef.current?.click()}
+      >
         {t('resume.choose')}
       </button>
       <p className="muted" style={{ fontSize: '0.85rem' }}>
