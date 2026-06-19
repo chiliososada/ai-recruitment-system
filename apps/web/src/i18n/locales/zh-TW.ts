@@ -125,6 +125,7 @@ const zhTW: Dict = {
       tooLarge: '檔案超過 10MB 上限',
       badExtension: '僅支援 PDF 和 DOCX 檔案',
       badMime: '不支援的檔案類型',
+      badContent: '檔案內容與類型不符',
       infected: '檔案未通過病毒掃描',
     },
     parse: { empty: '無法擷取任何文字', failed: '處理失敗' },

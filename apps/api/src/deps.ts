@@ -1,6 +1,7 @@
 import type { Logger } from 'pino';
 import { createEmbeddingProvider, createLlmProvider } from './adapters/ai/index.js';
 import type { EmbeddingProvider, LlmProvider } from './adapters/ai/index.js';
+import { resilientEmbedding, resilientLlm } from './adapters/ai/resilient.js';
 import { createAuthAdapter, createTokenService } from './adapters/auth/index.js';
 import type { AuthAdapter, TokenService } from './adapters/auth/index.js';
 import { createStorageAdapter } from './adapters/storage/index.js';
@@ -35,18 +36,19 @@ export interface Deps {
 export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}): Promise<Deps> {
   const log = overrides.log ?? createLogger(config);
   const db = overrides.db ?? (await createDb(config));
+  const metrics = overrides.metrics ?? createMetrics(config, log);
   const deps: Deps = {
     config,
     log,
     db,
+    metrics,
     auth: overrides.auth ?? createAuthAdapter(config, db),
     tokens: overrides.tokens ?? createTokenService(config),
     storage: overrides.storage ?? createStorageAdapter(config),
     scanner: overrides.scanner ?? createVirusScanner(config),
-    llm: overrides.llm ?? createLlmProvider(config),
-    embeddings: overrides.embeddings ?? createEmbeddingProvider(config),
+    llm: overrides.llm ?? resilientLlm(createLlmProvider(config), metrics, log),
+    embeddings: overrides.embeddings ?? resilientEmbedding(createEmbeddingProvider(config), metrics, log),
     bus: overrides.bus ?? new RealtimeBus(),
-    metrics: overrides.metrics ?? createMetrics(config, log),
     jobs: overrides.jobs ?? new JobQueue(db, log, { inline: config.jobsInline }),
   };
   registerJobHandlers(deps);

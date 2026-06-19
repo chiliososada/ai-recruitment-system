@@ -129,6 +129,7 @@ const en = {
       tooLarge: 'File exceeds the 10MB limit',
       badExtension: 'Only PDF and DOCX files are allowed',
       badMime: 'Unsupported file type',
+      badContent: 'The file content does not match its type',
       infected: 'The file failed the virus scan',
     },
     parse: { empty: 'No text could be extracted', failed: 'Processing failed' },

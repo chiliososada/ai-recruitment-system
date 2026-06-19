@@ -125,6 +125,7 @@ const zhCN: Dict = {
       tooLarge: '文件超过 10MB 上限',
       badExtension: '仅支持 PDF 和 DOCX 文件',
       badMime: '不支持的文件类型',
+      badContent: '文件内容与类型不匹配',
       infected: '文件未通过病毒扫描',
     },
     parse: { empty: '未能提取到任何文本', failed: '处理失败' },

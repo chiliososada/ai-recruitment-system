@@ -89,6 +89,17 @@ function extensionOf(filename: string): string {
   return lower.slice(lower.lastIndexOf('.'));
 }
 
+/** Magic-byte check: PDF starts with `%PDF-`; DOCX is a ZIP (`PK\x03\x04` local file header). */
+function contentMatchesExtension(buffer: Buffer, filename: string): boolean {
+  const ext = extensionOf(filename);
+  if (buffer.length < 4) return false;
+  if (ext === '.pdf') return buffer.subarray(0, 5).toString('latin1') === '%PDF-';
+  if (ext === '.docx') {
+    return buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
+  }
+  return false;
+}
+
 export async function uploadResume(
   deps: Deps,
   principal: Principal,
@@ -107,10 +118,16 @@ export async function uploadResume(
   if (failure === 'resume.upload.badExtension') throw unsupportedMedia('Bad extension', failure);
   if (failure === 'resume.upload.badMime') throw unsupportedMedia('Bad MIME type', failure);
 
-  // Virus scan (FR-02.4) before persisting.
+  // Virus scan (FR-02.4) first. Fail-closed: a scanner error rejects the upload.
   const verdict = await deps.scanner.scan(file.buffer, file.filename);
   if (verdict === 'infected') throw virusDetected();
   if (verdict === 'error') throw new AppError('INTERNAL', 'Virus scan failed', 'resume.scan.error');
+
+  // Content sniffing (SEC-2): the actual bytes must match the declared type — defeats MIME /
+  // extension spoofing of clean files (e.g. an executable renamed to .pdf).
+  if (!contentMatchesExtension(file.buffer, file.filename)) {
+    throw unsupportedMedia('File content does not match its type', 'resume.upload.badContent');
+  }
 
   // Unguessable, owner-scoped storage path (never derived from the filename).
   const storagePath = `${principal.userId}/${randomUUID()}${extensionOf(file.filename)}`;

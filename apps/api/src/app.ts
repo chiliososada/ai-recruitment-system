@@ -37,7 +37,24 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
     disableRequestLogging: deps.config.NODE_ENV === 'test',
   }) as unknown as FastifyInstance;
 
-  await app.register(helmet, { contentSecurityPolicy: false });
+  // Strict security headers (SEC-1). The API serves JSON/SSE/text only, so a locked-down CSP is
+  // safe; the SPA's CSP is applied at its static host / nginx (see docs/SECURITY.md, infra/nginx).
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        'default-src': ["'none'"],
+        'frame-ancestors': ["'none'"],
+        'base-uri': ["'none'"],
+        'form-action': ["'none'"],
+      },
+    },
+    // It's a CORS API consumed cross-origin by the SPA; CORS governs reads.
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    referrerPolicy: { policy: 'no-referrer' },
+    hsts: deps.config.isProduction ? { maxAge: 15_552_000, includeSubDomains: true } : false,
+  });
   await app.register(cors, { origin: deps.config.corsOrigins, credentials: true });
   await app.register(rateLimit, {
     max: deps.config.NODE_ENV === 'test' ? 100000 : 300,

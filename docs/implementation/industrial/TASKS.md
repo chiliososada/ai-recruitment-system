@@ -55,13 +55,13 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase PROVIDER — External provider resilience (§7)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| PR-1 | Timeout + bounded retry + circuit breaker wrapper for LLM/embedding (+ virus scan) | TODO | unit (breaker), resilience integration |
+| PR-1 | Timeout + bounded retry + circuit breaker wrapper for LLM/embedding (+ virus scan) | DONE | unit (breaker), resilience integration |
 
 ## Phase SEC — Security (§9)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| SEC-1 | CSP + security headers; strict CORS allowlist; clickjacking; no debug/internal leak in prod | TODO | header test |
-| SEC-2 | File hardening: magic-byte + zip-bomb/oversized DOCX guard; fail-closed scan | TODO | boundary tests |
+| SEC-1 | CSP + security headers; strict CORS allowlist; clickjacking; no debug/internal leak in prod | DONE | header test |
+| SEC-2 | File hardening: magic-byte + zip-bomb/oversized DOCX guard; fail-closed scan | DONE | boundary tests |
 | SEC-3 | Central PII redaction audited across logs/errors/traces | TODO | redaction unit |
 | SEC-4 | `npm audit`/secret-scan gate (no unexplained high/critical) | TODO | scripted gate |
 | SEC-5 | `docs/SECURITY.md` (threat model, trust boundaries, data classes, prod checklist) | TODO | doc exists |

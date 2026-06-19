@@ -125,6 +125,7 @@ const ja: Dict = {
       tooLarge: 'ファイルが10MBの上限を超えています',
       badExtension: 'PDFとDOCXファイルのみ使用できます',
       badMime: 'サポートされていないファイル形式です',
+      badContent: 'ファイルの内容が種類と一致しません',
       infected: 'ファイルがウイルススキャンに失敗しました',
     },
     parse: { empty: 'テキストを抽出できませんでした', failed: '処理に失敗しました' },
