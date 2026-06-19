@@ -47,7 +47,8 @@ export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}
     storage: overrides.storage ?? createStorageAdapter(config),
     scanner: overrides.scanner ?? createVirusScanner(config),
     llm: overrides.llm ?? resilientLlm(createLlmProvider(config), metrics, log),
-    embeddings: overrides.embeddings ?? resilientEmbedding(createEmbeddingProvider(config), metrics, log),
+    embeddings:
+      overrides.embeddings ?? resilientEmbedding(createEmbeddingProvider(config), metrics, log),
     bus: overrides.bus ?? new RealtimeBus(),
     jobs: overrides.jobs ?? new JobQueue(db, log, { inline: config.jobsInline }),
   };

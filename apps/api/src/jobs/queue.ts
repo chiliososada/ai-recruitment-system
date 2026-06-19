@@ -155,17 +155,20 @@ export class JobQueue {
             [job.id, message, String(backoff)],
           ),
         );
-        this.log.warn({ jobId: job.id, kind: job.kind, attempt: job.attempts }, 'job failed; will retry');
+        this.log.warn(
+          { jobId: job.id, kind: job.kind, attempt: job.attempts },
+          'job failed; will retry',
+        );
       }
     }
   }
 
   private async markDead(id: string, error: string): Promise<void> {
     await this.db.service((c) =>
-      c.query(`update job_queue set status = 'dead', locked_at = null, last_error = $2 where id = $1`, [
-        id,
-        error,
-      ]),
+      c.query(
+        `update job_queue set status = 'dead', locked_at = null, last_error = $2 where id = $1`,
+        [id, error],
+      ),
     );
   }
 

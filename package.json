@@ -25,6 +25,10 @@
     "test:rls": "npm run test:rls --workspace @ars/api",
     "test:e2e": "npm run test:e2e --workspace @ars/web",
     "db:migrate:check": "npm run db:migrate:check --workspace @ars/api",
+    "test:a11y": "npm run test:a11y --workspace @ars/web",
+    "test:visual": "npm run test:visual --workspace @ars/web",
+    "scan:security": "node scripts/scan-security.mjs",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "verify": "node scripts/verify.mjs"
   },
   "devDependencies": {

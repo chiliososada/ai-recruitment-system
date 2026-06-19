@@ -19,6 +19,7 @@ const en = {
     filter: 'Filter',
     clear: 'Clear',
     back: 'Back',
+    next: 'Next',
     create: 'Create',
     edit: 'Edit',
     delete: 'Delete',

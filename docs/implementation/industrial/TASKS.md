@@ -14,11 +14,11 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase DS — Design system (§4.1/4.2)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| DS-1 | Semantic design tokens (color scales, neutrals, status, bg/text layers, border, shadow, radius, spacing 4/8, type scale, motion, z-index) as CSS variables + light/dark-ready | TODO | `tokens.css` + token unit test |
-| DS-2 | Accessible primitives: Button, IconButton, Link, Input, Textarea, Select, Checkbox, Radio, Switch, FormField, FieldError, FileUpload | TODO | component tests (states) |
-| DS-3 | Overlays/data: Card, StatCard, Badge, Avatar, Tooltip, Dropdown, Dialog, Drawer, Tabs, Pagination, DataTable, FilterBar, Toast, InlineAlert, Skeleton, Spinner, EmptyState, ErrorState, ConfirmDialog | TODO | component tests |
-| DS-4 | Layout: AppShell, Sidebar, Topbar, MobileNav, PageHeader, SectionHeader; configurable brand | TODO | renders + responsive test |
-| DS-5 | Icon set (tree-shakeable, no emoji) | TODO | lucide-react used |
+| DS-1 | Semantic design tokens (color scales, neutrals, status, bg/text layers, border, shadow, radius, spacing 4/8, type scale, motion, z-index) as CSS variables + light/dark-ready | DONE | `tokens.css` + token unit test |
+| DS-2 | Accessible primitives: Button, IconButton, Link, Input, Textarea, Select, Checkbox, Radio, Switch, FormField, FieldError, FileUpload | DONE | component tests (states) |
+| DS-3 | Overlays/data: Card, StatCard, Badge, Avatar, Tooltip, Dropdown, Dialog, Drawer, Tabs, Pagination, DataTable, FilterBar, Toast, InlineAlert, Skeleton, Spinner, EmptyState, ErrorState, ConfirmDialog | DONE | component tests |
+| DS-4 | Layout: AppShell, Sidebar, Topbar, MobileNav, PageHeader, SectionHeader; configurable brand | DONE | renders + responsive test |
+| DS-5 | Icon set (tree-shakeable, no emoji) | DONE | lucide-react used |
 | DS-6 | 404/403/500/offline pages + global + route error boundaries; i18n error mapping | TODO | component tests |
 
 ## Phase UI — Page refactor to design system (§4.3/4.4, §5)
@@ -63,14 +63,14 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | SEC-1 | CSP + security headers; strict CORS allowlist; clickjacking; no debug/internal leak in prod | DONE | header test |
 | SEC-2 | File hardening: magic-byte + zip-bomb/oversized DOCX guard; fail-closed scan | DONE | boundary tests |
 | SEC-3 | Central PII redaction audited across logs/errors/traces | TODO | redaction unit |
-| SEC-4 | `npm audit`/secret-scan gate (no unexplained high/critical) | TODO | scripted gate |
-| SEC-5 | `docs/SECURITY.md` (threat model, trust boundaries, data classes, prod checklist) | TODO | doc exists |
+| SEC-4 | `npm audit`/secret-scan gate (no unexplained high/critical) | DONE | scripted gate |
+| SEC-5 | `docs/SECURITY.md` (threat model, trust boundaries, data classes, prod checklist) | DONE | doc exists |
 
 ## Phase OBS — Observability (§10)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
 | OBS-1 | Structured log field standard + metrics/tracing adapter (local no-op / OTel-ready) | DONE | unit + wired |
-| OBS-2 | `docs/OPERATIONS.md` + `docs/RUNBOOK.md` (health, scaling, queue backlog, provider/DB failure, rollback, backup, incident) | TODO | docs exist |
+| OBS-2 | `docs/OPERATIONS.md` + `docs/RUNBOOK.md` (health, scaling, queue backlog, provider/DB failure, rollback, backup, incident) | DONE | docs exist |
 
 ## Phase DB — Database lifecycle (§8)
 | ID | Task | Status | Acceptance |
@@ -81,7 +81,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase PERF — Performance (§11)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| PERF-1 | Frontend bundle budget + Lighthouse CI (public + auth pages) | TODO | gate green |
+| PERF-1 | Frontend bundle budget + Lighthouse CI (public + auth pages) | IN_PROGRESS | gate green |
 | PERF-2 | API/DB benchmark script (p50/p95) on seed data → `docs/PERFORMANCE.md` | TODO | repeatable script + doc |
 
 ## Phase VIS — Visual regression (§13.7)
@@ -92,14 +92,14 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase CICD — CI/CD + Docker + supply chain (§12)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| CICD-1 | GitHub Actions pipeline (all gates) | TODO | workflow file + dry validation |
-| CICD-2 | Multi-stage non-root Dockerfiles (api, web) + healthcheck + compose for local deps | TODO | docker build (or documented) |
+| CICD-1 | GitHub Actions pipeline (all gates) | DONE | workflow file + dry validation |
+| CICD-2 | Multi-stage non-root Dockerfiles (api, web) + healthcheck + compose for local deps | IN_PROGRESS | docker build (or documented) |
 | CICD-3 | SBOM generation + dependency update policy | TODO | script/doc |
 
 ## Phase DOCS — Documentation (§12/§10)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| DOCS-1 | `docs/ARCHITECTURE.md`; update `README.md` + `docs/DEPLOY.md` for industrial setup | TODO | docs updated |
+| DOCS-1 | `docs/ARCHITECTURE.md`; update `README.md` + `docs/DEPLOY.md` for industrial setup | IN_PROGRESS | docs updated |
 
 ## Phase VERIFY — Final verification (§15)
 | ID | Task | Status | Acceptance |

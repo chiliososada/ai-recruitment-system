@@ -1,0 +1,4 @@
+{
+  "_comment": "Allowlist for scripts/scan-security.mjs. Add an entry per knowingly-accepted high/critical npm-audit advisory that has no fix available, so the security gate can stay green without ignoring NEW issues. Each entry: { \"id\": <advisory id or GHSA string>, \"reason\": \"why it is accepted\", \"expires\": \"YYYY-MM-DD\" }. Keep this list empty unless an advisory is reviewed and consciously accepted; review on expiry. The \"id\" is matched against the advisory's numeric `id`, its `github_advisory_id` (GHSA-...), and its CVE(s).",
+  "advisories": []
+}

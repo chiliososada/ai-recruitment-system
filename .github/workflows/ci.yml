@@ -1,0 +1,97 @@
+# ---------------------------------------------------------------------------
+# Continuous Integration — AI Recruitment System
+#
+# Runs the full quality-gate matrix (the same gates as `node scripts/verify.mjs`)
+# as discrete steps in dependency order on every push and pull request.
+#
+# Node is pinned to 20 LTS here. Local development may use Node 23, but CI and the
+# Docker images use a supported LTS for reproducibility and supply-chain stability.
+#
+# Gate order (each step fails fast):
+#   npm ci  →  format:check  →  git diff --check  →  lint  →  typecheck  →
+#   build  →  db:migrate:check  →  test:unit  →  test:integration  →
+#   test:rls  →  test:e2e (with Chromium)  →  security scan
+#
+# Notes:
+# - The security scan is invoked as `node scripts/scan-security.mjs` directly so it
+#   works whether or not a `scan:security` npm alias is present in package.json.
+# - `db:migrate:check`, the unit/integration/RLS suites and the local E2E run all
+#   use the default `local` runtime (in-process PGlite + deterministic mocks), so no
+#   database service, secrets, or cloud credentials are required in CI.
+# ---------------------------------------------------------------------------
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: 'true'
+  # Keep the gate suite on the deterministic, credential-free runtime.
+  ARS_RUNTIME: local
+  NODE_ENV: test
+
+jobs:
+  gates:
+    name: Quality gates (Node 20)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Format check (Prettier)
+        run: npm run format:check
+
+      - name: Whitespace / conflict-marker check
+        run: git diff --check
+
+      - name: Lint (ESLint, max-warnings=0)
+        run: npm run lint
+
+      - name: Typecheck (tsc, all workspaces)
+        run: npm run typecheck
+
+      - name: Build (shared → api → web)
+        run: npm run build
+
+      - name: Database migration validation
+        run: npm run db:migrate:check
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: API integration tests
+        run: npm run test:integration
+
+      - name: RLS / DB negative tests
+        run: npm run test:rls
+
+      - name: Install Playwright Chromium (+ system deps)
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests (Playwright)
+        run: npm run test:e2e
+
+      - name: Security & supply-chain scan
+        run: node scripts/scan-security.mjs

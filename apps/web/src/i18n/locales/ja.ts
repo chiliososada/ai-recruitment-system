@@ -15,6 +15,7 @@ const ja: Dict = {
     filter: '絞り込み',
     clear: 'クリア',
     back: '戻る',
+    next: '次へ',
     create: '作成',
     edit: '編集',
     delete: '削除',

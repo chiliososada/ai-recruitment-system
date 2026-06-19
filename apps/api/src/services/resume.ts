@@ -159,7 +159,11 @@ export async function uploadResume(
   // Enqueue durable parse job (idempotent on the parse-job id). In inline mode (dev/test) it is
   // drained synchronously so the response reflects the final status; in async/prod the worker
   // processes it and the client polls parse-job status (FR-02 semantics preserved — ID-2/ID-3).
-  await deps.jobs.enqueue('resume_parse', { parseJobId: parseJob.id }, { idempotencyKey: parseJob.id });
+  await deps.jobs.enqueue(
+    'resume_parse',
+    { parseJobId: parseJob.id },
+    { idempotencyKey: parseJob.id },
+  );
   if (deps.jobs.inline) await deps.jobs.drainInline();
   const finalParse = (await fetchParseRow(deps, parseJob.id)) ?? parseJob;
   return { resume: mapResume(resume), parseJob: mapParse(finalParse) };

@@ -11,7 +11,12 @@ async function main(): Promise<void> {
   await app.listen({ port: config.API_PORT, host: config.API_HOST });
   deps.jobs.start(); // background worker (no-op in inline mode)
   deps.log.info(
-    { runtime: config.ARS_RUNTIME, version: APP_VERSION, commit: APP_COMMIT, jobsInline: config.jobsInline },
+    {
+      runtime: config.ARS_RUNTIME,
+      version: APP_VERSION,
+      commit: APP_COMMIT,
+      jobsInline: config.jobsInline,
+    },
     `API listening on ${config.API_HOST}:${config.API_PORT}`,
   );
 

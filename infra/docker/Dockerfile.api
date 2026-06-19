@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# @ars/api — production image (multi-stage)
+#
+# Build context MUST be the repository root:
+#   docker build -f infra/docker/Dockerfile.api -t ars-api .
+#
+# Stage 1 (builder): installs the full workspace, builds @ars/shared then @ars/api.
+# Stage 2 (runtime):  node:20-slim, non-root, production deps only + compiled dist +
+#                     @ars/shared dist + supabase/ migrations (so db:migrate:check and
+#                     operational migration steps can run from the image).
+#
+# Node is pinned to 20 LTS (local dev may use 23; the image uses a supported LTS).
+#
+# Graceful shutdown: apps/api/src/server.ts already handles SIGTERM/SIGINT — it stops
+# accepting connections, drains in-flight queue jobs, closes the DB pool, then exits.
+# Run the container so the orchestrator sends SIGTERM to PID 1 (the `node` process
+# below is PID 1 via exec-form CMD), giving the API its drain window before SIGKILL.
+# ---------------------------------------------------------------------------
+
+# ----------------------------- Stage 1: builder ----------------------------
+FROM node:20-slim AS builder
+WORKDIR /app
+
+# Install with the lockfile for reproducible, full (incl. dev) dependencies needed
+# to compile TypeScript. Copy manifests first to maximize layer caching.
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+RUN npm ci
+
+# Copy the sources required to build shared + api (web is not needed for the API image).
+COPY tsconfig.base.json ./
+COPY packages/shared packages/shared
+COPY apps/api apps/api
+
+# Build @ars/shared first (api depends on its dist), then @ars/api.
+RUN npm run build --workspace @ars/shared \
+ && npm run build --workspace @ars/api
+
+# Produce a pruned, production-only node_modules for the runtime stage.
+RUN npm ci --omit=dev
+
+
+# ----------------------------- Stage 2: runtime ----------------------------
+FROM node:20-slim AS runtime
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# curl is used by the container HEALTHCHECK below.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# Run as the unprivileged, pre-existing `node` user shipped in the base image.
+# Production-only dependencies (root + workspaces) from the builder.
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/package.json ./package.json
+COPY --from=builder --chown=node:node /app/package-lock.json ./package-lock.json
+
+# Built application code + workspace manifests (so workspace symlinks resolve).
+COPY --from=builder --chown=node:node /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=node:node /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder --chown=node:node /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder --chown=node:node /app/packages/shared/package.json ./packages/shared/package.json
+
+# Database migrations (and the reference seed) for operational migration runs.
+COPY --chown=node:node supabase ./supabase
+
+USER node
+
+EXPOSE 4000
+
+# Liveness/readiness for the orchestrator. /ready performs a real DB check and returns
+# 503 until dependencies are reachable; curl --fail turns a non-2xx into a failure.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl --fail --silent http://127.0.0.1:4000/ready || exit 1
+
+# Exec-form so `node` is PID 1 and receives SIGTERM directly for graceful drain.
+CMD ["node", "apps/api/dist/server.js"]

@@ -1,0 +1,64 @@
+# ---------------------------------------------------------------------------
+# @ars/web — production image (multi-stage SPA + nginx)
+#
+# Build context MUST be the repository root:
+#   docker build -f infra/docker/Dockerfile.web \
+#     --build-arg VITE_API_BASE_URL=https://api.example.com -t ars-web .
+#
+# Stage 1 (builder): node:20-slim, builds the React/Vite SPA. The API base URL is
+#                    baked in at BUILD time via VITE_API_BASE_URL (Vite inlines
+#                    VITE_* env at compile time — it cannot be changed at runtime
+#                    without rebuilding).
+# Stage 2 (runtime): nginx:1.27-alpine serving the static bundle on :8080 (a
+#                    non-privileged port) with SPA history fallback + security
+#                    headers from nginx.conf. Runs as the non-root `nginx` user.
+#
+# Node is pinned to 20 LTS for the build stage (local dev may use 23).
+# ---------------------------------------------------------------------------
+
+# ----------------------------- Stage 1: builder ----------------------------
+FROM node:20-slim AS builder
+WORKDIR /app
+
+# The SPA reads its API base URL at build time.
+ARG VITE_API_BASE_URL=http://localhost:4000
+ARG VITE_DEFAULT_LOCALE=ja
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_DEFAULT_LOCALE=${VITE_DEFAULT_LOCALE}
+
+# Manifests first for cache-friendly installs.
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+RUN npm ci
+
+# Sources needed to build shared (web depends on its dist) + web.
+COPY tsconfig.base.json ./
+COPY packages/shared packages/shared
+COPY apps/web apps/web
+
+# Build @ars/shared first, then the SPA → apps/web/dist.
+RUN npm run build --workspace @ars/shared \
+ && npm run build --workspace @ars/web
+
+
+# ----------------------------- Stage 2: runtime ----------------------------
+FROM nginx:1.27-alpine AS runtime
+
+# SPA + security-header server config (history fallback, gzip, CSP, caching).
+COPY infra/docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Static bundle.
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+
+# Serve on a non-privileged port and run nginx workers as the unprivileged user.
+# (nginx:alpine ships an unprivileged-ready setup; master runs as root only to bind
+# the port, but we use 8080 so the image can also run with a non-root entrypoint.)
+EXPOSE 8080
+
+# nginx 1.25+ supports the templated unprivileged image; here we keep the standard
+# image but listen on 8080 (see nginx.conf) so non-root runtime is feasible.
+USER nginx
+
+CMD ["nginx", "-g", "daemon off;"]

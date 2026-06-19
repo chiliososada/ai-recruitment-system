@@ -1,0 +1,47 @@
+# Keep the Docker build context small and reproducible. node_modules are always
+# reinstalled from the lockfile inside the builder stage; build outputs and local
+# runtime/test artifacts must never leak into an image.
+
+# Dependencies (reinstalled via `npm ci` in the builder)
+node_modules
+**/node_modules
+
+# Build outputs (rebuilt inside the image)
+dist
+**/dist
+
+# VCS / CI / editor / agent metadata
+.git
+.github
+.gitignore
+.claude
+.vscode
+.idea
+
+# Local database / storage / test artifacts
+.pglite
+**/.pglite
+.storage
+.storage-test
+**/.storage*
+coverage
+**/coverage
+test-results
+**/test-results
+playwright-report
+**/playwright-report
+.playwright
+
+# Logs and env
+*.log
+**/*.log
+.env
+.env.*
+!.env.example
+
+# OS cruft
+.DS_Store
+
+# Docs and infra are not needed inside the runtime images
+docs
+infra/docker/.env

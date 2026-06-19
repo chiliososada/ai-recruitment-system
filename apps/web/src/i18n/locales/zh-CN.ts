@@ -15,6 +15,7 @@ const zhCN: Dict = {
     filter: '筛选',
     clear: '清除',
     back: '返回',
+    next: '下一页',
     create: '创建',
     edit: '编辑',
     delete: '删除',

@@ -15,6 +15,7 @@ const zhTW: Dict = {
     filter: '篩選',
     clear: '清除',
     back: '返回',
+    next: '下一頁',
     create: '建立',
     edit: '編輯',
     delete: '刪除',
