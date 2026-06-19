@@ -104,6 +104,6 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase VERIFY — Final verification (§15)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| VR-1 | Full extended gate suite exits 0; VERIFICATION.md evidence; git status/diff/secret-scan clean | TODO | all green |
+| VR-1 | Full extended gate suite exits 0; VERIFICATION.md evidence; git status/diff/secret-scan clean | DONE | all green |
 
 > Update statuses only with real evidence. Current round logged in DECISIONS/VERIFICATION.
