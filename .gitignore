@@ -9,6 +9,9 @@ build/
 out/
 *.tsbuildinfo
 
+# Generated supply-chain artifact (scripts/gen-sbom.mjs)
+sbom.cyclonedx.json
+
 # Test / coverage artifacts
 coverage/
 .nyc_output/

@@ -103,9 +103,15 @@ profiles ─1:1─ candidates ──< resume_files ──< parse_jobs
    profiles ──< notifications
 ```
 
-All foreign keys cascade on delete from their owning aggregate (e.g. deleting a candidate removes
-its résumés, parse jobs, skills, analyses, and embedding). Tables that mutate carry `created_at`,
-many also `updated_at` (maintained by the `set_updated_at` trigger).
+Aggregate-owned rows cascade on delete from their owning row (e.g. deleting a candidate removes
+its résumés, parse jobs, skills, analyses, and embedding). **Actor/author references to
+`profiles(id)` do _not_ cascade** — `conversations.created_by`, `messages.sender_user_id`,
+`application_stage_history.changed_by`, `interviews.proposed_by`, `shortlists.created_by`, and
+`candidate_comparisons.created_by` use the default `RESTRICT`, so deleting a `profiles` row while
+any of these exist raises a foreign-key violation. Account deletion is therefore an ordered
+operator procedure (storage → authored/actor rows → candidate → membership → profile → auth user),
+documented in [OPERATIONS.md](OPERATIONS.md#data-retention--account-deletion). Tables that mutate
+carry `created_at`, many also `updated_at` (maintained by the `set_updated_at` trigger).
 
 ---
 

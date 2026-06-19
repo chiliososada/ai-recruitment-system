@@ -28,7 +28,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | UI-2 | Recruiter pages → DS (dashboard, company/job mgmt, talent search DataTable, candidate detail/compare, pipeline) | DONE | screenshots + tests |
 | UI-3 | Public + auth + messaging + notifications → DS; loading/empty/error/retry everywhere | DONE | screenshots + tests |
 | UI-4 | Responsive at 320/390/768/1024/1440; mobile data patterns; no console errors in E2E | DONE | visual + E2E |
-| UI-5 | Forms: shared schema, dirty/leave-confirm/dup-submit/saving/success/conflict/field errors | IN_PROGRESS | component tests |
+| UI-5 | Forms: shared schema, dirty/leave-confirm/dup-submit/saving/success/conflict/field errors | DONE | component tests |
 | UI-6 | Route-level code splitting + locale lazy-load | DONE | bundle budget |
 
 ## Phase A11Y — Accessibility (§6)
@@ -76,7 +76,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
 | DB-1 | Index review for hot queries (jobs list, talent search, messages, pipeline, match recall) — additive | DONE | migrate-check + benchmark |
-| DB-2 | Retention/deletion + account-deletion ops doc (no fictional UI) | TODO | doc in OPERATIONS |
+| DB-2 | Retention/deletion + account-deletion ops doc (no fictional UI) | DONE | doc in OPERATIONS |
 
 ## Phase PERF — Performance (§11)
 | ID | Task | Status | Acceptance |
@@ -93,13 +93,13 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
 | CICD-1 | GitHub Actions pipeline (all gates) | DONE | workflow file + dry validation |
-| CICD-2 | Multi-stage non-root Dockerfiles (api, web) + healthcheck + compose for local deps | IN_PROGRESS | docker build (or documented) |
-| CICD-3 | SBOM generation + dependency update policy | TODO | script/doc |
+| CICD-2 | Multi-stage non-root Dockerfiles (api, web) + healthcheck + compose for local deps | DONE | docker build (or documented) |
+| CICD-3 | SBOM generation + dependency update policy | DONE | script/doc |
 
 ## Phase DOCS — Documentation (§12/§10)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| DOCS-1 | `docs/ARCHITECTURE.md`; update `README.md` + `docs/DEPLOY.md` for industrial setup | IN_PROGRESS | docs updated |
+| DOCS-1 | `docs/ARCHITECTURE.md`; update `README.md` + `docs/DEPLOY.md` for industrial setup | DONE | docs updated |
 
 ## Phase VERIFY — Final verification (§15)
 | ID | Task | Status | Acceptance |

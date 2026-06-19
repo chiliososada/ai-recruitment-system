@@ -31,6 +31,7 @@
     "check:bundle": "node scripts/check-bundle.mjs",
     "bench": "tsx apps/api/scripts/benchmark.ts",
     "lighthouse": "node scripts/check-lighthouse.mjs",
+    "sbom": "node scripts/gen-sbom.mjs",
     "verify": "node scripts/verify.mjs"
   },
   "devDependencies": {

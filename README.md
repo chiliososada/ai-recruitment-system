@@ -27,8 +27,9 @@ ai-recruitment-system/
 │   ├── migrations/          Numbered, forward-only SQL (schema, indexes, RLS, storage)
 │   ├── local/bootstrap.sql  LOCAL-ONLY auth/storage shim + roles (applied before migrations)
 │   └── seed.sql             Non-sensitive reference seed (skill dictionary)
-├── docs/                    This documentation (API, AI, DATABASE, DEPLOY)
-└── scripts/verify.mjs       One-shot quality-gate runner
+├── docs/                    Operational & technical docs (see "Further documentation")
+├── infra/docker/            Production Dockerfiles + nginx + docker-compose
+└── scripts/                 verify.mjs (gate runner), scan-security.mjs, check-bundle.mjs, gen-sbom.mjs
 ```
 
 - **`@ars/shared`** is the single source of truth for request/response DTOs, enums, the error
@@ -152,10 +153,18 @@ demo company with a public "Full-Stack Engineer" job:
 > The local in-process PGlite database is **ephemeral** — it is rebuilt on each API start. Re-run the
 > seed after restarting if you want the demo data back.
 
-API endpoints live under `/api`. Useful unauthenticated endpoints:
+API endpoints live under `/api`. Useful unauthenticated operational endpoints (served at
+the root, not under `/api`):
 
-- `GET /health` — healthcheck (`{ "status": "ok", "runtime": "local" }`).
+- `GET /health` — liveness (`{ "status": "ok", "runtime", "version", "commit", "uptime" }`).
+  Always `200` while the process is up; does **not** touch the DB.
+- `GET /ready` — readiness; runs a real `select 1` against the database. `200` when
+  dependencies pass, `503` otherwise. Use this (not `/health`) to gate traffic.
+- `GET /metrics` — Prometheus-style exposition (`text/plain; version=0.0.4`): request
+  rate/latency, provider metrics, and job-queue depth gauges. Never fails the scrape.
 - `GET /openapi.json` — the generated OpenAPI document.
+
+Every response echoes an `x-correlation-id` header for log correlation.
 
 ---
 
@@ -185,32 +194,44 @@ These mirror the Playwright E2E tests in `apps/web/e2e/journeys.spec.ts`.
 
 ## Tests & quality gates
 
-Run individually (all from the repo root):
+All gates are root `package.json` scripts; run any individually from the repo root:
 
 ```bash
 npm ci                        # install / lockfile consistency
-npm run format:check          # Prettier
+npm run format:check          # Prettier (prettier --check .)
 git diff --check              # no whitespace errors / conflict markers
-npm run lint                  # ESLint (max-warnings=0)
+npm run lint                  # ESLint (--max-warnings=0)
 npm run typecheck             # tsc across all workspaces
 npm run test:unit             # unit: validation, authz, scoring, schema, i18n
 npm run test:integration      # API integration tests (@ars/api, real app in-process)
 npm run test:rls              # RLS / DB negative tests (cross-role, cross-tenant, IDOR)
-npm run test:e2e              # Playwright E2E (boots real API + built SPA)
-npm run build                 # production build of all workspaces
+npm run build                 # production build of all workspaces (shared → api → web)
 npm run db:migrate:check      # applies bootstrap + migrations + seed; verifies pgvector/ivfflat/RLS
+npm run test:e2e              # Playwright E2E (boots real API + built SPA)
+npm run test:a11y             # accessibility checks (@ars/web)
+npm run test:visual           # visual-regression checks (@ars/web)
+npm run scan:security         # supply-chain + secret scan (node scripts/scan-security.mjs)
+npm run check:bundle          # SPA bundle-size budget (node scripts/check-bundle.mjs)
 ```
 
-E2E requires Chromium once: `npx playwright install chromium`.
+E2E / a11y / visual require Chromium once: `npx playwright install chromium`.
 
-**One-shot:** run every gate in dependency order with a pass/fail summary:
+**One-shot orchestrator** — runs the core gates in dependency order with a pass/fail
+summary, stopping at the first failure and exiting non-zero:
 
 ```bash
-node scripts/verify.mjs            # all gates
+node scripts/verify.mjs            # core gates
 node scripts/verify.mjs --skip-e2e # skip Playwright
 ```
 
-It stops at the first failing gate and exits non-zero.
+`scripts/verify.mjs` covers install → format → `git diff --check` → lint → typecheck →
+unit → integration → RLS → build → migrate-check → E2E. The browser-specific suites
+(`test:a11y`, `test:visual`), the bundle budget (`check:bundle`), and the security scan
+(`scan:security`) are **not** part of `verify.mjs` — run those explicitly (CI runs the
+security scan as a discrete step; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+
+> Supply-chain extras: `node scripts/gen-sbom.mjs` writes a CycloneDX SBOM to
+> `sbom.cyclonedx.json` (see [docs/SECURITY.md](docs/SECURITY.md)).
 
 ---
 
@@ -232,6 +253,61 @@ Serve `apps/web/dist` as static files behind any static host/CDN, configured wit
 
 ---
 
+## Durable job queue
+
+Résumé parsing and AI analysis run **asynchronously** through a Postgres-backed durable
+queue (`job_queue` table, migration `0011`). It claims work with
+`FOR UPDATE SKIP LOCKED` and supports attempts, exponential backoff, lease/timeout,
+dead-lettering, and idempotency keys — so jobs survive restarts and multiple API/worker
+instances never double-process. Queue depth is exposed at `GET /metrics`
+(`job_queue_depth{status=...}`).
+
+The `JOBS_INLINE` switch picks the drain mode:
+
+- `local`/`test` (default): **inline** — jobs drain in-process for deterministic dev/CI.
+- `supabase`/prod (default `JOBS_INLINE=false`): a **background worker** drains the queue;
+  run N API instances and/or dedicated workers safely. See
+  [docs/OPERATIONS.md](docs/OPERATIONS.md) for scaling.
+
+---
+
+## Docker & docker-compose
+
+Production images and a local "supabase-style" stack live in `infra/docker/`. **The
+default `local` runtime needs no containers at all** — these are for the `supabase`
+runtime / image smoke-tests. Build contexts are the **repository root**.
+
+Build the images (from the repo root):
+
+```bash
+docker build -f infra/docker/Dockerfile.api -t ars-api .
+docker build -f infra/docker/Dockerfile.web \
+  --build-arg VITE_API_BASE_URL=https://api.example.com -t ars-web .
+```
+
+- **`Dockerfile.api`** — multi-stage, `node:20-slim`, non-root, production deps + compiled
+  `dist` + `supabase/` migrations. `HEALTHCHECK` curls `/ready`; runs `node` as PID 1 for
+  graceful SIGTERM drain.
+- **`Dockerfile.web`** — multi-stage; builds the SPA (with `VITE_API_BASE_URL` baked in at
+  build time) and serves it via `nginx:1.27-alpine` on port `8080` with SPA history
+  fallback and the security headers from `infra/docker/nginx.conf`.
+
+`docker compose` (DB-only by default; `api`/`web` gated behind the `apps` profile):
+
+```bash
+# Real Postgres + pgvector only (pgvector/pgvector:pg16) — useful to exercise ARS_RUNTIME=supabase:
+docker compose -f infra/docker/docker-compose.yml up postgres
+
+# Build + run api + web + db together (copy .env.example → infra/docker/.env first and set
+# ARS_RUNTIME=supabase, DATABASE_URL, secrets, provider keys):
+docker compose -f infra/docker/docker-compose.yml --profile apps up --build
+```
+
+Production deployment specifics (env vars, migrations, health/readiness, rollback) are in
+[docs/DEPLOY.md](docs/DEPLOY.md).
+
+---
+
 ## Deployment
 
 See **[docs/DEPLOY.md](docs/DEPLOY.md)** for deploying the SPA (static), the Node API, and Supabase
@@ -240,10 +316,15 @@ rollback procedure.
 
 ## Further documentation
 
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — system architecture, components, adapters, and the two-runtime design.
 - **[docs/API.md](docs/API.md)** — REST conventions, error envelope, pagination, and the endpoint catalog.
 - **[docs/AI.md](docs/AI.md)** — provider interfaces, structured analysis schema, embeddings, scoring formula, and prompt-injection / privacy defenses.
 - **[docs/DATABASE.md](docs/DATABASE.md)** — tables, relationships, RLS model, storage policies, and rollback/restore.
-- **[docs/DEPLOY.md](docs/DEPLOY.md)** — deployment and operations.
+- **[docs/DEPLOY.md](docs/DEPLOY.md)** — ordered production deploy procedure for the `supabase` runtime, env vars, migrations, container run, health checks, and rollback.
+- **[docs/OPERATIONS.md](docs/OPERATIONS.md)** — env matrix, migrations, health/readiness/metrics, scaling, data retention & account deletion, backup/restore, SLI/SLO.
+- **[docs/SECURITY.md](docs/SECURITY.md)** — threat model, trust boundaries, controls, SBOM & dependency policy, and the production security checklist.
+- **[docs/PERFORMANCE.md](docs/PERFORMANCE.md)** — performance targets, benchmarks, and tuning.
+- **[docs/RUNBOOK.md](docs/RUNBOOK.md)** — incident procedures and recovery steps.
 
 ## License
 

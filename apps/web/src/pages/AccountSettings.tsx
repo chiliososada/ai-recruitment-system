@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LOCALES, type Locale } from '@ars/shared';
 import { useTranslation } from 'react-i18next';
+import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { changeLocale } from '../i18n';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
@@ -15,6 +16,13 @@ export default function AccountSettings(): JSX.Element {
   const [error, setError] = useState<unknown>(null);
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const dirty =
+    !busy &&
+    (displayName !== (user?.displayName ?? '') ||
+      locale !== (user?.locale ?? 'ja') ||
+      password.length > 0);
+  useUnsavedChangesWarning(dirty);
 
   async function submit(e: React.FormEvent): Promise<void> {
     e.preventDefault();

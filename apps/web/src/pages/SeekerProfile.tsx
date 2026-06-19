@@ -9,6 +9,7 @@ import {
 } from '@ars/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { api, ApiError } from '../lib/api';
 import { localizeError } from '../lib/errors';
 import { RadarChart } from '../components/RadarChart';
@@ -202,6 +203,15 @@ function ProfileForm({ me }: { me: CandidateProfile }): JSX.Element {
     },
     onError: setError,
   });
+
+  const dirty =
+    !save.isPending &&
+    (headline !== (me.headline ?? '') ||
+      location !== (me.location ?? '') ||
+      years !== String(me.yearsExperience) ||
+      openToWork !== me.openToWork ||
+      languages !== me.languages.join(', '));
+  useUnsavedChangesWarning(dirty);
 
   return (
     <form

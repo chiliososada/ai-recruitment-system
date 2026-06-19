@@ -92,7 +92,8 @@ Boundaries crossed by data:
 - **Prompt-injection defenses + schema validation** — untrusted résumé text is
   segregated; LLM output must validate against the analysis schema.
 - **Supply-chain / secret scanning** — `node scripts/scan-security.mjs` (CI gate);
-  SBOM via `npm sbom --omit=dev` (CycloneDX-compatible).
+  SBOM via `node scripts/gen-sbom.mjs` (CycloneDX). See
+  [Software Bill of Materials & dependency policy](#software-bill-of-materials--dependency-policy).
 
 ### SPA Content-Security-Policy (from `infra/docker/nginx.conf`)
 
@@ -145,8 +146,90 @@ styles; scripts remain `'self'`-only (no inline JS).
     advisories unless listed in `audit-allowlist.json` (reviewed, unfixable only).
   - Secret scan over `git ls-files` for AWS keys, PEM private keys, `sk-` OpenAI
     keys and Slack tokens, excluding `.env.example` and `docs/` examples.
-- **SBOM:** generate with `npm sbom --omit=dev` (CycloneDX) and archive per release.
+- **SBOM:** generate with `node scripts/gen-sbom.mjs` (CycloneDX) and archive per
+  release — see the next section for details.
 - Keep dependencies current; bump promptly when an advisory has a fix.
+
+---
+
+## Software Bill of Materials & dependency policy
+
+The dependency graph is the largest part of the attack surface (threat **T3**, supply
+chain). Two complementary controls cover it: a generated **SBOM** for inventory/audit,
+and the **`npm audit` gate** that fails CI on known-vulnerable dependencies.
+
+### Generating the SBOM
+
+```bash
+node scripts/gen-sbom.mjs
+```
+
+The script (`scripts/gen-sbom.mjs`, no external deps) shells out to
+`npm sbom --sbom-format cyclonedx --sbom-type application` for the workspace root,
+writes the result to **`sbom.cyclonedx.json`** at the repo root, and prints the
+component count. It exits non-zero on a real failure (npm error, unparseable output, or
+a write error).
+
+- **Format:** CycloneDX (the current toolchain emits spec version 1.5), `application`
+  type, rooted at `ai-recruitment-system@<version>`.
+- **Scope:** the full installed dependency tree from `package-lock.json` (all
+  workspaces). Run after `npm ci` so the SBOM reflects the pinned lockfile.
+- **Toolchain requirement:** `npm sbom` needs **npm ≥ 9.5.0**. On an older npm the
+  script logs a `WARNING` and exits **0** (a documented fallback so a CI job that only
+  archives the SBOM is not hard-broken) — upgrade npm to actually produce the file.
+- **Artifact, not source:** `sbom.cyclonedx.json` is generated and is git-ignored.
+  Produce it in CI/release and **archive it per release** (attach to the build /
+  release artifacts); do not commit it.
+
+The CycloneDX JSON feeds vulnerability scanners (e.g. Grype/Trivy/Dependency-Track) and
+license/inventory tooling, and provides a point-in-time record of exactly what shipped.
+
+### The `npm audit` gate
+
+`node scripts/scan-security.mjs` (the CI security gate) runs
+`npm audit --omit=dev --audit-level=high --json` and **fails on any high/critical
+advisory** unless the advisory id is allowlisted. Production (non-dev) dependencies are
+what is audited (`--omit=dev`), since dev-only tooling does not ship. Advisories that
+npm reports as **fixable are always reported** even if allowlisted — the allowlist only
+suppresses reviewed, currently-unfixable advisories.
+
+### `audit-allowlist.json` — justification & expiry
+
+`audit-allowlist.json` (repo root) starts **empty** (`{"advisories": []}`). Add an entry
+only after reviewing an advisory that is high/critical **and has no fix available**:
+
+```json
+{
+  "advisories": [
+    {
+      "id": "GHSA-xxxx-xxxx-xxxx",
+      "reason": "Why this is accepted (impact within our trust boundaries; no fix yet).",
+      "expires": "2026-12-31"
+    }
+  ]
+}
+```
+
+- **`id`** is matched against the advisory's numeric `id`, its `GHSA-…` id, and its
+  CVE(s) — any one may be used.
+- **`reason`** must state why the risk is acceptable here (e.g. the vulnerable code path
+  is unreachable, or the impact is contained by another control) and that no fix exists.
+- **`expires`** is a review date. Re-evaluate on or before it: if a fix has shipped,
+  remove the entry and bump the dependency; if not, re-review and renew with a fresh
+  date. Do not leave entries to accumulate.
+
+### Dependency-update policy
+
+- **Lockfile-pinned installs everywhere** — `npm ci` in CI and the Docker builds, so
+  every environment resolves the exact same versions as `package-lock.json`.
+- **Cadence:** review dependency updates on a regular cadence (e.g. monthly) and bump
+  promptly. **Security fixes are out-of-band**: when an advisory has a fix, apply it
+  (`npm audit fix` or a targeted bump) rather than waiting for the next cycle.
+- **Gate before merge:** every change runs the full quality-gate suite plus
+  `scripts/scan-security.mjs`; a green security scan is required (see the production
+  checklist below).
+- **After any dependency change:** regenerate the SBOM (`node scripts/gen-sbom.mjs`) for
+  the next release archive.
 
 ---
 
@@ -160,7 +243,8 @@ styles; scripts remain `'self'`-only (no inline JS).
 - [ ] All secrets injected from a secret manager; none in the image or repo.
 - [ ] HTTPS/TLS terminated in front of both SPA and API; HSTS active (prod helmet).
 - [ ] SPA CSP `connect-src` set to the real API origin.
-- [ ] `npm ci` (lockfile), `node scripts/scan-security.mjs` green, SBOM archived.
+- [ ] `npm ci` (lockfile), `node scripts/scan-security.mjs` green, SBOM archived
+      (`node scripts/gen-sbom.mjs`).
 - [ ] Storage bucket `resumes` is private with RLS policies applied (migration 0010).
 - [ ] Rate limits and `MAX_UPLOAD_BYTES` reviewed for expected load.
 - [ ] Backups / PITR enabled; restore tested (see [RUNBOOK.md](RUNBOOK.md)).

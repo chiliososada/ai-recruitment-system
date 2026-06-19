@@ -54,16 +54,17 @@ prod; `ARS_RUNTIME=supabase` requires `DATABASE_URL`.
 
 ## Migrations
 
-- **Forward-only, numbered** SQL in `supabase/migrations/0001…0011`, applied in numeric
-  order, recorded in `ars_schema_migrations`; the runner is idempotent (already-applied
-  files are skipped). **No down-migrations** — reverse a change with a *new* numbered
-  migration.
+- **Forward-only, numbered** SQL in `supabase/migrations/` (through the highest-numbered
+  file — currently `0012`), applied in numeric order, recorded in `ars_schema_migrations`;
+  the runner is idempotent (already-applied files are skipped). **No down-migrations** —
+  reverse a change with a *new* numbered migration.
 - **Do not** apply `supabase/local/bootstrap.sql` to Supabase — it is local-only
   (recreates `auth`/`storage`/roles that Supabase provides natively).
 - **Run order on Supabase:** enable the `vector` extension (migration `0001` runs
   `create extension if not exists vector`; ensure the project allows it), then apply
-  migrations `0001 → 0011`. Migration `0010` creates the private `resumes` bucket +
-  policies; `0011` adds the additive `job_queue` table.
+  migrations `0001 → 0012`. Migration `0010` creates the private `resumes` bucket +
+  policies; `0011` adds the additive `job_queue` table; `0012` adds an additive
+  talent-search index.
 
 How to run:
 
@@ -147,6 +148,129 @@ DB / Supabase) — there is no self-service account-deletion UI; do not assume o
 - **Retention:** define per-class retention (e.g. inactive-candidate résumé text,
   dead-letter `job_queue` rows) per policy; prune dead/`succeeded` queue rows
   periodically to bound table growth. Reference seed/skill data is permanent.
+
+---
+
+## Data retention & account deletion (detailed)
+
+This expands the summary above with the exact PII inventory, the real foreign-key
+behavior (including the constraints that **block** a naive delete), and a step-by-step
+operator procedure. It is derived from the migrations in `supabase/migrations/` and the
+schema map in [DATABASE.md](DATABASE.md). For data classification see
+[SECURITY.md](SECURITY.md).
+
+### What personal data is stored (and where)
+
+| Data | Location | Notes |
+| ---- | -------- | ----- |
+| **Email + login credentials** | **Auth (GoTrue), not the app DB** | `profiles` holds **no** email. On Supabase the email/password live in `auth.users`; locally in the `auth.local_identities` shim. Deleting app rows alone does **not** remove the login. |
+| **Display name, locale, role** | `profiles` (`profiles.id == auth user id`) | Minimal identity. |
+| **Candidate profile** | `candidates` | Headline, summary, location, years of experience, languages, desired salary range. 1:1 with `profiles` via unique `user_id`. |
+| **Résumé file metadata** | `resume_files` | Filename, MIME, size, `scan_result`, **`extracted_text`** (full parsed résumé text — sensitive), and the `storage_path`. |
+| **Résumé bytes** | **Storage** (private `resumes` bucket), *not* the DB | Path `<owner_user_id>/<unguessable-uuid>.<ext>`. Locally under `LOCAL_STORAGE_DIR` (default `.storage`). |
+| **Extracted skills** | `candidate_skills`, `skill_analyses` | `skill_analyses.result` is the full validated AI-analysis JSON. |
+| **Candidate embedding** | `candidate_embeddings` | `vector(384)` derived from résumé/profile text. |
+| **Messages** | `messages` (`sender_user_id`), `conversations` (`created_by`), `conversation_members` | Free-text message bodies are personal content. |
+| **Notifications** | `notifications` (`user_id`) | Titles/bodies may reference personal activity. |
+| **Recruitment activity** | `applications`, `application_stage_history` (`changed_by`), `interviews` (`proposed_by`), `matches`/`match_results` | Application/stage/interview history tied to the candidate and to acting users. |
+| **Company-curated data** | `shortlists` (`created_by`), `candidate_comparisons` (`created_by`) | Owned by a **company**, not an individual — shared data; see below. |
+
+> Company rows (`companies`, `jobs`, `job_skills`) are **organizational**, not personal.
+> They are not deleted by an individual account-deletion request.
+
+### How deletion actually cascades (verified against the FKs)
+
+Deleting the **candidate aggregate** cascades cleanly. `candidates.user_id` is
+`on delete cascade` from `profiles`, and these all cascade from `candidates`:
+`resume_files` → `parse_jobs`; `candidate_skills`; `skill_analyses`;
+`candidate_embeddings`; `matches`/`match_results`; `applications` →
+(`application_stage_history`, `interviews`); and `shortlists` / `candidate_comparisons`
+rows that reference the candidate. So removing the `candidates` row removes the
+seeker's candidate-side data.
+
+**The catch — these columns reference `profiles(id)` with _no_ `on delete` action
+(default `NO ACTION`/RESTRICT), so deleting a `profiles` row while any of them exist
+fails with a foreign-key violation:**
+
+| Table.column | Created by |
+| ------------ | ---------- |
+| `conversations.created_by` | starting a conversation |
+| `messages.sender_user_id` | sending a message |
+| `application_stage_history.changed_by` | advancing an application's stage |
+| `interviews.proposed_by` | proposing an interview |
+| `shortlists.created_by` | shortlisting a candidate |
+| `candidate_comparisons.created_by` | saving a comparison |
+
+(`conversation_members.user_id` and `notifications.user_id` **do** cascade from
+`profiles`.) In practice an active user — especially a recruiter who has messaged,
+moved applications, proposed interviews, or shortlisted — has authored rows that
+**must be handled first** (re-assign/anonymize or delete them) before the `profiles`
+row can be removed. There is no `on delete set null` or anonymization built into the
+schema for these "actor" columns; an operator resolves them explicitly.
+
+### There is no self-service deletion
+
+**Account deletion is operator-only.** The API exposes `PATCH /auth/account` for a user
+to change their own **display name, locale, and password** (`apps/api/src/routes/auth.ts`)
+— and nothing else: there is **no** delete/deactivate/anonymize endpoint and no
+self-serve "delete my account" UI. A user requesting erasure must be handled by an
+operator following the procedure below. (If self-service erasure becomes a requirement,
+it needs new endpoints/UI and a resolution strategy for the RESTRICT'd actor columns
+above — it does not exist today.)
+
+### Operator deletion procedure
+
+Run against the production DB (`DATABASE_URL`) / Supabase dashboard. Do this inside a
+**transaction** and keep the BYPASSRLS `service_role` / direct DB access for it. Capture
+who/when for the audit trail before starting.
+
+1. **Identify the subject.** Auth user id `== profiles.id`. Find the `candidate.id`
+   (seekers: `select id from candidates where user_id = :uid`) and any
+   `company_members` rows (`select company_id, role from company_members where user_id = :uid`).
+2. **Delete résumé objects from Storage** (these do **not** cascade from the DB).
+   Remove every object under the user's folder `<uid>/…` in the `resumes` bucket via the
+   Supabase Storage API / dashboard. Cross-check against
+   `select storage_path from resume_files where candidate_id = :cid` so none are orphaned.
+3. **Resolve authored "actor" rows** that would block the `profiles` delete (see the
+   table above). Per policy, either:
+   - **Delete** them (e.g. the user's `messages`, their `application_stage_history`
+     entries, `interviews` they proposed, `conversations` they created,
+     `shortlists`/`candidate_comparisons` they created), **or**
+   - **Re-assign/anonymize** them to a retained "deleted user" / company-service
+     principal where the audit record must be preserved (e.g. stage history). Company
+     data (shortlists/comparisons/jobs) is shared — decide whether to transfer ownership
+     to another company member or remove it.
+4. **Delete the candidate row** (seekers): `delete from candidates where id = :cid;` —
+   this cascades away résumé metadata, parse jobs, skills, analyses, embedding, matches,
+   and applications (with their stage history and interviews).
+5. **Remove company membership** if applicable: `delete from company_members where user_id = :uid;`
+   (decide separately what happens to company-owned data — it is not personal).
+6. **Delete the profile**: `delete from profiles where id = :uid;` — with steps 3–5 done,
+   the cascading children (`conversation_members`, `notifications`) go too and no
+   RESTRICT constraint remains.
+7. **Delete the auth user** so the email/login is gone: remove the user in **Supabase
+   Auth** (dashboard or the GoTrue admin API). The app has no endpoint that deletes an
+   auth user, so this is a deliberate manual step.
+8. **Verify & record.** Confirm: no `resume_files`/`storage` objects remain for the
+   user, `select count(*) from profiles where id = :uid` is 0, the auth user is gone, and
+   `/ready` still returns `200`. Record the deletion (subject, operator, timestamp,
+   scope) for audit/compliance.
+
+> Order matters: storage → authored/actor rows → candidate → membership → profile →
+> auth user. Skipping step 3 will make step 6 fail with a foreign-key error.
+
+### Retention guidance
+
+- **Résumé text & analyses** (`resume_files.extracted_text`, `skill_analyses`): the most
+  sensitive at-rest PII. Define a retention window for inactive candidates and prune (or
+  delete on request) per policy.
+- **Queue rows** (`job_queue`): prune `succeeded` rows periodically, and review/retire
+  `dead` rows (they may carry payload context) to bound table growth.
+- **Audit/history** (`application_stage_history`): append-only by design; retain per
+  policy, anonymizing the actor on erasure rather than dropping the record where an audit
+  trail is required.
+- **Reference data** (`skills`, `algorithm_versions`, seed): non-personal — retained
+  permanently.
 
 ---
 
