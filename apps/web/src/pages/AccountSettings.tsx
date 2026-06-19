@@ -23,7 +23,7 @@ export default function AccountSettings(): JSX.Element {
     setDone(false);
     try {
       await updateAccount({ displayName, locale, ...(password ? { password } : {}) });
-      changeLocale(locale);
+      await changeLocale(locale);
       setPassword('');
       setDone(true);
     } catch (err) {

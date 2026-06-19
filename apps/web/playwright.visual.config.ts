@@ -4,7 +4,7 @@ import { webServer } from './e2e/webserver';
 export default defineConfig({
   testDir: './e2e',
   testMatch: 'visual.spec.ts',
-  timeout: 180_000,
+  timeout: 360_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,

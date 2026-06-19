@@ -4,17 +4,28 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en';
 import ja from './locales/ja';
-import zhCN from './locales/zh-CN';
-import zhTW from './locales/zh-TW';
 
 export const LOCALE_STORAGE_KEY = 'ars.locale';
 
+// Eager: the fallback chain (ja default + en). The larger zh catalogs are code-split
+// into separate chunks and loaded on demand (UI-6, locale lazy-load).
 export const resources = {
-  en: { translation: en },
   ja: { translation: ja },
-  'zh-CN': { translation: zhCN },
-  'zh-TW': { translation: zhTW },
+  en: { translation: en },
 } as const;
+
+const lazyLoaders: Record<string, () => Promise<{ default: Record<string, unknown> }>> = {
+  'zh-CN': () => import('./locales/zh-CN'),
+  'zh-TW': () => import('./locales/zh-TW'),
+};
+
+async function ensureBundle(locale: string): Promise<void> {
+  if (i18n.hasResourceBundle(locale, 'translation')) return;
+  const loader = lazyLoaders[locale];
+  if (!loader) return;
+  const mod = await loader();
+  i18n.addResourceBundle(locale, 'translation', mod.default, true, true);
+}
 
 void i18n
   .use(LanguageDetector)
@@ -30,7 +41,8 @@ void i18n
       caches: ['localStorage'],
     },
     interpolation: { escapeValue: false },
-  });
+  })
+  .then(() => ensureBundle(i18n.language));
 
 if (typeof document !== 'undefined') {
   i18n.on('languageChanged', (lng) => {
@@ -38,8 +50,9 @@ if (typeof document !== 'undefined') {
   });
 }
 
-export function changeLocale(locale: Locale): void {
-  void i18n.changeLanguage(locale);
+export async function changeLocale(locale: Locale): Promise<void> {
+  await ensureBundle(locale);
+  await i18n.changeLanguage(locale);
 }
 
 export default i18n;

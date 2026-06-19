@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -15,12 +15,13 @@ describe('LanguageSwitcher (FR-09.4)', () => {
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     expect(select.value).toBe('ja');
 
+    // zh-CN is lazy-loaded (code-split), so the switch resolves asynchronously.
     fireEvent.change(select, { target: { value: 'zh-CN' } });
-    expect(i18n.language).toBe('zh-CN');
+    await waitFor(() => expect(i18n.language).toBe('zh-CN'));
     expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('zh-CN');
 
     fireEvent.change(select, { target: { value: 'en' } });
-    expect(i18n.language).toBe('en');
+    await waitFor(() => expect(i18n.language).toBe('en'));
   });
 
   it('offers all four supported locales', () => {

@@ -99,7 +99,7 @@ export default function TalentSearch(): JSX.Element {
                   {c.recommended ? <Badge variant="rec">{t('talent.recommended')}</Badge> : null}
                 </div>
                 <p className="muted">
-                  {c.headline ?? ''} · {c.yearsExperience}{' '}
+                  {c.headline ? `${c.headline} · ` : ''}
                   {t('analysis.years', { count: c.yearsExperience })}
                   {c.matchScore != null ? ` · ${t('match.score')} ${c.matchScore}` : ''}
                 </p>

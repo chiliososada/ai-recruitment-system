@@ -1,9 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { seedFixtures } from './support';
 
+// UI-4 breakpoints: small mobile, mobile, tablet, small laptop, desktop.
 const VIEWPORTS = [
-  { name: 'desktop', width: 1440, height: 900 },
+  { name: 'xs', width: 320, height: 800 },
   { name: 'mobile', width: 390, height: 844 },
+  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'laptop', width: 1024, height: 768 },
+  { name: 'desktop', width: 1440, height: 900 },
 ];
 const LOCALES = ['ja', 'en'];
 

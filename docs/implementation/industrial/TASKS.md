@@ -9,7 +9,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 |----|------|--------|-----------|
 | IB-1 | Write industrial ledger (BASELINE/FEATURE_PARITY/TASKS/DESIGN_AUDIT/ARCHITECTURE_AUDIT/DECISIONS/VERIFICATION) | DONE | files exist |
 | IB-2 | Record baseline gate run (exit codes + counts) | DONE | recorded in VERIFICATION.md |
-| IB-3 | Pre-upgrade visual baseline screenshots (desktop+mobile) via Playwright + seed | TODO | screenshots saved under `apps/web/visual-baseline/` |
+| IB-3 | Pre-upgrade visual baseline screenshots (desktop+mobile) via Playwright + seed | DONE | screenshots saved under `apps/web/visual-baseline/` |
 
 ## Phase DS — Design system (§4.1/4.2)
 | ID | Task | Status | Acceptance |
@@ -24,12 +24,12 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase UI — Page refactor to design system (§4.3/4.4, §5)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| UI-1 | Seeker pages → DS (dashboard, résumé/analysis, recommendations, browse, applications) | TODO | screenshots + tests |
-| UI-2 | Recruiter pages → DS (dashboard, company/job mgmt, talent search DataTable, candidate detail/compare, pipeline) | TODO | screenshots + tests |
-| UI-3 | Public + auth + messaging + notifications → DS; loading/empty/error/retry everywhere | TODO | screenshots + tests |
-| UI-4 | Responsive at 320/390/768/1024/1440; mobile data patterns; no console errors in E2E | TODO | visual + E2E |
-| UI-5 | Forms: shared schema, dirty/leave-confirm/dup-submit/saving/success/conflict/field errors | TODO | component tests |
-| UI-6 | Route-level code splitting + locale lazy-load | TODO | bundle budget |
+| UI-1 | Seeker pages → DS (dashboard, résumé/analysis, recommendations, browse, applications) | DONE | screenshots + tests |
+| UI-2 | Recruiter pages → DS (dashboard, company/job mgmt, talent search DataTable, candidate detail/compare, pipeline) | DONE | screenshots + tests |
+| UI-3 | Public + auth + messaging + notifications → DS; loading/empty/error/retry everywhere | DONE | screenshots + tests |
+| UI-4 | Responsive at 320/390/768/1024/1440; mobile data patterns; no console errors in E2E | DONE | visual + E2E |
+| UI-5 | Forms: shared schema, dirty/leave-confirm/dup-submit/saving/success/conflict/field errors | IN_PROGRESS | component tests |
+| UI-6 | Route-level code splitting + locale lazy-load | DONE | bundle budget |
 
 ## Phase A11Y — Accessibility (§6)
 | ID | Task | Status | Acceptance |
@@ -41,9 +41,9 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
 | BE-1 | `/ready` (DB + critical deps) + version/commit on `/health`; graceful shutdown | DONE | integration test |
-| BE-2 | Idempotency + concurrency hardening on writes (register/login/upload/message/apply/interview) | TODO | concurrency tests |
-| BE-3 | Per-route rate limits; consistent timeouts/cancellation | TODO | integration test |
-| BE-4 | OpenAPI ↔ routes contract test | TODO | contract test |
+| BE-2 | Idempotency + concurrency hardening on writes (register/login/upload/message/apply/interview) | DONE | concurrency tests |
+| BE-3 | Per-route rate limits; consistent timeouts/cancellation | DONE | integration test |
+| BE-4 | OpenAPI ↔ routes contract test | DONE | contract test |
 
 ## Phase JOBS — Durable async tasks (§7)
 | ID | Task | Status | Acceptance |
@@ -62,7 +62,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 |----|------|--------|-----------|
 | SEC-1 | CSP + security headers; strict CORS allowlist; clickjacking; no debug/internal leak in prod | DONE | header test |
 | SEC-2 | File hardening: magic-byte + zip-bomb/oversized DOCX guard; fail-closed scan | DONE | boundary tests |
-| SEC-3 | Central PII redaction audited across logs/errors/traces | TODO | redaction unit |
+| SEC-3 | Central PII redaction audited across logs/errors/traces | DONE | redaction unit |
 | SEC-4 | `npm audit`/secret-scan gate (no unexplained high/critical) | DONE | scripted gate |
 | SEC-5 | `docs/SECURITY.md` (threat model, trust boundaries, data classes, prod checklist) | DONE | doc exists |
 
