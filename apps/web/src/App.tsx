@@ -7,7 +7,10 @@ import CompaniesBrowse from './pages/CompaniesBrowse';
 import CompanyConsole from './pages/CompanyConsole';
 import CompanyDetail from './pages/CompanyDetail';
 import CompanyManage from './pages/CompanyManage';
+import Forbidden from './pages/Forbidden';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
+import ServerError from './pages/ServerError';
 import JobDetail from './pages/JobDetail';
 import JobManage from './pages/JobManage';
 import JobsBrowse from './pages/JobsBrowse';
@@ -134,7 +137,9 @@ export default function App(): JSX.Element {
           }
         />
 
-        <Route path="*" element={<Home />} />
+        <Route path="/403" element={<Forbidden />} />
+        <Route path="/500" element={<ServerError />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
   );

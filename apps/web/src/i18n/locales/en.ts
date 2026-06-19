@@ -38,6 +38,7 @@ const en = {
     page: 'Page {{page}} of {{total}}',
     results: '{{count}} result(s)',
     requiredField: 'This field is required',
+    skipToContent: 'Skip to content',
   },
   nav: {
     home: 'Home',
@@ -115,6 +116,16 @@ const en = {
     badRequest: 'Bad request',
     aiUnavailable: 'AI service is unavailable, please retry',
     network: 'Network error',
+  },
+  errorPage: {
+    notFoundTitle: 'Page not found',
+    notFoundBody: 'The page you are looking for does not exist or has moved.',
+    forbiddenTitle: 'Access denied',
+    forbiddenBody: 'You do not have permission to view this page.',
+    serverTitle: 'Something went wrong',
+    serverBody: 'An unexpected error occurred. Please try again.',
+    goHome: 'Go home',
+    reload: 'Reload',
   },
   resume: {
     title: 'Resume',

@@ -19,7 +19,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 | DS-3 | Overlays/data: Card, StatCard, Badge, Avatar, Tooltip, Dropdown, Dialog, Drawer, Tabs, Pagination, DataTable, FilterBar, Toast, InlineAlert, Skeleton, Spinner, EmptyState, ErrorState, ConfirmDialog | DONE | component tests |
 | DS-4 | Layout: AppShell, Sidebar, Topbar, MobileNav, PageHeader, SectionHeader; configurable brand | DONE | renders + responsive test |
 | DS-5 | Icon set (tree-shakeable, no emoji) | DONE | lucide-react used |
-| DS-6 | 404/403/500/offline pages + global + route error boundaries; i18n error mapping | TODO | component tests |
+| DS-6 | 404/403/500/offline pages + global + route error boundaries; i18n error mapping | DONE | component tests |
 
 ## Phase UI — Page refactor to design system (§4.3/4.4, §5)
 | ID | Task | Status | Acceptance |

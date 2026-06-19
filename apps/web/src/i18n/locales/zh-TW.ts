@@ -34,6 +34,7 @@ const zhTW: Dict = {
     page: '第 {{page}} 頁，共 {{total}} 頁',
     results: '{{count}} 筆結果',
     requiredField: '此欄位為必填',
+    skipToContent: '跳到主要內容',
   },
   nav: {
     home: '首頁',
@@ -111,6 +112,16 @@ const zhTW: Dict = {
     badRequest: '請求無效',
     aiUnavailable: 'AI 服務暫時無法使用，請重試',
     network: '網路錯誤',
+  },
+  errorPage: {
+    notFoundTitle: '找不到頁面',
+    notFoundBody: '你造訪的頁面不存在或已移動。',
+    forbiddenTitle: '存取被拒',
+    forbiddenBody: '你沒有權限檢視此頁面。',
+    serverTitle: '發生了一些問題',
+    serverBody: '發生未預期的錯誤，請重試。',
+    goHome: '返回首頁',
+    reload: '重新載入',
   },
   resume: {
     title: '履歷',

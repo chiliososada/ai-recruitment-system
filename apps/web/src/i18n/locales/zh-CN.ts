@@ -34,6 +34,7 @@ const zhCN: Dict = {
     page: '第 {{page}} 页，共 {{total}} 页',
     results: '{{count}} 条结果',
     requiredField: '此项为必填项',
+    skipToContent: '跳到主内容',
   },
   nav: {
     home: '首页',
@@ -111,6 +112,16 @@ const zhCN: Dict = {
     badRequest: '请求无效',
     aiUnavailable: 'AI 服务暂不可用，请重试',
     network: '网络错误',
+  },
+  errorPage: {
+    notFoundTitle: '页面未找到',
+    notFoundBody: '你访问的页面不存在或已移动。',
+    forbiddenTitle: '访问被拒绝',
+    forbiddenBody: '你没有权限查看此页面。',
+    serverTitle: '出了点问题',
+    serverBody: '发生了意外错误，请重试。',
+    goHome: '返回首页',
+    reload: '重新加载',
   },
   resume: {
     title: '简历',

@@ -34,6 +34,7 @@ const ja: Dict = {
     page: '{{page}} / {{total}} ページ',
     results: '{{count}} 件の結果',
     requiredField: 'この項目は必須です',
+    skipToContent: 'コンテンツへスキップ',
   },
   nav: {
     home: 'ホーム',
@@ -111,6 +112,16 @@ const ja: Dict = {
     badRequest: '不正なリクエストです',
     aiUnavailable: 'AIサービスが利用できません。再試行してください',
     network: 'ネットワークエラー',
+  },
+  errorPage: {
+    notFoundTitle: 'ページが見つかりません',
+    notFoundBody: 'お探しのページは存在しないか、移動しました。',
+    forbiddenTitle: 'アクセスが拒否されました',
+    forbiddenBody: 'このページを表示する権限がありません。',
+    serverTitle: '問題が発生しました',
+    serverBody: '予期しないエラーが発生しました。もう一度お試しください。',
+    goHome: 'ホームへ',
+    reload: '再読み込み',
   },
   resume: {
     title: '履歴書',
