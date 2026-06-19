@@ -40,7 +40,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase BE — Backend/API industrialization (§7)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| BE-1 | `/ready` (DB + critical deps) + version/commit on `/health`; graceful shutdown | TODO | integration test |
+| BE-1 | `/ready` (DB + critical deps) + version/commit on `/health`; graceful shutdown | DONE | integration test |
 | BE-2 | Idempotency + concurrency hardening on writes (register/login/upload/message/apply/interview) | TODO | concurrency tests |
 | BE-3 | Per-route rate limits; consistent timeouts/cancellation | TODO | integration test |
 | BE-4 | OpenAPI ↔ routes contract test | TODO | contract test |
@@ -48,9 +48,9 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase JOBS — Durable async tasks (§7)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| JOBS-1 | `job_queue` table (status, idempotency key, lease, attempts, run_after, backoff, error, dead_letter) migration | TODO | migrate-check |
-| JOBS-2 | Worker: claim (SKIP LOCKED), exec, retry+expo-backoff, timeout, dead-letter, graceful shutdown | TODO | state-machine unit + integration |
-| JOBS-3 | Résumé parse/analysis/embedding enqueued (not inline); parse-status API semantics preserved | TODO | resume.integration still green |
+| JOBS-1 | `job_queue` table (status, idempotency key, lease, attempts, run_after, backoff, error, dead_letter) migration | DONE | migrate-check |
+| JOBS-2 | Worker: claim (SKIP LOCKED), exec, retry+expo-backoff, timeout, dead-letter, graceful shutdown | DONE | state-machine unit + integration |
+| JOBS-3 | Résumé parse/analysis/embedding enqueued (not inline); parse-status API semantics preserved | DONE | resume.integration still green |
 
 ## Phase PROVIDER — External provider resilience (§7)
 | ID | Task | Status | Acceptance |
@@ -69,7 +69,7 @@ documented `BLOCKED_EXTERNAL` with adapter + local verification) before `FINAL_S
 ## Phase OBS — Observability (§10)
 | ID | Task | Status | Acceptance |
 |----|------|--------|-----------|
-| OBS-1 | Structured log field standard + metrics/tracing adapter (local no-op / OTel-ready) | TODO | unit + wired |
+| OBS-1 | Structured log field standard + metrics/tracing adapter (local no-op / OTel-ready) | DONE | unit + wired |
 | OBS-2 | `docs/OPERATIONS.md` + `docs/RUNBOOK.md` (health, scaling, queue backlog, provider/DB failure, rollback, backup, incident) | TODO | docs exist |
 
 ## Phase DB — Database lifecycle (§8)

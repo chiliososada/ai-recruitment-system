@@ -10,6 +10,7 @@ import { ZodError } from 'zod';
 import type { Deps } from './deps.js';
 import { AppError, validationError, zodToIssues } from './errors.js';
 import { registerRoutes } from './routes/index.js';
+import { APP_COMMIT, APP_VERSION, uptimeSeconds } from './version.js';
 
 interface FastifyHttpError {
   statusCode?: number;
@@ -57,6 +58,17 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
   // Echo the correlation id back on every response.
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-correlation-id', req.id);
+  });
+
+  // Request metrics: rate + status + latency, low-cardinality route label (§10).
+  app.addHook('onResponse', async (req, reply) => {
+    const route = req.routeOptions?.url ?? 'unknown';
+    deps.metrics.increment('http_requests_total', {
+      method: req.method,
+      status: reply.statusCode,
+      route,
+    });
+    deps.metrics.observe('http_request_duration', reply.elapsedTime, { route });
   });
 
   // Resolve the bearer token to a principal (null when absent/invalid).
@@ -135,7 +147,40 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
     reply.code(404).send(errorBody('NOT_FOUND', 'Route not found', 'error.notFound', req.id));
   });
 
-  app.get('/health', async () => ({ status: 'ok', runtime: deps.config.ARS_RUNTIME }));
+  app.get('/health', async () => ({
+    status: 'ok',
+    runtime: deps.config.ARS_RUNTIME,
+    version: APP_VERSION,
+    commit: APP_COMMIT,
+    uptime: uptimeSeconds(),
+  }));
+
+  // Readiness probes critical dependencies (DB) — never a static success (§7).
+  app.get('/ready', async (_req, reply) => {
+    const checks: Record<string, 'ok' | 'fail'> = {};
+    try {
+      await deps.db.service((c) => c.query('select 1 as ok'));
+      checks.database = 'ok';
+    } catch {
+      checks.database = 'fail';
+    }
+    const ready = Object.values(checks).every((v) => v === 'ok');
+    return reply.code(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready', checks });
+  });
+
+  // Prometheus-style metrics exposition (job queue depth + request/provider metrics).
+  app.get('/metrics', async (_req, reply) => {
+    try {
+      const stats = await deps.jobs.stats();
+      for (const [status, count] of Object.entries(stats)) {
+        deps.metrics.gauge('job_queue_depth', count, { status });
+      }
+    } catch {
+      /* metrics endpoint must not fail the scrape */
+    }
+    return reply.header('content-type', 'text/plain; version=0.0.4').send(deps.metrics.render());
+  });
+
   app.get('/openapi.json', async () => app.swagger());
 
   await app.register(

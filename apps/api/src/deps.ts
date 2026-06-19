@@ -10,7 +10,10 @@ import type { VirusScanner } from './adapters/virusscan/index.js';
 import type { AppConfig } from './config.js';
 import { createDb } from './db/index.js';
 import type { Db } from './db/types.js';
+import { registerJobHandlers } from './jobs/handlers.js';
+import { JobQueue } from './jobs/queue.js';
 import { createLogger } from './logger.js';
+import { createMetrics, type Metrics } from './observability/metrics.js';
 import { RealtimeBus } from './realtime.js';
 
 /** Everything the services + routes need. Swappable for deterministic tests. */
@@ -25,12 +28,14 @@ export interface Deps {
   llm: LlmProvider;
   embeddings: EmbeddingProvider;
   bus: RealtimeBus;
+  jobs: JobQueue;
+  metrics: Metrics;
 }
 
 export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}): Promise<Deps> {
   const log = overrides.log ?? createLogger(config);
   const db = overrides.db ?? (await createDb(config));
-  return {
+  const deps: Deps = {
     config,
     log,
     db,
@@ -41,5 +46,9 @@ export async function buildDeps(config: AppConfig, overrides: Partial<Deps> = {}
     llm: overrides.llm ?? createLlmProvider(config),
     embeddings: overrides.embeddings ?? createEmbeddingProvider(config),
     bus: overrides.bus ?? new RealtimeBus(),
+    metrics: overrides.metrics ?? createMetrics(config, log),
+    jobs: overrides.jobs ?? new JobQueue(db, log, { inline: config.jobsInline }),
   };
+  registerJobHandlers(deps);
+  return deps;
 }

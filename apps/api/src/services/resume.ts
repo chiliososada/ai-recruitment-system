@@ -139,9 +139,24 @@ export async function uploadResume(
     return { resume: r.rows[0]!, parseJob: pj.rows[0]! };
   });
 
-  // Process inline (deterministic; the job model + statuses + retry make this queue-ready — D-013).
-  const finalParse = await runParse(deps, parseJob.id);
+  // Enqueue durable parse job (idempotent on the parse-job id). In inline mode (dev/test) it is
+  // drained synchronously so the response reflects the final status; in async/prod the worker
+  // processes it and the client polls parse-job status (FR-02 semantics preserved — ID-2/ID-3).
+  await deps.jobs.enqueue('resume_parse', { parseJobId: parseJob.id }, { idempotencyKey: parseJob.id });
+  if (deps.jobs.inline) await deps.jobs.drainInline();
+  const finalParse = (await fetchParseRow(deps, parseJob.id)) ?? parseJob;
   return { resume: mapResume(resume), parseJob: mapParse(finalParse) };
+}
+
+async function fetchParseRow(deps: Deps, parseJobId: string): Promise<ParseRow | null> {
+  const res = await deps.db.service((c) =>
+    c.query<ParseRow>(
+      `select id, resume_file_id, candidate_id, status, attempts, error, created_at, updated_at
+       from parse_jobs where id = $1`,
+      [parseJobId],
+    ),
+  );
+  return res.rows[0] ?? null;
 }
 
 /** Run extraction + AI analysis for a parse job, persisting status transitions. */
@@ -242,13 +257,25 @@ export async function retryParse(
   principal: Principal,
   parseJobId: string,
 ): Promise<ParseJob> {
-  // Authorize ownership through RLS before re-running (which uses service).
+  // Authorize ownership through RLS before re-enqueueing (worker runs as service).
   const owned = await deps.db.withContext(ctx(principal), (c) =>
     c.query(`select 1 from parse_jobs where id = $1`, [parseJobId]),
   );
   if (!owned.rows.length) throw notFound('Parse job not found', 'error.notFound');
-  const result = await runParse(deps, parseJobId);
-  return mapParse(result);
+  await deps.jobs.enqueue(
+    'resume_parse',
+    { parseJobId },
+    { idempotencyKey: `${parseJobId}:retry:${randomUUID()}` },
+  );
+  if (deps.jobs.inline) await deps.jobs.drainInline();
+  const refreshed = await fetchParseRow(deps, parseJobId);
+  return mapParse(refreshed ?? (await requireParseRow(deps, parseJobId)));
+}
+
+async function requireParseRow(deps: Deps, parseJobId: string): Promise<ParseRow> {
+  const row = await fetchParseRow(deps, parseJobId);
+  if (!row) throw notFound('Parse job not found', 'error.notFound');
+  return row;
 }
 
 export interface ResumeDownload {

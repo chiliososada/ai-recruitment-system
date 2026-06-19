@@ -36,11 +36,16 @@ const EnvSchema = z.object({
   CLAMAV_PORT: z.coerce.number().int().default(3310),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+
+  // Durable job queue: drain inline (deterministic, dev/test) vs. background worker (prod).
+  JOBS_INLINE: z.enum(['true', 'false']).optional(),
+  METRICS_PROVIDER: z.enum(['noop', 'console', 'otel']).default('noop'),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema> & {
   isProduction: boolean;
   corsOrigins: string[];
+  jobsInline: boolean;
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -68,5 +73,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     corsOrigins: parsed.WEB_ORIGIN.split(',')
       .map((s) => s.trim())
       .filter(Boolean),
+    jobsInline:
+      parsed.JOBS_INLINE !== undefined
+        ? parsed.JOBS_INLINE === 'true'
+        : parsed.ARS_RUNTIME === 'local',
   };
 }

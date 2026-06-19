@@ -30,6 +30,7 @@ const EXPECTED_TABLES = [
   'shortlists',
   'candidate_comparisons',
   'interviews',
+  'job_queue',
 ];
 
 async function main(): Promise<void> {
