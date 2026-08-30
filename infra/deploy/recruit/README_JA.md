@@ -24,12 +24,10 @@ sudo ./kong-cert.sh                 # 証明書を Kong へ登録
 git pull --ff-only && ./deploy.sh   # 迁移は追跡表で冪等、無停止再起動
 ```
 
-## 証明書更新(90日毎)
-```bash
-docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \
-  -v /var/certbot/web:/var/certbot/web certbot/certbot renew
-sudo ~/recruit/ai-recruitment-system/infra/deploy/recruit/kong-cert.sh
-```
+## 証明書更新
+自動化済み: `/etc/cron.d/certbot-renew-recruit` が毎日 2 回 `certbot-renew.sh` を実行し、
+更新時は Kong へ自動反映する(ログ: `/var/log/certbot-renew-recruit.log`)。
+手動実行: `sudo ./certbot-renew.sh`
 
 ## 備考
 - AI は初期値 mock(決定論・外部呼出なし)。本物に切替える際は .env の
