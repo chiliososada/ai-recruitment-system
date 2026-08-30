@@ -111,7 +111,7 @@ export default function JobDetail(): JSX.Element {
 
       {/* ---- skills ---- */}
       <div className="card">
-        <h3>{t('job.requiredSkills')}</h3>
+        <h3>{t('job.requiredSkillsTitle')}</h3>
         <div>
           {j.requiredSkills.map((s) => (
             <span key={s} className="tag">
@@ -121,7 +121,7 @@ export default function JobDetail(): JSX.Element {
         </div>
         {j.preferredSkills.length > 0 && (
           <>
-            <h3 style={{ marginTop: 'var(--space-4)' }}>{t('job.preferredSkills')}</h3>
+            <h3 style={{ marginTop: 'var(--space-4)' }}>{t('job.preferredSkillsTitle')}</h3>
             <div>
               {j.preferredSkills.map((s) => (
                 <span key={s} className="tag plain">

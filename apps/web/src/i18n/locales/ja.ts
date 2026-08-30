@@ -236,6 +236,8 @@ const ja: Dict = {
     description: '仕事内容',
     requiredSkills: '必須スキル（カンマ区切り）',
     preferredSkills: '歓迎スキル（カンマ区切り）',
+    requiredSkillsTitle: '必須スキル',
+    preferredSkillsTitle: '歓迎スキル',
     minYears: '最小経験年数',
     maxYears: '最大経験年数',
     salaryMin: '年収（下限）',

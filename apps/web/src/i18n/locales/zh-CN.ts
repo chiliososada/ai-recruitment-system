@@ -235,6 +235,8 @@ const zhCN: Dict = {
     description: '职位描述',
     requiredSkills: '必备技能（用逗号分隔）',
     preferredSkills: '加分技能（用逗号分隔）',
+    requiredSkillsTitle: '必备技能',
+    preferredSkillsTitle: '加分技能',
     minYears: '最少年限',
     maxYears: '最多年限',
     salaryMin: '薪资（最低）',

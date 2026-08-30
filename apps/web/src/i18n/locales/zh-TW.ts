@@ -235,6 +235,8 @@ const zhTW: Dict = {
     description: '職缺說明',
     requiredSkills: '必備技能（以逗號分隔）',
     preferredSkills: '加分技能（以逗號分隔）',
+    requiredSkillsTitle: '必備技能',
+    preferredSkillsTitle: '加分技能',
     minYears: '最少年資',
     maxYears: '最多年資',
     salaryMin: '薪資（最低）',

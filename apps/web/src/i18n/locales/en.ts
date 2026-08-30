@@ -240,6 +240,8 @@ const en = {
     description: 'Description',
     requiredSkills: 'Required skills (comma-separated)',
     preferredSkills: 'Preferred skills (comma-separated)',
+    requiredSkillsTitle: 'Required skills',
+    preferredSkillsTitle: 'Preferred skills',
     minYears: 'Minimum years',
     maxYears: 'Maximum years',
     salaryMin: 'Salary (min)',
