@@ -89,7 +89,12 @@ export function registerMessagingRoutes(app: FastifyInstance, deps: Deps): void 
     const unsubscribe = deps.bus.subscribe(conversationChannel(req.params.id), (event) => {
       reply.raw.write(`event: ${event.type}\ndata: ${JSON.stringify(event.payload)}\n\n`);
     });
-    req.raw.on('close', unsubscribe);
+    // Comment-line heartbeat so idle streams survive proxy read timeouts (e.g. Kong 60s).
+    const heartbeat = setInterval(() => reply.raw.write(':hb\n\n'), 25_000);
+    req.raw.on('close', () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    });
   });
 
   app.get('/notifications', async (req) => listNotifications(deps, requireAuth(req)));

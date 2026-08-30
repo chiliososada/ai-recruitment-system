@@ -1,7 +1,7 @@
 import * as Avatar from '@radix-ui/react-avatar';
 import { Slot } from '@radix-ui/react-slot';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
-import { forwardRef } from 'react';
+import { useId, forwardRef } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -217,11 +217,13 @@ export function InitialAvatar({
 
 /** SVG donut score indicator (0–100) with the brand gradient stroke. */
 export function ScoreRing({ value, size = 56 }: { value: number; size?: number }): JSX.Element {
+  // useId keeps the gradient id unique per instance (duplicate SVG ids are invalid
+  // and can resolve to the wrong <defs> when several rings share a page).
+  const gid = `sr${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const v = Math.max(0, Math.min(100, Math.round(value)));
   const stroke = size >= 56 ? 5 : 4;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const gid = `sr-${size}`;
   return (
     <span
       className="score-ring"

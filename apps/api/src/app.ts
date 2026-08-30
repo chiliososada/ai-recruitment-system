@@ -33,6 +33,11 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
     requestIdHeader: 'x-correlation-id',
     requestIdLogLabel: 'correlationId',
     genReqId: () => randomUUID(),
+    // Trust exactly one hop (the local Kong gateway) so req.ip is the real client
+    // address appended by Kong — otherwise every request shares 127.0.0.1 and the
+    // per-IP rate limits become one global bucket. A count (not `true`) keeps
+    // client-forged X-Forwarded-For prefixes untrusted.
+    trustProxy: 1,
     bodyLimit: 1024 * 1024,
     disableRequestLogging: deps.config.NODE_ENV === 'test',
   }) as unknown as FastifyInstance;

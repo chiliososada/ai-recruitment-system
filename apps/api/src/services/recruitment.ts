@@ -301,15 +301,38 @@ export async function addShortlist(
   input: AddShortlistInput,
 ): Promise<ShortlistEntry> {
   const companyId = await memberCompanyId(deps, principal.userId, input.jobId);
-  const res = await deps.db.withContext(ctx(principal), (c) =>
-    c.query<{ id: string; created_at: unknown }>(
+  // Explicit upsert: ON CONFLICT cannot target the NULL-job case (NULLs are
+  // distinct), so update-first, insert-otherwise; the partial unique index from
+  // migration 0013 makes the insert race-safe (do nothing → re-read).
+  const res = await deps.db.withContext(ctx(principal), async (c) => {
+    const params = [
+      companyId,
+      input.candidateId,
+      input.jobId ?? null,
+      input.note ?? null,
+      principal.userId,
+    ];
+    const upd = await c.query<{ id: string; created_at: unknown }>(
+      `update shortlists set note = coalesce($4, note)
+       where company_id = $1 and candidate_id = $2 and job_id is not distinct from $3
+       returning id, created_at`,
+      params.slice(0, 4),
+    );
+    if (upd.rows.length) return upd;
+    const ins = await c.query<{ id: string; created_at: unknown }>(
       `insert into shortlists (company_id, candidate_id, job_id, note, created_by)
        values ($1, $2, $3, $4, $5)
-       on conflict (company_id, candidate_id, job_id) do update set note = excluded.note
+       on conflict do nothing
        returning id, created_at`,
-      [companyId, input.candidateId, input.jobId ?? null, input.note ?? null, principal.userId],
-    ),
-  );
+      params,
+    );
+    if (ins.rows.length) return ins;
+    return c.query<{ id: string; created_at: unknown }>(
+      `select id, created_at from shortlists
+       where company_id = $1 and candidate_id = $2 and job_id is not distinct from $3`,
+      params.slice(0, 3),
+    );
+  });
   return {
     id: res.rows[0]!.id,
     companyId,

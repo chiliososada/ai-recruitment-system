@@ -14,7 +14,7 @@ import type { Deps } from '../deps.js';
 import type { RequestContext } from '../db/types.js';
 import { contextFor, type Principal } from '../http/context.js';
 import { forbidden, notFound } from '../errors.js';
-import { toIso } from '../util.js';
+import { escapeLike, toIso } from '../util.js';
 
 interface CompanyRow {
   id: string;
@@ -151,7 +151,7 @@ export async function listCompanies(
     return `$${params.length}`;
   };
   if (query.q) {
-    const p = ph(query.q);
+    const p = ph(escapeLike(query.q));
     conditions.push(
       `(name ilike '%' || ${p} || '%' or coalesce(description, '') ilike '%' || ${p} || '%')`,
     );
@@ -159,7 +159,7 @@ export async function listCompanies(
   if (query.industry) conditions.push(`industry = ${ph(query.industry)}`);
   if (query.size) conditions.push(`size = ${ph(query.size)}::company_size`);
   if (query.location) {
-    const p = ph(query.location);
+    const p = ph(escapeLike(query.location));
     conditions.push(`location ilike '%' || ${p} || '%'`);
   }
 

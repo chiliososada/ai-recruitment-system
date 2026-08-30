@@ -108,6 +108,34 @@ describe('shortlist + comparison (FR-10.1)', () => {
     ).toBe(true);
   });
 
+  it('is idempotent for a job-less shortlist (NULL job_id must not duplicate)', async () => {
+    const first = await post('/api/shortlists', company, { candidateId: seeker2CandidateId });
+    expect(first.statusCode).toBe(201);
+    const second = await post('/api/shortlists', company, {
+      candidateId: seeker2CandidateId,
+      note: 'updated note',
+    });
+    expect(second.statusCode).toBe(201);
+    expect(second.json().id).toBe(first.json().id);
+    const list = await get('/api/shortlists', company);
+    const rows = list
+      .json()
+      .filter(
+        (e: { candidateId: string; jobId: string | null }) =>
+          e.candidateId === seeker2CandidateId && e.jobId === null,
+      );
+    expect(rows.length).toBe(1);
+    expect(rows[0].note).toBe('updated note');
+  });
+
+  it('rejects a comparison with duplicated candidate ids', async () => {
+    const res = await post('/api/compare', company, {
+      candidateIds: [seekerCandidateId, seekerCandidateId],
+      jobId,
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
   it('compares candidates side by side with skills, summary and match score', async () => {
     const res = await post('/api/compare', company, {
       candidateIds: [seekerCandidateId, seeker2CandidateId],

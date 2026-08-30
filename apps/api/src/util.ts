@@ -31,3 +31,8 @@ export function pgArrayLiteral(values: string[]): string {
 export function vectorLiteral(values: number[]): string {
   return `[${values.join(',')}]`;
 }
+
+/** Escape LIKE/ILIKE wildcards in user input so `%`/`_` match literally. */
+export function escapeLike(input: string): string {
+  return input.replace(/[\\%_]/g, (m) => `\\${m}`);
+}

@@ -99,4 +99,16 @@ describe('talent search + detail (FR-06)', () => {
     });
     expect(res.statusCode).toBe(403);
   });
+
+  it('treats ILIKE wildcards in q literally (no match-all via %)', async () => {
+    const all = await t.app.inject({ method: 'GET', url: '/api/talent', headers: company.headers });
+    expect(all.json().total).toBeGreaterThan(0);
+    const res = await t.app.inject({
+      method: 'GET',
+      url: '/api/talent?q=%25',
+      headers: company.headers,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().total).toBe(0);
+  });
 });

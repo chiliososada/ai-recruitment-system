@@ -16,7 +16,7 @@ import type { Deps } from '../deps.js';
 import type { DbClient, RequestContext } from '../db/types.js';
 import { forbidden, notFound } from '../errors.js';
 import { contextFor, type Principal } from '../http/context.js';
-import { parseList, pgArrayLiteral, toIso } from '../util.js';
+import { escapeLike, parseList, pgArrayLiteral, toIso } from '../util.js';
 import { regenerateJobEmbedding } from './embeddings.js';
 
 interface JobRow {
@@ -276,12 +276,13 @@ export async function listPublicJobs(
     return `$${params.length}`;
   };
   if (query.q) {
-    const p = ph(query.q);
+    const p = ph(escapeLike(query.q));
     conditions.push(`(j.title ilike '%' || ${p} || '%' or j.description ilike '%' || ${p} || '%')`);
   }
   if (query.category) conditions.push(`j.category = ${ph(query.category)}`);
   if (query.workStyle) conditions.push(`j.work_style = ${ph(query.workStyle)}::work_style`);
-  if (query.location) conditions.push(`j.location ilike '%' || ${ph(query.location)} || '%'`);
+  if (query.location)
+    conditions.push(`j.location ilike '%' || ${ph(escapeLike(query.location))} || '%'`);
   if (query.companyId) conditions.push(`j.company_id = ${ph(query.companyId)}`);
   if (query.salaryMin !== undefined)
     conditions.push(`coalesce(j.salary_max, j.salary_min, 0) >= ${ph(query.salaryMin)}`);

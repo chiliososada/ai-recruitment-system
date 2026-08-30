@@ -14,7 +14,7 @@ export function LanguageSwitcher(): JSX.Element {
       </label>
       <select
         id="locale-select"
-        aria-label={t('locale.switchLanguage' as never, { defaultValue: t('locale.label') })}
+        aria-label={t('locale.label')}
         value={current}
         onChange={(e) => {
           void changeLocale(e.target.value as Locale);

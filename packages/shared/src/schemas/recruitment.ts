@@ -63,7 +63,13 @@ export type AddShortlistInput = z.infer<typeof AddShortlistSchema>;
 
 /** FR-10.1: compare 2–5 candidates side by side. */
 export const CompareRequestSchema = z.object({
-  candidateIds: z.array(z.string().uuid()).min(2).max(5),
+  candidateIds: z
+    .array(z.string().uuid())
+    .min(2)
+    .max(5)
+    .refine((ids) => new Set(ids).size === ids.length, {
+      message: 'candidateIds must be distinct',
+    }),
   jobId: z.string().uuid().optional(),
 });
 export type CompareRequestInput = z.infer<typeof CompareRequestSchema>;

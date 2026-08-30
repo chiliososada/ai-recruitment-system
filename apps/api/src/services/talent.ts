@@ -15,7 +15,7 @@ import type { Deps } from '../deps.js';
 import type { DbClient } from '../db/types.js';
 import { forbidden, notFound } from '../errors.js';
 import { contextFor, type Principal } from '../http/context.js';
-import { parseList, pgArrayLiteral, toIso } from '../util.js';
+import { escapeLike, parseList, pgArrayLiteral, toIso } from '../util.js';
 import { getUserEmail } from './candidate.js';
 import { companyCanAccessCandidate } from './resume.js';
 import { computeMatchesForJob } from './matching.js';
@@ -109,13 +109,14 @@ export async function searchTalent(
     return `$${params.length}`;
   };
   if (query.q) {
-    const p = ph(query.q);
+    const p = ph(escapeLike(query.q));
     conditions.push(
       `(coalesce(c.headline,'') ilike '%' || ${p} || '%' or coalesce(c.summary,'') ilike '%' || ${p} || '%' or p.display_name ilike '%' || ${p} || '%')`,
     );
   }
   if (query.minYears !== undefined) conditions.push(`c.years_experience >= ${ph(query.minYears)}`);
-  if (query.location) conditions.push(`c.location ilike '%' || ${ph(query.location)} || '%'`);
+  if (query.location)
+    conditions.push(`c.location ilike '%' || ${ph(escapeLike(query.location))} || '%'`);
   const skillList = parseList(query.skills).map(normalizeSkill);
   if (skillList.length) {
     conditions.push(
