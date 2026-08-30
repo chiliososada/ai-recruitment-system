@@ -7,8 +7,7 @@ Supabase(GoTrue+Storage+Postgres/pgvector)・ClamAV は compose 内部で完結�
 ```bash
 cd ~/recruit && git clone git@github.com:chiliososada/ai-recruitment-system.git
 cd ai-recruitment-system/infra/deploy/recruit
-python3 gen-keys.py > .env          # 秘密鍵4種を生成
-tail -n +6 .env.example >> .env     # AI_PROVIDER 等の残り変数を追記
+python3 gen-keys.py > .env          # 完全な .env を生成(秘密鍵+既定値)
 ./deploy.sh                         # db→supabase→migrate→api/web→smoke
 ./kong-setup.sh                     # Kong に service/route を追加(冪等)
 docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \

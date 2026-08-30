@@ -11,7 +11,9 @@ COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env"
   echo "ERROR: .env missing. Run: python3 gen-keys.py > .env && cat .env.example  (then append the non-secret vars)"
   exit 1
 }
-grep -q '^JWT_SECRET=CHANGE_ME' .env && { echo "ERROR: .env still has CHANGE_ME placeholders"; exit 1; }
+grep -q 'CHANGE_ME' .env && { echo "ERROR: .env still has CHANGE_ME placeholders"; exit 1; }
+dup="$(grep -E '^[A-Z_]+=' .env | cut -d= -f1 | sort | uniq -d)"
+[ -z "$dup" ] || { echo "ERROR: duplicate keys in .env (last wins in compose): $dup"; exit 1; }
 
 # Record the deployed commit into the env (shown at /health).
 GIT_COMMIT="$(git -C ../../.. rev-parse --short HEAD 2>/dev/null || echo unknown)"

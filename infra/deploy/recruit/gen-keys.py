@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate the secrets block for .env (JWT secret + anon/service_role keys).
-Usage: python3 gen-keys.py >> .env   (then fill the remaining vars)"""
+"""Generate a COMPLETE .env for the recruit stack (secrets + defaults).
+Usage: python3 gen-keys.py > .env   (then adjust AI provider/keys as needed)"""
 import base64, hmac, hashlib, json, secrets, time
 
 def b64url(b: bytes) -> str:
@@ -22,3 +22,13 @@ print(f"POSTGRES_PASSWORD={pg_pass}")
 print(f"JWT_SECRET={jwt_secret}")
 print(f"ANON_KEY={mk('anon')}")
 print(f"SERVICE_ROLE_KEY={mk('service_role')}")
+print("""
+# AI providers: mock = deterministic built-in. For real AI set the key(s) and
+# switch provider(s), then: docker compose ... up -d api
+AI_PROVIDER=mock
+EMBEDDING_PROVIDER=mock
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+
+APP_VERSION=0.1.0
+GIT_COMMIT=unknown""")
