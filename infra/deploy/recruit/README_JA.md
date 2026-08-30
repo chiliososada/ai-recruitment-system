@@ -11,7 +11,9 @@ python3 gen-keys.py > .env          # 秘密鍵4種を生成
 tail -n +6 .env.example >> .env     # AI_PROVIDER 等の残り変数を追記
 ./deploy.sh                         # db→supabase→migrate→api/web→smoke
 ./kong-setup.sh                     # Kong に service/route を追加(冪等)
-sudo certbot certonly --webroot -w /var/certbot/web -n \
+docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \
+  -v /var/certbot/web:/var/certbot/web certbot/certbot certonly \
+  --webroot -w /var/certbot/web -n --agree-tos \
   -d recruit.toyousoft.co.jp -d www.recruit.toyousoft.co.jp \
   --cert-name recruit.toyousoft.co.jp
 sudo ./kong-cert.sh                 # 証明書を Kong へ登録
@@ -22,8 +24,12 @@ sudo ./kong-cert.sh                 # 証明書を Kong へ登録
 git pull --ff-only && ./deploy.sh   # 迁移は追跡表で冪等、無停止再起動
 ```
 
-## 証明書更新後(renew)
-`sudo ./kong-cert.sh` を再実行(renew の deploy-hook に登録可)。
+## 証明書更新(90日毎)
+```bash
+docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \
+  -v /var/certbot/web:/var/certbot/web certbot/certbot renew
+sudo ~/recruit/ai-recruitment-system/infra/deploy/recruit/kong-cert.sh
+```
 
 ## 備考
 - AI は初期値 mock(決定論・外部呼出なし)。本物に切替える際は .env の
