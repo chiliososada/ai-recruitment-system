@@ -19,7 +19,12 @@ sed -i "s/^GIT_COMMIT=.*/GIT_COMMIT=${GIT_COMMIT}/" .env
 
 echo "== 1/6 start db =="
 $COMPOSE up -d db
-$COMPOSE exec -T db sh -c 'until pg_isready -U postgres -h 127.0.0.1 >/dev/null 2>&1; do sleep 1; done'
+# The supabase image restarts postgres during first-boot init; tolerate exec drops.
+for i in $(seq 1 90); do
+  if $COMPOSE exec -T db pg_isready -U postgres -h 127.0.0.1 >/dev/null 2>&1; then break; fi
+  [ "$i" = "90" ] && { echo "FAIL: db never became ready"; exit 1; }
+  sleep 2
+done
 
 echo "== 2/6 start supabase services + clamav =="
 $COMPOSE up -d auth rest storage sbgw clamav
