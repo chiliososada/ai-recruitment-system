@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { cosineSimilarity, SkillAnalysisResultSchema, type Locale } from '@ars/shared';
+import { loadConfig } from '../../config.js';
+import { createLlmProvider } from './index.js';
 import { MockLlmProvider } from './mock-llm.js';
 import { MockEmbeddingProvider } from './embedding.js';
 import { runAnalysis } from '../../services/analysis.js';
@@ -52,6 +54,30 @@ describe('MockLlmProvider.analyzeResume (unit, FR-03)', () => {
     );
     expect(ja.summary).toMatch(/年/);
     expect(en.summary).toMatch(/years/i);
+  });
+});
+
+describe('createLlmProvider selection (unit)', () => {
+  const base = { NODE_ENV: 'test', ARS_RUNTIME: 'local' } as NodeJS.ProcessEnv;
+
+  it('selects OpenAI when AI_PROVIDER=openai and a key is present', () => {
+    const llm = createLlmProvider(
+      loadConfig({ ...base, AI_PROVIDER: 'openai', OPENAI_API_KEY: 'test-key' }),
+    );
+    expect(llm.providerName).toBe('openai');
+    expect(llm.modelVersion).toBe('gpt-4o-mini'); // OPENAI_MODEL default
+  });
+
+  it('selects Anthropic when AI_PROVIDER=anthropic and a key is present', () => {
+    const llm = createLlmProvider(
+      loadConfig({ ...base, AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'test-key' }),
+    );
+    expect(llm.providerName).toBe('anthropic');
+  });
+
+  it('falls back to the mock when the configured provider has no key', () => {
+    const llm = createLlmProvider(loadConfig({ ...base, AI_PROVIDER: 'openai' }));
+    expect(llm.providerName).toBe('mock');
   });
 });
 
