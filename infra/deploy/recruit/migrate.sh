@@ -8,13 +8,17 @@ cd "$(dirname "$0")"
 COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env"
 MIG_DIR="../../../supabase/migrations"
 
-# Prefer the image superuser (needed to own storage.objects policies in 0010).
+# Run as the image superuser supabase_admin (required: 0010 creates policies on
+# storage.objects, owned by supabase_storage_admin). Its password = POSTGRES_PASSWORD.
+PGPW="$(grep '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)"
 PSQL_USER=supabase_admin
-if ! $COMPOSE exec -T db psql -U "$PSQL_USER" -d postgres -qAt -c 'select 1' >/dev/null 2>&1; then
+psql_base() { $COMPOSE exec -T -e PGPASSWORD="$PGPW" db psql -h 127.0.0.1 -U "$PSQL_USER" -d postgres "$@"; }
+if ! psql_base -qAt -c 'select 1' >/dev/null 2>&1; then
   PSQL_USER=postgres
+  psql_base -qAt -c 'select 1' >/dev/null
 fi
-run() { $COMPOSE exec -T db psql -U "$PSQL_USER" -d postgres -v ON_ERROR_STOP=1 -q "$@"; }
-val() { $COMPOSE exec -T db psql -U "$PSQL_USER" -d postgres -qAt -c "$1"; }
+run() { psql_base -v ON_ERROR_STOP=1 -q "$@"; }
+val() { psql_base -qAt -c "$1"; }
 echo "migrating as db user: $PSQL_USER"
 
 # Wait for the storage schema (created by storage-api's own migrations) —
