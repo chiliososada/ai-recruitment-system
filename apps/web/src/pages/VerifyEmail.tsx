@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
 import { Field } from '../components/ui';
+import { AuthShell } from './AuthShell';
 
 export default function VerifyEmail(): JSX.Element {
   const { t } = useTranslation();
@@ -32,8 +33,7 @@ export default function VerifyEmail(): JSX.Element {
   }
 
   return (
-    <section className="card" style={{ maxWidth: 460, margin: '2rem auto' }}>
-      <h1>{t('auth.verifyEmailTitle')}</h1>
+    <AuthShell title={t('auth.verifyEmailTitle')}>
       <p className="muted">{t('auth.verifyEmailHint')}</p>
       {state.token ? (
         <p className="muted" data-testid="dev-token">
@@ -64,6 +64,6 @@ export default function VerifyEmail(): JSX.Element {
           </button>
         </div>
       </form>
-    </section>
+    </AuthShell>
   );
 }

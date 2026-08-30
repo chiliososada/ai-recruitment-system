@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { CompareTable } from '../components/CompareTable';
 import { EmptyState, ErrorState, Loading } from '../components/ui';
+import { Icons, InitialAvatar } from '../design';
 
 export default function Shortlist(): JSX.Element {
   const { t } = useTranslation();
@@ -38,8 +39,8 @@ export default function Shortlist(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h1>{t('shortlist.title')}</h1>
+      <div className="row page-header" style={{ justifyContent: 'space-between' }}>
+        <h1 style={{ margin: 0 }}>{t('shortlist.title')}</h1>
         <button type="button" disabled={selected.length < 2} onClick={() => compare.mutate()}>
           {t('shortlist.compare')} ({selected.length})
         </button>
@@ -60,12 +61,28 @@ export default function Shortlist(): JSX.Element {
                   onChange={() => toggle(s.candidateId)}
                   aria-label={`${t('shortlist.compare')} ${s.candidateName ?? ''}`}
                 />
-                <Link to={`/talent/${s.candidateId}`}>{s.candidateName ?? s.candidateId}</Link>
-                {s.candidateHeadline ? (
-                  <span className="muted"> — {s.candidateHeadline}</span>
-                ) : null}
+                <InitialAvatar name={s.candidateName ?? '?'} round />
+                <span>
+                  <Link to={`/talent/${s.candidateId}`}>
+                    <strong>{s.candidateName ?? s.candidateId}</strong>
+                  </Link>
+                  {s.candidateHeadline ? (
+                    <span
+                      className="muted"
+                      style={{ display: 'block', fontSize: 'var(--text-sm)' }}
+                    >
+                      {s.candidateHeadline}
+                    </span>
+                  ) : null}
+                </span>
               </label>
-              <button type="button" className="danger" onClick={() => remove.mutate(s.id)}>
+              <button
+                type="button"
+                className="ghost sm"
+                aria-label={t('common.remove')}
+                onClick={() => remove.mutate(s.id)}
+              >
+                <Icons.Trash2 size={16} aria-hidden="true" />
                 {t('common.remove')}
               </button>
             </li>

@@ -42,7 +42,10 @@ export default function AccountSettings(): JSX.Element {
   }
 
   return (
-    <section className="card" style={{ maxWidth: 520, margin: '1rem auto' }}>
+    <section
+      className="card"
+      style={{ maxWidth: 560, margin: '1rem auto', padding: 'var(--space-8)' }}
+    >
       <h1>{t('auth.accountSettings')}</h1>
       <p>
         {user?.email}{' '}

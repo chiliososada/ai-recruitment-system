@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { WORK_STYLES, type Job, type Paginated, type WorkStyle } from '@ars/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
 import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { JobCard } from '../components/JobCard';
+import { Icons } from '../design';
 
 export default function JobsBrowse(): JSX.Element {
   const { t } = useTranslation();
@@ -22,9 +23,11 @@ export default function JobsBrowse(): JSX.Element {
 
   return (
     <section className="stack">
-      <h1>{t('job.list')}</h1>
+      <div className="page-header">
+        <h1>{t('job.list')}</h1>
+      </div>
       <form
-        className="card row"
+        className="card ui-filterbar"
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);
@@ -51,7 +54,10 @@ export default function JobsBrowse(): JSX.Element {
         <Field label={t('job.requiredSkills')} htmlFor="skills">
           <input id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
         </Field>
-        <button type="submit">{t('common.search')}</button>
+        <button type="submit">
+          <Icons.Search size={16} aria-hidden="true" />
+          {t('common.search')}
+        </button>
       </form>
 
       {query.isLoading ? (
@@ -64,22 +70,7 @@ export default function JobsBrowse(): JSX.Element {
         <>
           <div className="grid cols-2">
             {query.data!.items.map((job) => (
-              <article key={job.id} className="card" data-testid="job-card">
-                <h2 style={{ margin: '0 0 0.25rem' }}>
-                  <Link to={`/jobs/${job.id}`}>{job.title}</Link>
-                </h2>
-                <p className="muted">
-                  {job.companyName} · {t(`job.workStyleValue.${job.workStyle}`)}
-                  {job.location ? ` · ${job.location}` : ''}
-                </p>
-                <div>
-                  {job.requiredSkills.slice(0, 6).map((s) => (
-                    <span key={s} className="tag">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </article>
+              <JobCard key={job.id} job={job} />
             ))}
           </div>
           <Pagination data={query.data!} page={page} setPage={setPage} />
@@ -116,7 +107,7 @@ export function Pagination<T>({
         disabled={page >= data.totalPages}
         onClick={() => setPage(page + 1)}
       >
-        {t('common.view')}
+        {t('common.next')}
       </button>
     </div>
   );

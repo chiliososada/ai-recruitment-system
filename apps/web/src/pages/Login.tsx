@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
 import { Field } from '../components/ui';
+import { AuthShell } from './AuthShell';
 
 export default function Login(): JSX.Element {
   const { t } = useTranslation();
@@ -29,8 +30,7 @@ export default function Login(): JSX.Element {
   }
 
   return (
-    <section className="card" style={{ maxWidth: 420, margin: '2rem auto' }}>
-      <h1>{t('auth.loginTitle')}</h1>
+    <AuthShell title={t('auth.loginTitle')}>
       <form onSubmit={submit} noValidate>
         <Field label={t('auth.email')} htmlFor="email">
           <input
@@ -61,9 +61,9 @@ export default function Login(): JSX.Element {
           {busy ? t('common.loading') : t('auth.signIn')}
         </button>
       </form>
-      <p className="muted">
+      <p className="muted" style={{ marginTop: 'var(--space-4)' }}>
         {t('auth.noAccount')} <Link to="/register">{t('auth.signUp')}</Link>
       </p>
-    </section>
+    </AuthShell>
   );
 }

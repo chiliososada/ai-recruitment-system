@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { EmptyState, Loading } from '../components/ui';
+import { Icons, InitialAvatar } from '../design';
 
 export default function Messages(): JSX.Element {
   const { t } = useTranslation();
@@ -63,18 +64,45 @@ export default function Messages(): JSX.Element {
                 <li key={c.id}>
                   <button
                     type="button"
-                    className={active === c.id ? 'secondary' : 'ghost'}
-                    style={{ width: '100%', textAlign: 'left' }}
+                    className="ghost"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      height: 'auto',
+                      padding: 'var(--space-2) var(--space-3)',
+                      justifyContent: 'flex-start',
+                      background: active === c.id ? 'var(--color-primary-soft)' : undefined,
+                      borderRadius: 'var(--radius-md)',
+                    }}
                     onClick={() => setActive(c.id)}
                   >
-                    <strong>{other?.displayName ?? c.subject ?? t('messaging.title')}</strong>
-                    {c.unreadCount > 0 ? (
-                      <span className="badge">
-                        {' '}
-                        {t('messaging.unread', { count: c.unreadCount })}
+                    <InitialAvatar name={other?.displayName ?? '?'} round />
+                    <span style={{ minWidth: 0, flex: 1 }}>
+                      <span
+                        className="row"
+                        style={{ justifyContent: 'space-between', gap: 'var(--space-2)' }}
+                      >
+                        <strong style={{ color: 'var(--color-text)' }}>
+                          {other?.displayName ?? c.subject ?? t('messaging.title')}
+                        </strong>
+                        {c.unreadCount > 0 ? (
+                          <span className="ui-badge danger">{c.unreadCount}</span>
+                        ) : null}
                       </span>
-                    ) : null}
-                    <div className="muted">{c.lastMessagePreview ?? ''}</div>
+                      <span
+                        className="muted"
+                        style={{
+                          display: 'block',
+                          fontSize: 'var(--text-sm)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          fontWeight: 'var(--weight-regular)',
+                        }}
+                      >
+                        {c.lastMessagePreview ?? ''}
+                      </span>
+                    </span>
                   </button>
                 </li>
               );
@@ -91,13 +119,22 @@ export default function Messages(): JSX.Element {
           <>
             <div
               data-testid="message-list"
-              style={{ minHeight: 200, display: 'flex', flexDirection: 'column' }}
+              style={{
+                minHeight: 260,
+                maxHeight: '55vh',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: 'var(--space-2)',
+              }}
             >
               {(messages.data ?? []).map((m) => (
                 <div key={m.id} className={m.senderUserId === user?.id ? 'msg mine' : 'msg'}>
-                  <div className="muted" style={{ fontSize: '0.75rem' }}>
-                    {m.senderName}
-                  </div>
+                  {m.senderUserId !== user?.id ? (
+                    <div className="muted" style={{ fontSize: '0.75rem' }}>
+                      {m.senderName}
+                    </div>
+                  ) : null}
                   {m.body}
                 </div>
               ))}
@@ -123,6 +160,7 @@ export default function Messages(): JSX.Element {
               />
               <button type="submit" disabled={send.isPending || !draft.trim()}>
                 {send.isPending ? t('messaging.sending') : t('messaging.send')}
+                <Icons.ArrowRight size={16} aria-hidden="true" />
               </button>
             </form>
             {send.error ? (

@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { localizeError, localizeFieldErrors } from '../lib/errors';
 import { Field } from '../components/ui';
+import { AuthShell } from './AuthShell';
 
 export default function Register(): JSX.Element {
   const { t, i18n } = useTranslation();
@@ -40,8 +41,7 @@ export default function Register(): JSX.Element {
   }
 
   return (
-    <section className="card" style={{ maxWidth: 460, margin: '2rem auto' }}>
-      <h1>{t('auth.registerTitle')}</h1>
+    <AuthShell title={t('auth.registerTitle')}>
       <form onSubmit={submit} noValidate>
         <Field label={t('auth.role')} htmlFor="role">
           <select id="role" value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
@@ -89,9 +89,9 @@ export default function Register(): JSX.Element {
           {busy ? t('common.loading') : t('auth.signUp')}
         </button>
       </form>
-      <p className="muted">
+      <p className="muted" style={{ marginTop: 'var(--space-4)' }}>
         {t('auth.alreadyHaveAccount')} <Link to="/login">{t('auth.signIn')}</Link>
       </p>
-    </section>
+    </AuthShell>
   );
 }

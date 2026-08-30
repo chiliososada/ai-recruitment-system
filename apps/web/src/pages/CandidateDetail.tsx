@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { ErrorState, Loading } from '../components/ui';
+import { InitialAvatar } from '../design';
 
 export default function CandidateDetail(): JSX.Element {
   const { t } = useTranslation();
@@ -43,7 +44,10 @@ export default function CandidateDetail(): JSX.Element {
   return (
     <section className="stack">
       <div className="card">
-        <h1>{c.displayName}</h1>
+        <div className="row" style={{ flexWrap: 'nowrap', gap: 'var(--space-4)' }}>
+          <InitialAvatar name={c.displayName} size="lg" round />
+          <h1 style={{ margin: 0 }}>{c.displayName}</h1>
+        </div>
         <p className="muted">
           {c.headline ?? ''} · {c.yearsExperience}{' '}
           {t('analysis.years', { count: c.yearsExperience })}

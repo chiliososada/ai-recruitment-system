@@ -172,3 +172,95 @@ export function UserAvatar({ name }: { name: string }): JSX.Element {
     </Avatar.Root>
   );
 }
+
+/** Deterministic hue from a string — stable, pleasant gradient per entity. */
+function hashHue(input: string): number {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) | 0;
+  return Math.abs(h) % 360;
+}
+
+/**
+ * Colored-initial avatar for companies/candidates. The gradient is derived from the
+ * name, so every entity gets a stable, distinct identity mark without images.
+ */
+export function InitialAvatar({
+  name,
+  size = 'md',
+  round = false,
+}: {
+  name: string;
+  size?: 'md' | 'lg';
+  round?: boolean;
+}): JSX.Element {
+  const hue = hashHue(name || '?');
+  const initials = (name || '?')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0] ?? '')
+    .join('');
+  const cls = ['ui-avatar-mark', size === 'lg' ? 'lg' : '', round ? 'round' : '']
+    .filter(Boolean)
+    .join(' ');
+  return (
+    <span
+      aria-hidden="true"
+      className={cls}
+      style={{
+        background: `linear-gradient(135deg, hsl(${hue} 64% 52%), hsl(${(hue + 42) % 360} 64% 40%))`,
+      }}
+    >
+      {initials}
+    </span>
+  );
+}
+
+/** SVG donut score indicator (0–100) with the brand gradient stroke. */
+export function ScoreRing({ value, size = 56 }: { value: number; size?: number }): JSX.Element {
+  const v = Math.max(0, Math.min(100, Math.round(value)));
+  const stroke = size >= 56 ? 5 : 4;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const gid = `sr-${size}`;
+  return (
+    <span
+      className="score-ring"
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`${v}/100`}
+    >
+      <svg width={size} height={size}>
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--indigo-500)" />
+            <stop offset="100%" stopColor="var(--violet-500)" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="var(--color-surface-3)"
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={`url(#${gid})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${(c * v) / 100} ${c}`}
+        />
+      </svg>
+      <span
+        className="score-ring-num"
+        style={{ fontSize: size >= 56 ? 'var(--text-base)' : 'var(--text-xs)' }}
+      >
+        {v}
+      </span>
+    </span>
+  );
+}

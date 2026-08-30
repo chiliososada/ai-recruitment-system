@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { localizeError } from '../lib/errors';
 import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { Icons, InitialAvatar } from '../design';
 
 export default function CompanyConsole(): JSX.Element {
   const { t } = useTranslation();
@@ -37,7 +38,9 @@ export default function CompanyConsole(): JSX.Element {
   return (
     <section className="grid cols-2">
       <div>
-        <h1>{t('nav.console')}</h1>
+        <div className="page-header">
+          <h1>{t('nav.console')}</h1>
+        </div>
         {companies.isLoading ? (
           <Loading />
         ) : companies.error ? (
@@ -47,12 +50,26 @@ export default function CompanyConsole(): JSX.Element {
         ) : (
           <ul className="list-reset stack">
             {companies.data!.map((c) => (
-              <li key={c.id} className="card">
-                <Link to={`/console/companies/${c.id}`}>
-                  <strong>{c.name}</strong>
-                </Link>
-                <div className="muted">
-                  {c.industry} · {t('company.openJobs')}: {c.openJobCount ?? 0}
+              <li key={c.id} className="card card-hover">
+                <div className="row" style={{ flexWrap: 'nowrap', gap: 'var(--space-3)' }}>
+                  <InitialAvatar name={c.name} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <Link to={`/console/companies/${c.id}`}>
+                      <strong>{c.name}</strong>
+                    </Link>
+                    <div className="meta-row" style={{ marginTop: 2 }}>
+                      {c.industry ? <span className="meta-item">{c.industry}</span> : null}
+                      <span className="meta-item">
+                        <Icons.Briefcase size={13} aria-hidden="true" />
+                        {t('company.openJobs')}: {c.openJobCount ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                  <Icons.ChevronRight
+                    size={18}
+                    aria-hidden="true"
+                    style={{ color: 'var(--color-text-subtle)' }}
+                  />
                 </div>
               </li>
             ))}

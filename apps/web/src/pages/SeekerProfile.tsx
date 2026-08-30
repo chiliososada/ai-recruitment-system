@@ -132,13 +132,21 @@ export default function SeekerProfile(): JSX.Element {
               <h3>{t('analysis.skills')}</h3>
               <ul className="list-reset">
                 {a.skills.map((s) => (
-                  <li key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
-                    <span>
-                      {s.name}{' '}
-                      <span className="muted">· {t(`analysis.proficiency.${s.proficiency}`)}</span>
+                  <li key={s.name} className="skill-row">
+                    <span className="row" style={{ gap: 'var(--space-2)' }}>
+                      <strong>{s.name}</strong>
+                      <span className={`prof-badge ${s.proficiency}`}>
+                        {t(`analysis.proficiency.${s.proficiency}`)}
+                      </span>
                     </span>
-                    <span className="muted">
+                    <span className="muted" style={{ fontSize: 'var(--text-sm)' }}>
                       {t('analysis.years', { count: Math.round(s.yearsExperience) })}
+                    </span>
+                    <span className="level-bar" aria-hidden="true">
+                      <span
+                        className="level-fill"
+                        style={{ width: `${PROFICIENCY_WEIGHT[s.proficiency] * 100}%` }}
+                      />
                     </span>
                   </li>
                 ))}

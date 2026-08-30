@@ -14,7 +14,8 @@ export function Badge({
   variant,
 }: {
   children: ReactNode;
-  variant?: 'rec';
+  variant?: 'rec' | 'success' | 'warning' | 'danger' | 'info';
 }): JSX.Element {
-  return <DSBadge tone={variant === 'rec' ? 'success' : 'neutral'}>{children}</DSBadge>;
+  const tone = variant === 'rec' ? 'success' : (variant ?? 'neutral');
+  return <DSBadge tone={tone}>{children}</DSBadge>;
 }

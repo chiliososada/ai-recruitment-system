@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALLOWED_RESUME_EXT } from '@ars/shared';
+import { Icons } from '../design';
 
 export function ResumeDropzone({
   onSelect,
@@ -32,10 +33,19 @@ export function ResumeDropzone({
       style={{
         textAlign: 'center',
         borderStyle: 'dashed',
+        borderColor: over ? 'var(--color-primary)' : 'var(--color-border-strong)',
+        borderWidth: 2,
         background: over ? 'var(--color-primary-soft)' : undefined,
+        boxShadow: 'none',
+        transition: 'border-color var(--duration-fast), background var(--duration-fast)',
       }}
     >
-      <p>{t('resume.dropHere')}</p>
+      <span className="icon-chip lg" style={{ margin: '0 auto var(--space-3)' }}>
+        <Icons.Upload size={26} aria-hidden="true" />
+      </span>
+      <p style={{ fontWeight: 'var(--weight-semibold)', marginBottom: 'var(--space-1)' }}>
+        {t('resume.dropHere')}
+      </p>
       <button
         type="button"
         className="secondary"

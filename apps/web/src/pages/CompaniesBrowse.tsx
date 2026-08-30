@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
 import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { Icons, InitialAvatar } from '../design';
 import { Pagination } from './JobsBrowse';
 
 export default function CompaniesBrowse(): JSX.Element {
@@ -25,9 +26,11 @@ export default function CompaniesBrowse(): JSX.Element {
 
   return (
     <section className="stack">
-      <h1>{t('company.list')}</h1>
+      <div className="page-header">
+        <h1>{t('company.list')}</h1>
+      </div>
       <form
-        className="card row"
+        className="card ui-filterbar"
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);
@@ -54,7 +57,10 @@ export default function CompaniesBrowse(): JSX.Element {
             ))}
           </select>
         </Field>
-        <button type="submit">{t('common.search')}</button>
+        <button type="submit">
+          <Icons.Search size={16} aria-hidden="true" />
+          {t('common.search')}
+        </button>
       </form>
 
       {query.isLoading ? (
@@ -68,14 +74,37 @@ export default function CompaniesBrowse(): JSX.Element {
           <div className="grid cols-2">
             {query.data!.items.map((c) => (
               <article key={c.id} className="card" data-testid="company-card">
-                <h2 style={{ margin: '0 0 0.25rem' }}>
-                  <Link to={`/companies/${c.id}`}>{c.name}</Link>
-                </h2>
-                <p className="muted">
-                  {c.industry ?? ''} {c.size ? `· ${c.size}` : ''}{' '}
-                  {c.location ? `· ${c.location}` : ''}
-                </p>
-                <span className="badge">
+                <div
+                  className="row"
+                  style={{ gap: 'var(--space-3)', alignItems: 'flex-start', flexWrap: 'nowrap' }}
+                >
+                  <InitialAvatar name={c.name} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <h2 style={{ margin: 0, fontSize: 'var(--text-lg)' }}>
+                      <Link to={`/companies/${c.id}`}>{c.name}</Link>
+                    </h2>
+                    <div className="meta-row" style={{ marginTop: 4 }}>
+                      {c.industry ? <span className="meta-item">{c.industry}</span> : null}
+                      {c.size ? (
+                        <span className="meta-item">
+                          <Icons.Users size={14} aria-hidden="true" />
+                          {c.size}
+                        </span>
+                      ) : null}
+                      {c.location ? (
+                        <span className="meta-item">
+                          <Icons.MapPin size={14} aria-hidden="true" />
+                          {c.location}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+                <span
+                  className={`ui-badge ${(c.openJobCount ?? 0) > 0 ? 'success' : ''}`}
+                  style={{ marginTop: 'var(--space-3)' }}
+                >
+                  <Icons.Briefcase size={12} aria-hidden="true" />
                   {t('company.openJobs')}: {c.openJobCount ?? 0}
                 </span>
               </article>

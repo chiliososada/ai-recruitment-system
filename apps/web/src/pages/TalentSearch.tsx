@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
 import { Badge, EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { Icons, InitialAvatar, ScoreRing } from '../design';
 import { CompareTable } from '../components/CompareTable';
 import { Pagination } from './JobsBrowse';
 
@@ -47,9 +48,11 @@ export default function TalentSearch(): JSX.Element {
 
   return (
     <section className="stack">
-      <h1>{t('talent.title')}</h1>
+      <div className="page-header">
+        <h1>{t('talent.title')}</h1>
+      </div>
       <form
-        className="card row"
+        className="card ui-filterbar"
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);
@@ -71,7 +74,10 @@ export default function TalentSearch(): JSX.Element {
         <Field label={t('talent.skills')} htmlFor="skills">
           <input id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
         </Field>
-        <button type="submit">{t('common.search')}</button>
+        <button type="submit">
+          <Icons.Search size={16} aria-hidden="true" />
+          {t('common.search')}
+        </button>
       </form>
 
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -92,17 +98,31 @@ export default function TalentSearch(): JSX.Element {
           <div className="grid cols-2">
             {talent.data!.items.map((c) => (
               <article key={c.id} className="card stack" data-testid="talent-card">
-                <div className="row" style={{ justifyContent: 'space-between' }}>
-                  <h2 style={{ margin: 0 }}>
-                    <Link to={`/talent/${c.id}`}>{c.displayName}</Link>
-                  </h2>
-                  {c.recommended ? <Badge variant="rec">{t('talent.recommended')}</Badge> : null}
+                <div
+                  className="row"
+                  style={{ gap: 'var(--space-3)', alignItems: 'flex-start', flexWrap: 'nowrap' }}
+                >
+                  <InitialAvatar name={c.displayName} round />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div className="row" style={{ gap: 'var(--space-2)' }}>
+                      <h2 style={{ margin: 0, fontSize: 'var(--text-lg)' }}>
+                        <Link to={`/talent/${c.id}`}>{c.displayName}</Link>
+                      </h2>
+                      {c.recommended ? (
+                        <Badge variant="rec">{t('talent.recommended')}</Badge>
+                      ) : null}
+                    </div>
+                    <p className="muted" style={{ margin: '2px 0 0', fontSize: 'var(--text-sm)' }}>
+                      {c.headline ? `${c.headline} · ` : ''}
+                      {t('analysis.years', { count: c.yearsExperience })}
+                    </p>
+                  </div>
+                  {c.matchScore != null ? (
+                    <span aria-label={`${t('match.score')} ${c.matchScore}/100`}>
+                      <ScoreRing value={c.matchScore} size={46} />
+                    </span>
+                  ) : null}
                 </div>
-                <p className="muted">
-                  {c.headline ? `${c.headline} · ` : ''}
-                  {t('analysis.years', { count: c.yearsExperience })}
-                  {c.matchScore != null ? ` · ${t('match.score')} ${c.matchScore}` : ''}
-                </p>
                 <div>
                   {c.topSkills.slice(0, 6).map((s) => (
                     <span key={s} className="tag">

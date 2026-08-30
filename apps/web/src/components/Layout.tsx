@@ -122,7 +122,10 @@ export function Layout({ children }: { children: ReactNode }): JSX.Element {
       to="/"
       style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
     >
-      <Icons.Sparkles size={20} aria-hidden="true" /> {t('common.appName')}
+      <span className="brand-mark">
+        <Icons.Sparkles size={18} aria-hidden="true" />
+      </span>
+      {t('common.appName')}
     </Link>
   );
 

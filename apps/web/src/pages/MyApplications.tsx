@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { Badge, EmptyState, ErrorState, Loading } from '../components/ui';
+import { InitialAvatar } from '../design';
 
 export default function MyApplications(): JSX.Element {
   const { t } = useTranslation();
@@ -24,23 +25,46 @@ export default function MyApplications(): JSX.Element {
 
   return (
     <section className="stack">
-      <h1>{t('application.title')}</h1>
+      <div className="page-header">
+        <h1>{t('application.title')}</h1>
+      </div>
       {items.length === 0 ? (
         <EmptyState message={t('application.empty')} />
       ) : (
         <ul className="list-reset stack">
           {items.map((app) => (
             <li key={app.id} className="card row" style={{ justifyContent: 'space-between' }}>
-              <div>
-                <Link to={`/jobs/${app.jobId}`}>
-                  <strong>{app.jobTitle}</strong>
-                </Link>
-                <div className="muted">{app.companyName}</div>
+              <div className="row" style={{ flexWrap: 'nowrap', gap: 'var(--space-3)' }}>
+                <InitialAvatar name={app.companyName ?? app.jobTitle ?? '?'} />
+                <div>
+                  <Link to={`/jobs/${app.jobId}`}>
+                    <strong>{app.jobTitle}</strong>
+                  </Link>
+                  <div className="muted" style={{ fontSize: 'var(--text-sm)' }}>
+                    {app.companyName}
+                  </div>
+                </div>
               </div>
               <div className="row">
-                <Badge>{t(`application.stage.${app.stage}`)}</Badge>
+                <Badge
+                  variant={
+                    app.stage === 'hired' || app.stage === 'offer'
+                      ? 'success'
+                      : app.stage === 'rejected' || app.stage === 'withdrawn'
+                        ? 'danger'
+                        : app.stage === 'interview' || app.stage === 'screening'
+                          ? 'info'
+                          : undefined
+                  }
+                >
+                  {t(`application.stage.${app.stage}`)}
+                </Badge>
                 {['applied', 'screening', 'interview', 'offer'].includes(app.stage) && (
-                  <button type="button" className="danger" onClick={() => withdraw.mutate(app.id)}>
+                  <button
+                    type="button"
+                    className="secondary sm"
+                    onClick={() => withdraw.mutate(app.id)}
+                  >
                     {t('application.withdraw')}
                   </button>
                 )}

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import type { Company, Conversation, Job, Paginated } from '@ars/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
 import { EmptyState, ErrorState, Loading } from '../components/ui';
+import { JobCard } from '../components/JobCard';
+import { Icons, InitialAvatar } from '../design';
 
 export default function CompanyDetail(): JSX.Element {
   const { t } = useTranslation();
@@ -39,11 +41,33 @@ export default function CompanyDetail(): JSX.Element {
   return (
     <section className="stack">
       <div className="card">
-        <h1>{c.name}</h1>
-        <p className="muted">
-          {c.industry ?? ''} {c.size ? `· ${c.size}` : ''} {c.location ? `· ${c.location}` : ''}
-        </p>
-        {c.description ? <p style={{ whiteSpace: 'pre-wrap' }}>{c.description}</p> : null}
+        <div
+          className="row"
+          style={{ gap: 'var(--space-4)', alignItems: 'flex-start', flexWrap: 'nowrap' }}
+        >
+          <InitialAvatar name={c.name} size="lg" />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h1 style={{ margin: 0 }}>{c.name}</h1>
+            <div className="meta-row" style={{ marginTop: 'var(--space-2)' }}>
+              {c.industry ? <span className="meta-item">{c.industry}</span> : null}
+              {c.size ? (
+                <span className="meta-item">
+                  <Icons.Users size={15} aria-hidden="true" />
+                  {c.size}
+                </span>
+              ) : null}
+              {c.location ? (
+                <span className="meta-item">
+                  <Icons.MapPin size={15} aria-hidden="true" />
+                  {c.location}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        {c.description ? (
+          <p style={{ whiteSpace: 'pre-wrap', marginTop: 'var(--space-4)' }}>{c.description}</p>
+        ) : null}
         {c.websiteUrl ? (
           <p>
             <a href={c.websiteUrl} target="_blank" rel="noreferrer">
@@ -80,22 +104,17 @@ export default function CompanyDetail(): JSX.Element {
         ) : null}
       </div>
 
-      <h2>{t('company.openJobs')}</h2>
+      <h2 style={{ marginTop: 'var(--space-2)' }}>{t('company.openJobs')}</h2>
       {jobs.isLoading ? (
         <Loading />
       ) : (jobs.data?.items.length ?? 0) === 0 ? (
         <EmptyState message={t('job.empty')} />
       ) : (
-        <ul className="list-reset stack">
+        <div className="grid cols-2">
           {jobs.data!.items.map((j) => (
-            <li key={j.id} className="card">
-              <Link to={`/jobs/${j.id}`}>
-                <strong>{j.title}</strong>
-              </Link>{' '}
-              <span className="muted">· {t(`job.workStyleValue.${j.workStyle}`)}</span>
-            </li>
+            <JobCard key={j.id} job={j} />
           ))}
-        </ul>
+        </div>
       )}
     </section>
   );

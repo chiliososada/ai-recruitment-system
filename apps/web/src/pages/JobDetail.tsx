@@ -7,6 +7,7 @@ import { api, ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
 import { ErrorState, Loading } from '../components/ui';
+import { Icons, InitialAvatar } from '../design';
 
 export default function JobDetail(): JSX.Element {
   const { t } = useTranslation();
@@ -26,55 +27,111 @@ export default function JobDetail(): JSX.Element {
   if (job.isLoading) return <Loading />;
   if (job.error) return <ErrorState error={job.error} onRetry={() => job.refetch()} />;
   const j = job.data!;
+  const hasSalary = j.salaryMin != null || j.salaryMax != null;
 
   return (
-    <article className="card stack">
-      <h1>{j.title}</h1>
-      <p className="muted">
-        <Link to={`/companies/${j.companyId}`}>{j.companyName}</Link> · {j.category} ·{' '}
-        {t(`job.workStyleValue.${j.workStyle}`)}
-        {j.location ? ` · ${j.location}` : ''}
-      </p>
-      {j.salaryMin || j.salaryMax ? (
-        <p>
-          {t('job.salaryMin')}: {j.salaryMin ?? '—'} – {j.salaryMax ?? '—'} {j.currency}
-        </p>
-      ) : null}
-      <p style={{ whiteSpace: 'pre-wrap' }}>{j.description}</p>
-      <div>
-        <h3>{t('job.requiredSkills')}</h3>
-        {j.requiredSkills.map((s) => (
-          <span key={s} className="tag">
-            {s}
-          </span>
-        ))}
+    <section className="stack" style={{ maxWidth: 880, margin: '0 auto' }}>
+      {/* ---- header ---- */}
+      <div className="card">
+        <div
+          className="row"
+          style={{ gap: 'var(--space-4)', alignItems: 'flex-start', flexWrap: 'nowrap' }}
+        >
+          <InitialAvatar name={j.companyName ?? j.title} size="lg" />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h1 style={{ margin: 0 }}>{j.title}</h1>
+            <div className="meta-row" style={{ marginTop: 'var(--space-2)' }}>
+              <span className="meta-item">
+                <Icons.Building2 size={15} aria-hidden="true" />
+                <Link to={`/companies/${j.companyId}`}>{j.companyName}</Link>
+              </span>
+              <span className="meta-item">{j.category}</span>
+              <span className="meta-item">
+                <Icons.Laptop size={15} aria-hidden="true" />
+                {t(`job.workStyleValue.${j.workStyle}`)}
+              </span>
+              {j.location ? (
+                <span className="meta-item">
+                  <Icons.MapPin size={15} aria-hidden="true" />
+                  {j.location}
+                </span>
+              ) : null}
+            </div>
+            {hasSalary ? (
+              <div
+                className="meta-item"
+                style={{
+                  marginTop: 'var(--space-3)',
+                  fontWeight: 'var(--weight-bold)',
+                  fontSize: 'var(--text-lg)',
+                  color: 'var(--color-text)',
+                }}
+              >
+                <Icons.Banknote size={18} aria-hidden="true" />
+                {(j.salaryMin ?? 0).toLocaleString()} – {(j.salaryMax ?? 0).toLocaleString()}{' '}
+                {j.currency}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        {user?.role === 'job_seeker' && (
+          <div className="stack" style={{ marginTop: 'var(--space-5)' }}>
+            <button
+              type="button"
+              disabled={apply.isPending || applied}
+              onClick={() => apply.mutate()}
+            >
+              {applied ? (
+                <>
+                  <Icons.CheckCircle2 size={16} aria-hidden="true" />
+                  {t('job.applied')}
+                </>
+              ) : (
+                <>
+                  {t('application.apply')}
+                  <Icons.ArrowRight size={16} aria-hidden="true" />
+                </>
+              )}
+            </button>
+            {apply.error &&
+            !(apply.error instanceof ApiError && apply.error.code === 'CONFLICT') ? (
+              <div className="field-error" role="alert">
+                {localizeError(t, apply.error)}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
-      {j.preferredSkills.length > 0 && (
+
+      {/* ---- description ---- */}
+      <div className="card">
+        <h3>{t('job.description')}</h3>
+        <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{j.description}</p>
+      </div>
+
+      {/* ---- skills ---- */}
+      <div className="card">
+        <h3>{t('job.requiredSkills')}</h3>
         <div>
-          <h3>{t('job.preferredSkills')}</h3>
-          {j.preferredSkills.map((s) => (
+          {j.requiredSkills.map((s) => (
             <span key={s} className="tag">
               {s}
             </span>
           ))}
         </div>
-      )}
-      {user?.role === 'job_seeker' && (
-        <div className="stack">
-          <button
-            type="button"
-            disabled={apply.isPending || applied}
-            onClick={() => apply.mutate()}
-          >
-            {applied ? t('job.applied') : t('application.apply')}
-          </button>
-          {apply.error && !(apply.error instanceof ApiError && apply.error.code === 'CONFLICT') ? (
-            <div className="field-error" role="alert">
-              {localizeError(t, apply.error)}
+        {j.preferredSkills.length > 0 && (
+          <>
+            <h3 style={{ marginTop: 'var(--space-4)' }}>{t('job.preferredSkills')}</h3>
+            <div>
+              {j.preferredSkills.map((s) => (
+                <span key={s} className="tag plain">
+                  {s}
+                </span>
+              ))}
             </div>
-          ) : null}
-        </div>
-      )}
-    </article>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
