@@ -51,8 +51,6 @@ function useNavItems(role: 'job_seeker' | 'company_member' | undefined): NavItem
         label: t('nav.messagesCompany'),
         icon: <Icons.MessageSquare size={ICON} />,
       },
-      { to: '/jobs', label: t('nav.publicJobs'), icon: <Icons.Briefcase size={ICON} /> },
-      { to: '/companies', label: t('nav.companyList'), icon: <Icons.Building2 size={ICON} /> },
     ];
   }
   return [

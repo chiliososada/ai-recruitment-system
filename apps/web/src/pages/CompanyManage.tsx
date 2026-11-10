@@ -93,7 +93,7 @@ export default function CompanyManage(): JSX.Element {
       <div className="grid cols-2">
         <div className="stack">
           <div className="card">
-            <h2>{t('job.list')}</h2>
+            <h2>{t('job.ownList')}</h2>
             {jobs.isLoading ? (
               <Loading />
             ) : (jobs.data?.length ?? 0) === 0 ? (
