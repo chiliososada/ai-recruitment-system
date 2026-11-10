@@ -53,6 +53,9 @@ void i18n
       caches: ['localStorage'],
     },
     interpolation: { escapeValue: false },
+    // The zh catalogs arrive after first render; re-render when a bundle is added so parts of
+    // the page that rendered with the fallback (e.g. the top navigation) switch language too.
+    react: { bindI18nStore: 'added' },
   })
   .then(() => ensureBundle(i18n.language))
   .then(syncDocument);
