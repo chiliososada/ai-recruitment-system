@@ -27,6 +27,18 @@ async function ensureBundle(locale: string): Promise<void> {
   i18n.addResourceBundle(locale, 'translation', mod.default, true, true);
 }
 
+/** Keep <html lang> and the tab title in the active language. */
+function syncDocument(): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = i18n.language;
+  const title = i18n.t('meta.title');
+  if (title && title !== 'meta.title') document.title = title;
+}
+
+// Registered before init(): with inline resources, init emits its first events synchronously.
+i18n.on('languageChanged', syncDocument);
+i18n.on('loaded', syncDocument);
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -42,18 +54,8 @@ void i18n
     },
     interpolation: { escapeValue: false },
   })
-  .then(() => ensureBundle(i18n.language));
-
-if (typeof document !== 'undefined') {
-  const syncDocument = (lng: string): void => {
-    document.documentElement.lang = lng;
-    const title = i18n.t('meta.title');
-    if (title && title !== 'meta.title') document.title = title;
-  };
-  i18n.on('languageChanged', syncDocument);
-  i18n.on('loaded', () => syncDocument(i18n.language));
-  i18n.on('initialized', () => syncDocument(i18n.language));
-}
+  .then(() => ensureBundle(i18n.language))
+  .then(syncDocument);
 
 export async function changeLocale(locale: Locale): Promise<void> {
   await ensureBundle(locale);

@@ -980,9 +980,16 @@ table tbody tr:hover {
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 248px 1fr;
+  /* Wide enough for 12-character Japanese labels such as 求職者へのメッセージ送信. */
+  grid-template-columns: 280px 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas: 'sidebar topbar' 'sidebar main';
+}
+@supports (word-break: auto-phrase) {
+  .app-sidebar a,
+  .app-mobilenav a {
+    word-break: auto-phrase;
+  }
 }
 .app-sidebar {
   grid-area: sidebar;

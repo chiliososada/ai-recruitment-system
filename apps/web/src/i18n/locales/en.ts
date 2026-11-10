@@ -54,6 +54,7 @@ const en = {
     companyList: 'Companies',
     recommendations: 'AI job picks',
     messages: 'Messages',
+    messagesCompany: 'Messages',
     notifications: 'Notifications',
     profile: 'My profile',
     resume: 'Resume & AI analysis',
@@ -72,7 +73,8 @@ const en = {
     applications: 'Track the status of your applications and answer interview requests.',
     jobs: 'Browse open jobs by keyword, work style and skills.',
     companies: 'Browse companies that are hiring.',
-    messages: 'Message companies and candidates directly.',
+    messages: 'Message company recruiters directly.',
+    messagesCompany: 'Message candidates directly.',
     notifications: 'Updates about applications, interviews and messages.',
     console: 'Choose your company to create jobs and manage applicants.',
     companyManage:

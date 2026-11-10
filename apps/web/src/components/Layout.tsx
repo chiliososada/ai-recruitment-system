@@ -46,7 +46,11 @@ function useNavItems(role: 'job_seeker' | 'company_member' | undefined): NavItem
       { to: '/console', label: t('nav.console'), icon: <Icons.LayoutDashboard size={ICON} /> },
       { to: '/talent', label: t('nav.talent'), icon: <Icons.Users size={ICON} /> },
       { to: '/shortlist', label: t('nav.shortlist'), icon: <Icons.Star size={ICON} /> },
-      { to: '/messages', label: t('nav.messages'), icon: <Icons.MessageSquare size={ICON} /> },
+      {
+        to: '/messages',
+        label: t('nav.messagesCompany'),
+        icon: <Icons.MessageSquare size={ICON} />,
+      },
       { to: '/jobs', label: t('nav.publicJobs'), icon: <Icons.Briefcase size={ICON} /> },
       { to: '/companies', label: t('nav.companyList'), icon: <Icons.Building2 size={ICON} /> },
     ];

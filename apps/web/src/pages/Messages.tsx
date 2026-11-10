@@ -53,7 +53,11 @@ export default function Messages(): JSX.Element {
 
   return (
     <section className="stack">
-      <PageHeader title={t('messaging.title')} desc={t('pageDesc.messages')} />
+      {user?.role === 'company_member' ? (
+        <PageHeader title={t('nav.messagesCompany')} desc={t('pageDesc.messagesCompany')} />
+      ) : (
+        <PageHeader title={t('nav.messages')} desc={t('pageDesc.messages')} />
+      )}
       <div className="grid cols-2">
         <div className="card">
           {conversations.isLoading ? (
