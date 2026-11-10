@@ -31,10 +31,14 @@ function useNavItems(role: 'job_seeker' | 'company_member' | undefined): NavItem
         label: t('nav.recommendations'),
         icon: <Icons.Sparkles size={ICON} />,
       },
-      { to: '/applications', label: t('nav.applications'), icon: <Icons.Briefcase size={ICON} /> },
-      { to: '/jobs', label: t('nav.jobs'), icon: <Icons.Briefcase size={ICON} /> },
-      { to: '/companies', label: t('nav.companies'), icon: <Icons.Building2 size={ICON} /> },
+      {
+        to: '/applications',
+        label: t('nav.applications'),
+        icon: <Icons.ClipboardList size={ICON} />,
+      },
       { to: '/messages', label: t('nav.messages'), icon: <Icons.MessageSquare size={ICON} /> },
+      { to: '/jobs', label: t('nav.jobs'), icon: <Icons.Search size={ICON} /> },
+      { to: '/companies', label: t('nav.companies'), icon: <Icons.Building2 size={ICON} /> },
     ];
   }
   if (role === 'company_member') {
@@ -42,9 +46,9 @@ function useNavItems(role: 'job_seeker' | 'company_member' | undefined): NavItem
       { to: '/console', label: t('nav.console'), icon: <Icons.LayoutDashboard size={ICON} /> },
       { to: '/talent', label: t('nav.talent'), icon: <Icons.Users size={ICON} /> },
       { to: '/shortlist', label: t('nav.shortlist'), icon: <Icons.Star size={ICON} /> },
-      { to: '/jobs', label: t('nav.jobs'), icon: <Icons.Briefcase size={ICON} /> },
-      { to: '/companies', label: t('nav.companies'), icon: <Icons.Building2 size={ICON} /> },
       { to: '/messages', label: t('nav.messages'), icon: <Icons.MessageSquare size={ICON} /> },
+      { to: '/jobs', label: t('nav.publicJobs'), icon: <Icons.Briefcase size={ICON} /> },
+      { to: '/companies', label: t('nav.companyList'), icon: <Icons.Building2 size={ICON} /> },
     ];
   }
   return [
@@ -178,7 +182,7 @@ export function Layout({ children }: { children: ReactNode }): JSX.Element {
         sidebar={<Sidebar brand={brand} items={items} />}
         topbar={
           <Topbar>
-            <MobileNav items={items} label={t('nav.home')} />
+            <MobileNav items={items} label={t('nav.menu')} />
             <span className="spacer" />
             <LanguageSwitcher />
             <NotificationsBell />

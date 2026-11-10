@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
-import { Badge, EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { Badge, EmptyState, ErrorState, Field, Loading, PageHeader } from '../components/ui';
 import { Icons, InitialAvatar, ScoreRing } from '../design';
 import { CompareTable } from '../components/CompareTable';
 import { Pagination } from './JobsBrowse';
@@ -48,9 +48,7 @@ export default function TalentSearch(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="page-header">
-        <h1>{t('talent.title')}</h1>
-      </div>
+      <PageHeader title={t('talent.title')} desc={t('pageDesc.talent')} />
       <form
         className="card ui-filterbar"
         onSubmit={(e) => {
@@ -59,8 +57,13 @@ export default function TalentSearch(): JSX.Element {
           void talent.refetch();
         }}
       >
-        <Field label={t('common.search')} htmlFor="q">
-          <input id="q" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Field label={t('talent.keyword')} htmlFor="q">
+          <input
+            id="q"
+            value={q}
+            placeholder={t('talent.keywordPlaceholder')}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </Field>
         <Field label={t('talent.minYears')} htmlFor="minYears">
           <input
@@ -72,7 +75,12 @@ export default function TalentSearch(): JSX.Element {
           />
         </Field>
         <Field label={t('talent.skills')} htmlFor="skills">
-          <input id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
+          <input
+            id="skills"
+            value={skills}
+            placeholder={t('talent.skillsPlaceholder')}
+            onChange={(e) => setSkills(e.target.value)}
+          />
         </Field>
         <button type="submit">
           <Icons.Search size={16} aria-hidden="true" />
@@ -81,7 +89,7 @@ export default function TalentSearch(): JSX.Element {
       </form>
 
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <span className="muted">{t('common.results', { count: talent.data?.total ?? 0 })}</span>
+        <span className="muted">{t('talent.count', { count: talent.data?.total ?? 0 })}</span>
         <button type="button" disabled={selected.length < 2} onClick={() => compare.mutate()}>
           {t('shortlist.compare')} ({selected.length})
         </button>
@@ -114,7 +122,7 @@ export default function TalentSearch(): JSX.Element {
                     </div>
                     <p className="muted" style={{ margin: '2px 0 0', fontSize: 'var(--text-sm)' }}>
                       {c.headline ? `${c.headline} · ` : ''}
-                      {t('analysis.years', { count: c.yearsExperience })}
+                      {t('analysis.experience', { count: c.yearsExperience })}
                     </p>
                   </div>
                   {c.matchScore != null ? (
@@ -137,9 +145,9 @@ export default function TalentSearch(): JSX.Element {
                       style={{ width: 'auto' }}
                       checked={selected.includes(c.id)}
                       onChange={() => toggle(c.id)}
-                      aria-label={`${t('shortlist.compare')} ${c.displayName}`}
+                      aria-label={`${t('talent.compareToggle')} ${c.displayName}`}
                     />
-                    {t('shortlist.compare')}
+                    {t('talent.compareToggle')}
                   </label>
                   <button
                     type="button"

@@ -53,7 +53,7 @@ export default function CompanyDetail(): JSX.Element {
               {c.size ? (
                 <span className="meta-item">
                   <Icons.Users size={15} aria-hidden="true" />
-                  {c.size}
+                  {t(`company.sizeValue.${c.size}`)}
                 </span>
               ) : null}
               {c.location ? (

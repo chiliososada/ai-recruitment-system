@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
-import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { EmptyState, ErrorState, Field, Loading, PageHeader } from '../components/ui';
 import { JobCard } from '../components/JobCard';
 import { Icons } from '../design';
 
@@ -23,9 +23,7 @@ export default function JobsBrowse(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="page-header">
-        <h1>{t('job.list')}</h1>
-      </div>
+      <PageHeader title={t('job.list')} desc={t('pageDesc.jobs')} />
       <form
         className="card ui-filterbar"
         onSubmit={(e) => {
@@ -34,8 +32,13 @@ export default function JobsBrowse(): JSX.Element {
           void query.refetch();
         }}
       >
-        <Field label={t('common.search')} htmlFor="q">
-          <input id="q" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Field label={t('job.keyword')} htmlFor="q">
+          <input
+            id="q"
+            value={q}
+            placeholder={t('job.keywordPlaceholder')}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </Field>
         <Field label={t('job.workStyle')} htmlFor="ws">
           <select
@@ -51,8 +54,13 @@ export default function JobsBrowse(): JSX.Element {
             ))}
           </select>
         </Field>
-        <Field label={t('job.requiredSkills')} htmlFor="skills">
-          <input id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
+        <Field label={t('talent.skills')} htmlFor="skills">
+          <input
+            id="skills"
+            value={skills}
+            placeholder={t('job.skillsPlaceholder')}
+            onChange={(e) => setSkills(e.target.value)}
+          />
         </Field>
         <button type="submit">
           <Icons.Search size={16} aria-hidden="true" />
@@ -98,7 +106,7 @@ export function Pagination<T>({
         disabled={page <= 1}
         onClick={() => setPage(page - 1)}
       >
-        {t('common.back')}
+        {t('common.prev')}
       </button>
       <span>{t('common.page', { page: data.page, total: data.totalPages })}</span>
       <button

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { EmptyState, Loading } from '../components/ui';
+import { EmptyState, Loading, PageHeader } from '../components/ui';
 import { Icons, InitialAvatar } from '../design';
 
 export default function Messages(): JSX.Element {
@@ -48,128 +48,133 @@ export default function Messages(): JSX.Element {
     },
   });
 
-  return (
-    <section className="grid cols-2">
-      <div className="card">
-        <h1>{t('messaging.conversations')}</h1>
-        {conversations.isLoading ? (
-          <Loading />
-        ) : (conversations.data?.length ?? 0) === 0 ? (
-          <EmptyState message={t('messaging.noConversations')} />
-        ) : (
-          <ul className="list-reset stack">
-            {conversations.data!.map((c) => {
-              const other = c.members.find((m) => m.userId !== user?.id);
-              return (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    className="ghost"
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      height: 'auto',
-                      padding: 'var(--space-2) var(--space-3)',
-                      justifyContent: 'flex-start',
-                      background: active === c.id ? 'var(--color-primary-soft)' : undefined,
-                      borderRadius: 'var(--radius-md)',
-                    }}
-                    onClick={() => setActive(c.id)}
-                  >
-                    <InitialAvatar name={other?.displayName ?? '?'} round />
-                    <span style={{ minWidth: 0, flex: 1 }}>
-                      <span
-                        className="row"
-                        style={{ justifyContent: 'space-between', gap: 'var(--space-2)' }}
-                      >
-                        <strong style={{ color: 'var(--color-text)' }}>
-                          {other?.displayName ?? c.subject ?? t('messaging.title')}
-                        </strong>
-                        {c.unreadCount > 0 ? (
-                          <span className="ui-badge danger">{c.unreadCount}</span>
-                        ) : null}
-                      </span>
-                      <span
-                        className="muted"
-                        style={{
-                          display: 'block',
-                          fontSize: 'var(--text-sm)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          fontWeight: 'var(--weight-regular)',
-                        }}
-                      >
-                        {c.lastMessagePreview ?? ''}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+  const activeConv = conversations.data?.find((c) => c.id === active);
+  const activeOther = activeConv?.members.find((m) => m.userId !== user?.id);
 
-      <div className="card stack">
-        <h2>{t('messaging.title')}</h2>
-        {!active ? (
-          <EmptyState message={t('messaging.empty')} />
-        ) : (
-          <>
-            <div
-              data-testid="message-list"
-              style={{
-                minHeight: 260,
-                maxHeight: '55vh',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: 'var(--space-2)',
-              }}
-            >
-              {(messages.data ?? []).map((m) => (
-                <div key={m.id} className={m.senderUserId === user?.id ? 'msg mine' : 'msg'}>
-                  {m.senderUserId !== user?.id ? (
-                    <div className="muted" style={{ fontSize: '0.75rem' }}>
-                      {m.senderName}
-                    </div>
-                  ) : null}
-                  {m.body}
-                </div>
-              ))}
-              {(messages.data?.length ?? 0) === 0 ? (
-                <EmptyState message={t('messaging.empty')} />
-              ) : null}
-            </div>
-            <form
-              className="row"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (draft.trim()) send.mutate(draft.trim());
-              }}
-            >
-              <label htmlFor="draft" className="visually-hidden">
-                {t('messaging.newMessage')}
-              </label>
-              <input
-                id="draft"
-                placeholder={t('messaging.newMessage')}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-              />
-              <button type="submit" disabled={send.isPending || !draft.trim()}>
-                {send.isPending ? t('messaging.sending') : t('messaging.send')}
-                <Icons.ArrowRight size={16} aria-hidden="true" />
-              </button>
-            </form>
-            {send.error ? (
-              <div className="field-error" role="alert">
-                {t('messaging.failed')}
+  return (
+    <section className="stack">
+      <PageHeader title={t('messaging.title')} desc={t('pageDesc.messages')} />
+      <div className="grid cols-2">
+        <div className="card">
+          {conversations.isLoading ? (
+            <Loading />
+          ) : (conversations.data?.length ?? 0) === 0 ? (
+            <EmptyState message={t('messaging.noConversations')} />
+          ) : (
+            <ul className="list-reset stack">
+              {conversations.data!.map((c) => {
+                const other = c.members.find((m) => m.userId !== user?.id);
+                return (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      className="ghost"
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        height: 'auto',
+                        padding: 'var(--space-2) var(--space-3)',
+                        justifyContent: 'flex-start',
+                        background: active === c.id ? 'var(--color-primary-soft)' : undefined,
+                        borderRadius: 'var(--radius-md)',
+                      }}
+                      onClick={() => setActive(c.id)}
+                    >
+                      <InitialAvatar name={other?.displayName ?? '?'} round />
+                      <span style={{ minWidth: 0, flex: 1 }}>
+                        <span
+                          className="row"
+                          style={{ justifyContent: 'space-between', gap: 'var(--space-2)' }}
+                        >
+                          <strong style={{ color: 'var(--color-text)' }}>
+                            {other?.displayName ?? c.subject ?? t('messaging.title')}
+                          </strong>
+                          {c.unreadCount > 0 ? (
+                            <span className="ui-badge danger">{c.unreadCount}</span>
+                          ) : null}
+                        </span>
+                        <span
+                          className="muted"
+                          style={{
+                            display: 'block',
+                            fontSize: 'var(--text-sm)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            fontWeight: 'var(--weight-regular)',
+                          }}
+                        >
+                          {c.lastMessagePreview ?? ''}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="card stack">
+          <h2>{activeOther?.displayName ?? activeConv?.subject ?? t('messaging.title')}</h2>
+          {!active ? (
+            <EmptyState message={t('messaging.empty')} />
+          ) : (
+            <>
+              <div
+                data-testid="message-list"
+                style={{
+                  minHeight: 260,
+                  maxHeight: '55vh',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: 'var(--space-2)',
+                }}
+              >
+                {(messages.data ?? []).map((m) => (
+                  <div key={m.id} className={m.senderUserId === user?.id ? 'msg mine' : 'msg'}>
+                    {m.senderUserId !== user?.id ? (
+                      <div className="muted" style={{ fontSize: '0.75rem' }}>
+                        {m.senderName}
+                      </div>
+                    ) : null}
+                    {m.body}
+                  </div>
+                ))}
+                {(messages.data?.length ?? 0) === 0 ? (
+                  <EmptyState message={t('messaging.empty')} />
+                ) : null}
               </div>
-            ) : null}
-          </>
-        )}
+              <form
+                className="row"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (draft.trim()) send.mutate(draft.trim());
+                }}
+              >
+                <label htmlFor="draft" className="visually-hidden">
+                  {t('messaging.newMessage')}
+                </label>
+                <input
+                  id="draft"
+                  placeholder={t('messaging.newMessage')}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                />
+                <button type="submit" disabled={send.isPending || !draft.trim()}>
+                  {send.isPending ? t('messaging.sending') : t('messaging.send')}
+                  <Icons.ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </form>
+              {send.error ? (
+                <div className="field-error" role="alert">
+                  {t('messaging.failed')}
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
     </section>
   );

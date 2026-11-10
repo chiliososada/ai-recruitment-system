@@ -100,7 +100,7 @@ export function Pagination<T>({
         disabled={page <= 1}
         onClick={() => setPage(page - 1)}
       >
-        {t('common.back')}
+        {t('common.prev')}
       </button>
       <span aria-live="polite">
         {t('common.page', { page: data.page, total: data.totalPages })}

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { CompareTable } from '../components/CompareTable';
-import { EmptyState, ErrorState, Loading } from '../components/ui';
+import { EmptyState, ErrorState, Loading, PageHeader } from '../components/ui';
 import { Icons, InitialAvatar } from '../design';
 
 export default function Shortlist(): JSX.Element {
@@ -39,12 +39,15 @@ export default function Shortlist(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="row page-header" style={{ justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>{t('shortlist.title')}</h1>
-        <button type="button" disabled={selected.length < 2} onClick={() => compare.mutate()}>
-          {t('shortlist.compare')} ({selected.length})
-        </button>
-      </div>
+      <PageHeader
+        title={t('shortlist.title')}
+        desc={t('pageDesc.shortlist')}
+        actions={
+          <button type="button" disabled={selected.length < 2} onClick={() => compare.mutate()}>
+            {t('shortlist.compare')} ({selected.length})
+          </button>
+        }
+      />
       {selected.length === 1 ? <p className="muted">{t('shortlist.selectAtLeastTwo')}</p> : null}
 
       {items.length === 0 ? (
@@ -59,7 +62,7 @@ export default function Shortlist(): JSX.Element {
                   style={{ width: 'auto' }}
                   checked={selected.includes(s.candidateId)}
                   onChange={() => toggle(s.candidateId)}
-                  aria-label={`${t('shortlist.compare')} ${s.candidateName ?? ''}`}
+                  aria-label={`${t('talent.compareToggle')} ${s.candidateName ?? ''}`}
                 />
                 <InitialAvatar name={s.candidateName ?? '?'} round />
                 <span>

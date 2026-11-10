@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { USER_ROLES, type Locale, type UserRole } from '@ars/shared';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { localizeError, localizeFieldErrors } from '../lib/errors';
 import { Field } from '../components/ui';
@@ -14,7 +14,10 @@ export default function Register(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<UserRole>('job_seeker');
+  const [params] = useSearchParams();
+  const [role, setRole] = useState<UserRole>(
+    params.get('role') === 'company_member' ? 'company_member' : 'job_seeker',
+  );
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
 

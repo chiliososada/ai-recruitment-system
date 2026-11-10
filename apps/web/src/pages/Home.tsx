@@ -28,7 +28,7 @@ export default function Home(): JSX.Element {
               <Icons.ArrowRight size={16} aria-hidden="true" />
             </Link>
             <Link to="/jobs" className="ui-btn secondary">
-              {t('nav.jobs')}
+              {t('home.browseJobs')}
             </Link>
           </div>
           <div className="hero-props">
@@ -52,9 +52,9 @@ export default function Home(): JSX.Element {
             <div className="row" style={{ gap: 'var(--space-3)' }}>
               <ScoreRing value={92} size={56} />
               <div>
-                <b>Full-Stack Engineer</b>
+                <b>{t('home.heroSampleTitle')}</b>
                 <div className="muted" style={{ fontSize: 'var(--text-sm)' }}>
-                  Acme Robotics · Tokyo
+                  {t('home.heroSampleCompany')}
                 </div>
               </div>
             </div>
@@ -88,7 +88,7 @@ export default function Home(): JSX.Element {
 
       {/* ---- features ---- */}
       <section style={{ paddingTop: 'var(--space-8)' }}>
-        <p className="section-eyebrow">{t('home.heroEyebrow')}</p>
+        <p className="section-eyebrow">{t('home.featuresEyebrow')}</p>
         <h2 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-5)' }}>
           {t('home.featuresTitle')}
         </h2>
@@ -146,18 +146,24 @@ export default function Home(): JSX.Element {
             <Icons.Users size={22} />
           </span>
           <h3>{t('home.seekerCta')}</h3>
-          <p className="muted">{t('analysis.none')}</p>
-          <Link to={user?.role === 'job_seeker' ? '/me' : '/register'}>{t('nav.resume')} →</Link>
+          <p className="muted">{t('home.seekerBody')}</p>
+          {!user ? (
+            <Link to="/register?role=job_seeker">{t('home.seekerLink')} →</Link>
+          ) : user.role === 'job_seeker' ? (
+            <Link to="/me">{t('home.seekerLinkMember')} →</Link>
+          ) : null}
         </article>
         <article className="card card-hover">
           <span className="icon-chip violet" style={{ marginBottom: 'var(--space-3)' }}>
             <Icons.Building2 size={22} />
           </span>
           <h3>{t('home.companyCta')}</h3>
-          <p className="muted">{t('match.candidates.empty')}</p>
-          <Link to={user?.role === 'company_member' ? '/console' : '/register'}>
-            {t('nav.console')} →
-          </Link>
+          <p className="muted">{t('home.companyBody')}</p>
+          {!user ? (
+            <Link to="/register?role=company_member">{t('home.companyLink')} →</Link>
+          ) : user.role === 'company_member' ? (
+            <Link to="/console">{t('home.companyLinkMember')} →</Link>
+          ) : null}
         </article>
       </section>
 

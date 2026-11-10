@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { qs } from '../lib/qs';
-import { EmptyState, ErrorState, Field, Loading } from '../components/ui';
+import { EmptyState, ErrorState, Field, Loading, PageHeader } from '../components/ui';
 import { Icons, InitialAvatar } from '../design';
 import { Pagination } from './JobsBrowse';
 
@@ -26,9 +26,7 @@ export default function CompaniesBrowse(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="page-header">
-        <h1>{t('company.list')}</h1>
-      </div>
+      <PageHeader title={t('company.list')} desc={t('pageDesc.companies')} />
       <form
         className="card ui-filterbar"
         onSubmit={(e) => {
@@ -37,11 +35,16 @@ export default function CompaniesBrowse(): JSX.Element {
           void query.refetch();
         }}
       >
-        <Field label={t('common.search')} htmlFor="q">
+        <Field label={t('job.keyword')} htmlFor="q">
           <input id="q" value={q} onChange={(e) => setQ(e.target.value)} />
         </Field>
         <Field label={t('company.industry')} htmlFor="industry">
-          <input id="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} />
+          <input
+            id="industry"
+            value={industry}
+            placeholder={t('company.industryPlaceholder')}
+            onChange={(e) => setIndustry(e.target.value)}
+          />
         </Field>
         <Field label={t('company.size')} htmlFor="size">
           <select
@@ -52,7 +55,7 @@ export default function CompaniesBrowse(): JSX.Element {
             <option value="">{t('common.all')}</option>
             {COMPANY_SIZES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {t(`company.sizeValue.${s}`)}
               </option>
             ))}
           </select>
@@ -88,7 +91,7 @@ export default function CompaniesBrowse(): JSX.Element {
                       {c.size ? (
                         <span className="meta-item">
                           <Icons.Users size={14} aria-hidden="true" />
-                          {c.size}
+                          {t(`company.sizeValue.${c.size}`)}
                         </span>
                       ) : null}
                       {c.location ? (
@@ -105,7 +108,7 @@ export default function CompaniesBrowse(): JSX.Element {
                   style={{ marginTop: 'var(--space-3)' }}
                 >
                   <Icons.Briefcase size={12} aria-hidden="true" />
-                  {t('company.openJobs')}: {c.openJobCount ?? 0}
+                  {t('company.openJobsCount', { count: c.openJobCount ?? 0 })}
                 </span>
               </article>
             ))}

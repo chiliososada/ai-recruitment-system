@@ -6,11 +6,12 @@ import { Link, useParams } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
+import { formatSalaryRange } from '../lib/format';
 import { ErrorState, Loading } from '../components/ui';
 import { Icons, InitialAvatar } from '../design';
 
 export default function JobDetail(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id = '' } = useParams();
   const { user } = useAuth();
   const [applied, setApplied] = useState(false);
@@ -27,7 +28,7 @@ export default function JobDetail(): JSX.Element {
   if (job.isLoading) return <Loading />;
   if (job.error) return <ErrorState error={job.error} onRetry={() => job.refetch()} />;
   const j = job.data!;
-  const hasSalary = j.salaryMin != null || j.salaryMax != null;
+  const salary = formatSalaryRange(t, i18n.language, j.salaryMin, j.salaryMax, j.currency);
 
   return (
     <section className="stack" style={{ maxWidth: 880, margin: '0 auto' }}>
@@ -56,8 +57,16 @@ export default function JobDetail(): JSX.Element {
                   {j.location}
                 </span>
               ) : null}
+              {j.minYears > 0 ? (
+                <span className="meta-item">{t('job.minYearsValue', { count: j.minYears })}</span>
+              ) : null}
+              {j.languages.length > 0 ? (
+                <span className="meta-item">
+                  {t('job.languages')}: {j.languages.join(', ')}
+                </span>
+              ) : null}
             </div>
-            {hasSalary ? (
+            {salary ? (
               <div
                 className="meta-item"
                 style={{
@@ -68,8 +77,7 @@ export default function JobDetail(): JSX.Element {
                 }}
               >
                 <Icons.Banknote size={18} aria-hidden="true" />
-                {(j.salaryMin ?? 0).toLocaleString()} – {(j.salaryMax ?? 0).toLocaleString()}{' '}
-                {j.currency}
+                {salary}
               </div>
             ) : null}
           </div>

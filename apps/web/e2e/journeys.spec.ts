@@ -60,7 +60,7 @@ test.describe.serial('Two-sided recruitment journeys (E2E main paths)', () => {
     await page
       .getByLabel('Description')
       .fill('Build TypeScript, React and Node.js apps on PostgreSQL and AWS.');
-    await page.getByLabel('Required skills (comma-separated)').fill('TypeScript, React, Node.js');
+    await page.getByLabel('Required skills').fill('TypeScript, React, Node.js');
     await page.getByRole('button', { name: 'Create job' }).click();
     await expect(page.getByText(JOB_TITLE)).toBeVisible();
   });

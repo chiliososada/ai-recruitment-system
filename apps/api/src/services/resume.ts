@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  normalizeResumeMime,
   sanitizeFilename,
   validateUpload,
   type Locale,
@@ -10,6 +11,7 @@ import {
   type UploadResult,
 } from '@ars/shared';
 import { extractResumeText } from '../adapters/extract.js';
+import { isPlainXlsx } from '../adapters/xlsx.js';
 import type { Deps } from '../deps.js';
 import type { RequestContext } from '../db/types.js';
 import {
@@ -89,14 +91,18 @@ function extensionOf(filename: string): string {
   return lower.slice(lower.lastIndexOf('.'));
 }
 
-/** Magic-byte check: PDF starts with `%PDF-`; DOCX is a ZIP (`PK\x03\x04` local file header). */
-function contentMatchesExtension(buffer: Buffer, filename: string): boolean {
+/**
+ * Magic-byte check: PDF starts with `%PDF-`; DOCX and XLSX are ZIPs (`PK\x03\x04` local file
+ * header). An XLSX must additionally contain a workbook part and no VBA project.
+ */
+async function contentMatchesExtension(buffer: Buffer, filename: string): Promise<boolean> {
   const ext = extensionOf(filename);
   if (buffer.length < 4) return false;
   if (ext === '.pdf') return buffer.subarray(0, 5).toString('latin1') === '%PDF-';
-  if (ext === '.docx') {
-    return buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
-  }
+  const isZip =
+    buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
+  if (ext === '.docx') return isZip;
+  if (ext === '.xlsx') return isZip && (await isPlainXlsx(buffer));
   return false;
 }
 
@@ -125,13 +131,16 @@ export async function uploadResume(
 
   // Content sniffing (SEC-2): the actual bytes must match the declared type — defeats MIME /
   // extension spoofing of clean files (e.g. an executable renamed to .pdf).
-  if (!contentMatchesExtension(file.buffer, file.filename)) {
+  if (!(await contentMatchesExtension(file.buffer, file.filename))) {
     throw unsupportedMedia('File content does not match its type', 'resume.upload.badContent');
   }
 
+  // Canonical type (browsers may send a generic one for Office files; the bytes were verified).
+  const mime = normalizeResumeMime(file.filename, file.mime);
+
   // Unguessable, owner-scoped storage path (never derived from the filename).
   const storagePath = `${principal.userId}/${randomUUID()}${extensionOf(file.filename)}`;
-  await deps.storage.put(storagePath, file.buffer, file.mime, principal.userId);
+  await deps.storage.put(storagePath, file.buffer, mime, principal.userId);
 
   const { resume, parseJob } = await deps.db.service(async (c) => {
     const r = await c.query<ResumeRow>(
@@ -141,7 +150,7 @@ export async function uploadResume(
       [
         candidateId,
         sanitizeFilename(file.filename),
-        file.mime,
+        mime,
         file.buffer.length,
         storagePath,
         verdict,

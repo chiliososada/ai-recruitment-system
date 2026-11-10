@@ -9,7 +9,7 @@ export function CompareTable({ result }: { result: ComparisonResult }): JSX.Elem
       <table>
         <thead>
           <tr>
-            <th>{t('compare.summary')}</th>
+            <th>{t('compare.item')}</th>
             {result.candidates.map((c) => (
               <th key={c.candidateId}>{c.displayName}</th>
             ))}
@@ -27,7 +27,7 @@ export function CompareTable({ result }: { result: ComparisonResult }): JSX.Elem
           <tr>
             <th>{t('compare.years')}</th>
             {result.candidates.map((c) => (
-              <td key={c.candidateId}>{c.yearsExperience}</td>
+              <td key={c.candidateId}>{t('analysis.years', { count: c.yearsExperience })}</td>
             ))}
           </tr>
           <tr>

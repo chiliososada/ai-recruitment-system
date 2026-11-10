@@ -291,7 +291,7 @@ export async function sendMessage(
         'message',
         message.senderName,
         message.body.slice(0, 120),
-        `/messages/${conversationId}`,
+        `/messages?c=${conversationId}`,
         {
           conversationId,
           senderName: message.senderName,

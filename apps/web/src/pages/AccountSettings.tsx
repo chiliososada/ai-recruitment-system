@@ -5,7 +5,7 @@ import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 import { changeLocale } from '../i18n';
 import { useAuth } from '../lib/auth';
 import { localizeError } from '../lib/errors';
-import { Badge, Field } from '../components/ui';
+import { Badge, Field, PageHeader } from '../components/ui';
 
 export default function AccountSettings(): JSX.Element {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ export default function AccountSettings(): JSX.Element {
       className="card"
       style={{ maxWidth: 560, margin: '1rem auto', padding: 'var(--space-8)' }}
     >
-      <h1>{t('auth.accountSettings')}</h1>
+      <PageHeader title={t('auth.accountSettings')} desc={t('pageDesc.settings')} />
       <p>
         {user?.email}{' '}
         <Badge>{user?.emailVerified ? t('auth.verified') : t('auth.notVerified')}</Badge>

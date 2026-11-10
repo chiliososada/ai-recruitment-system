@@ -38,7 +38,7 @@ describe('JobsBrowse filtering (FR-07)', () => {
       { match: '/jobs', body: { items: [job], page: 1, pageSize: 20, total: 1, totalPages: 1 } },
     ]);
     renderWithProviders(<JobsBrowse />);
-    expect(screen.getByLabelText('Search')).toBeInTheDocument();
+    expect(screen.getByLabelText('Keyword')).toBeInTheDocument();
     expect(screen.getByLabelText('Work style')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('Backend Engineer')).toBeInTheDocument();

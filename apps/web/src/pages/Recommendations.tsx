@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import { EmptyState, ErrorState, Loading } from '../components/ui';
+import { EmptyState, ErrorState, Loading, PageHeader } from '../components/ui';
+import { MatchExplanation } from '../components/MatchExplanation';
 import { Icons, InitialAvatar, ScoreRing } from '../design';
 
 export default function Recommendations(): JSX.Element {
@@ -19,15 +20,13 @@ export default function Recommendations(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="page-header">
-        <h1>{t('match.recommendations.title')}</h1>
-      </div>
+      <PageHeader title={t('match.recommendations.title')} desc={t('pageDesc.recommendations')} />
       {items.length === 0 ? (
         <EmptyState message={t('match.recommendations.empty')} />
       ) : (
         <div className="grid cols-2">
           {items.map((m) => (
-            <article key={m.id} className="card" data-testid="rec-card">
+            <article key={m.id} className="card stack" data-testid="rec-card">
               <div
                 className="row"
                 style={{ gap: 'var(--space-3)', alignItems: 'flex-start', flexWrap: 'nowrap' }}
@@ -44,25 +43,18 @@ export default function Recommendations(): JSX.Element {
                     </span>
                   </div>
                 </div>
-                <span aria-label={`${t('match.score')} ${m.score}/100`}>
+                <span
+                  aria-label={`${t('match.score')} ${m.score}/100`}
+                  title={t('match.score')}
+                  style={{ textAlign: 'center' }}
+                >
                   <ScoreRing value={m.score} size={52} />
+                  <span className="muted" style={{ display: 'block', fontSize: 'var(--text-xs)' }}>
+                    {t('match.score')}
+                  </span>
                 </span>
               </div>
-              <p className="muted" style={{ margin: 'var(--space-3) 0' }}>
-                {m.reason}
-              </p>
-              <div>
-                {m.matchedSkills.slice(0, 6).map((s) => (
-                  <span key={s} className="tag ok">
-                    {s}
-                  </span>
-                ))}
-                {m.missingSkills.slice(0, 4).map((s) => (
-                  <span key={s} className="tag gap">
-                    {s}
-                  </span>
-                ))}
-              </div>
+              <MatchExplanation match={m} />
             </article>
           ))}
         </div>

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { RegisterSchema } from './schemas/auth.js';
 import { CreateJobSchema } from './schemas/job.js';
-import { MAX_UPLOAD_BYTES, sanitizeFilename, validateUpload } from './schemas/resume.js';
+import {
+  MAX_UPLOAD_BYTES,
+  normalizeResumeMime,
+  sanitizeFilename,
+  validateUpload,
+} from './schemas/resume.js';
 import { SkillAnalysisResultSchema } from './schemas/analysis.js';
 import { SendMessageSchema } from './schemas/messaging.js';
 
@@ -23,6 +28,38 @@ describe('validateUpload (FR-02.3)', () => {
   });
   it('rejects disallowed MIME types', () => {
     expect(validateUpload({ ...pdf, mime: 'application/x-msdownload' })).toBe(
+      'resume.upload.badMime',
+    );
+  });
+  it('accepts Excel (.xlsx) résumés', () => {
+    expect(
+      validateUpload({
+        filename: '職務経歴書.xlsx',
+        mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        sizeBytes: 2048,
+      }),
+    ).toBeNull();
+  });
+  it('rejects legacy Office formats', () => {
+    expect(
+      validateUpload({ filename: 'cv.xls', mime: 'application/vnd.ms-excel', sizeBytes: 10 }),
+    ).toBe('resume.upload.badExtension');
+    expect(validateUpload({ filename: 'cv.doc', mime: 'application/msword', sizeBytes: 10 })).toBe(
+      'resume.upload.badExtension',
+    );
+  });
+  it('takes the type from the extension when the browser reports a generic one', () => {
+    for (const generic of ['', 'application/octet-stream', 'application/zip']) {
+      expect(validateUpload({ filename: 'cv.xlsx', mime: generic, sizeBytes: 10 })).toBeNull();
+      expect(validateUpload({ filename: 'cv.docx', mime: generic, sizeBytes: 10 })).toBeNull();
+    }
+    expect(normalizeResumeMime('cv.xlsx', '')).toBe(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    expect(normalizeResumeMime('cv.pdf', 'application/pdf')).toBe('application/pdf');
+  });
+  it('rejects a declared type that does not belong to the extension', () => {
+    expect(validateUpload({ filename: 'cv.xlsx', mime: 'application/pdf', sizeBytes: 10 })).toBe(
       'resume.upload.badMime',
     );
   });

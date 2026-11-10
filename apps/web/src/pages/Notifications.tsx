@@ -3,11 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { EmptyState, Loading } from '../components/ui';
+import { formatDateTime, notificationBody, notificationLink } from '../lib/format';
+import { EmptyState, Loading, PageHeader } from '../components/ui';
 import { Icons } from '../design';
 
 export default function Notifications(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const list = useQuery({
@@ -28,14 +29,17 @@ export default function Notifications(): JSX.Element {
 
   return (
     <section className="stack">
-      <div className="row page-header" style={{ justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>{t('notification.title')}</h1>
-        {items.some((n) => !n.readAt) && (
-          <button type="button" className="secondary" onClick={() => markAll.mutate()}>
-            {t('notification.markAllRead')}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={t('notification.title')}
+        desc={t('pageDesc.notifications')}
+        actions={
+          items.some((n) => !n.readAt) ? (
+            <button type="button" className="secondary" onClick={() => markAll.mutate()}>
+              {t('notification.markAllRead')}
+            </button>
+          ) : null
+        }
+      />
       {items.length === 0 ? (
         <EmptyState message={t('notification.empty')} />
       ) : (
@@ -47,12 +51,14 @@ export default function Notifications(): JSX.Element {
               ) : n.type === 'match_ready' ? (
                 <Icons.Sparkles size={18} />
               ) : n.type.startsWith('interview') ? (
-                <Icons.Users size={18} />
+                <Icons.CalendarClock size={18} />
               ) : n.type.startsWith('application') ? (
                 <Icons.Briefcase size={18} />
               ) : (
                 <Icons.Bell size={18} />
               );
+            const body = notificationBody(t, n);
+            const link = notificationLink(n.link);
             return (
               <li
                 key={n.id}
@@ -74,8 +80,8 @@ export default function Notifications(): JSX.Element {
                     gap: 'var(--space-3)',
                   }}
                   onClick={() => {
-                    markOne.mutate(n.id);
-                    if (n.link) navigate(n.link);
+                    if (!n.readAt) markOne.mutate(n.id);
+                    if (link) navigate(link);
                   }}
                 >
                   <span className={`icon-chip ${n.readAt ? '' : 'violet'}`} aria-hidden="true">
@@ -85,7 +91,7 @@ export default function Notifications(): JSX.Element {
                     <strong style={{ color: 'var(--color-text)' }}>
                       {t(`notification.types.${n.type}`)}
                     </strong>
-                    {n.body ? (
+                    {body ? (
                       <span
                         className="muted"
                         style={{
@@ -94,9 +100,19 @@ export default function Notifications(): JSX.Element {
                           fontSize: 'var(--text-sm)',
                         }}
                       >
-                        {n.body}
+                        {body}
                       </span>
                     ) : null}
+                  </span>
+                  <span
+                    className="muted"
+                    style={{
+                      fontWeight: 'var(--weight-regular)',
+                      fontSize: 'var(--text-xs)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {formatDateTime(n.createdAt, i18n.language)}
                   </span>
                 </button>
               </li>

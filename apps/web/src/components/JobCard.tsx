@@ -1,12 +1,13 @@
 import type { Job } from '@ars/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { formatSalaryRange } from '../lib/format';
 import { Icons, InitialAvatar } from '../design';
 
 /** Rich job card: company mark, meta row with icons, skills and salary. */
 export function JobCard({ job }: { job: Job }): JSX.Element {
-  const { t } = useTranslation();
-  const hasSalary = job.salaryMin != null || job.salaryMax != null;
+  const { t, i18n } = useTranslation();
+  const salary = formatSalaryRange(t, i18n.language, job.salaryMin, job.salaryMax, job.currency);
   return (
     <article className="card" data-testid="job-card">
       <div
@@ -29,11 +30,14 @@ export function JobCard({ job }: { job: Job }): JSX.Element {
               <Icons.Laptop size={14} aria-hidden="true" />
               {t(`job.workStyleValue.${job.workStyle}`)}
             </span>
-            {job.location ? (
+            {job.location && job.location !== t(`job.workStyleValue.${job.workStyle}`) ? (
               <span className="meta-item">
                 <Icons.MapPin size={14} aria-hidden="true" />
                 {job.location}
               </span>
+            ) : null}
+            {job.minYears > 0 ? (
+              <span className="meta-item">{t('job.minYearsValue', { count: job.minYears })}</span>
             ) : null}
           </div>
         </div>
@@ -50,7 +54,7 @@ export function JobCard({ job }: { job: Job }): JSX.Element {
           </span>
         ))}
       </div>
-      {hasSalary ? (
+      {salary ? (
         <div
           className="meta-item"
           style={{
@@ -61,8 +65,7 @@ export function JobCard({ job }: { job: Job }): JSX.Element {
           }}
         >
           <Icons.Banknote size={15} aria-hidden="true" />
-          {(job.salaryMin ?? 0).toLocaleString()} – {(job.salaryMax ?? 0).toLocaleString()}{' '}
-          {job.currency}
+          {salary}
         </div>
       ) : null}
     </article>

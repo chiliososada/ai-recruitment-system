@@ -22,6 +22,26 @@ import {
   uploadResume,
 } from '../services/resume.js';
 
+/**
+ * RFC 6266 / 5987 Content-Disposition. Header values must be Latin-1, so a Japanese file name
+ * (「職務経歴書.xlsx」) goes in the UTF-8 `filename*` parameter with an ASCII fallback; writing
+ * it raw into `filename=` makes Node reject the header and the download fails.
+ */
+export function contentDisposition(filename: string): string {
+  const dot = filename.lastIndexOf('.');
+  const ext = dot > 0 ? filename.slice(dot).replace(/[^A-Za-z0-9.]/g, '') : '';
+  const ascii = filename
+    .replace(/[^\x20-\x7e]/g, '')
+    .replace(/["\\]/g, '')
+    .trim();
+  const fallback = ascii && ascii !== ext ? ascii : `resume${ext}`;
+  const encoded = encodeURIComponent(filename).replace(
+    /['()*]/g,
+    (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+}
+
 export function registerCandidateRoutes(app: FastifyInstance, deps: Deps): void {
   // Stricter per-route limit on the expensive upload+parse pipeline (BE-3). Test default stays
   // high so existing suites are unaffected.
@@ -89,7 +109,7 @@ export function registerCandidateRoutes(app: FastifyInstance, deps: Deps): void 
     const principal = requireAuth(req);
     const file = await downloadResume(deps, principal, req.params.id);
     reply.header('content-type', file.mime);
-    reply.header('content-disposition', `attachment; filename="${file.filename}"`);
+    reply.header('content-disposition', contentDisposition(file.filename));
     return reply.send(file.buffer);
   });
 }

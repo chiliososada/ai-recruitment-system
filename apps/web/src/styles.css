@@ -458,6 +458,15 @@ select[aria-invalid='true'] {
   line-height: 1.12;
   margin-bottom: var(--space-4);
 }
+/* Japanese headings: break between phrases (人材と仕事の / 最適な出会いを、) instead of
+   inside a word such as 出会い. Browsers without support keep the default behaviour. */
+@supports (word-break: auto-phrase) {
+  .hero-title,
+  .page-header h1,
+  .cta-band h2 {
+    word-break: auto-phrase;
+  }
+}
 .hero-sub {
   font-size: var(--text-lg);
   color: var(--color-text-muted);

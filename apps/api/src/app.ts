@@ -60,7 +60,12 @@ export async function buildServer(deps: Deps): Promise<FastifyInstance> {
     referrerPolicy: { policy: 'no-referrer' },
     hsts: deps.config.isProduction ? { maxAge: 15_552_000, includeSubDomains: true } : false,
   });
-  await app.register(cors, { origin: deps.config.corsOrigins, credentials: true });
+  await app.register(cors, {
+    origin: deps.config.corsOrigins,
+    credentials: true,
+    // Let the SPA read the download file name when it is served from another origin.
+    exposedHeaders: ['Content-Disposition'],
+  });
   await app.register(rateLimit, {
     max: deps.config.rateLimitMax,
     timeWindow: '1 minute',

@@ -3,6 +3,7 @@ import {
   INTERVIEW_MODES,
   RECRUITMENT_STAGES,
   type Application,
+  type Interview,
   type InterviewMode,
   type Job,
   type MatchResult,
@@ -13,7 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { localizeError } from '../lib/errors';
-import { Badge, EmptyState, ErrorState, Loading } from '../components/ui';
+import { formatDateTime } from '../lib/format';
+import { Badge, EmptyState, ErrorState, Loading, PageHeader } from '../components/ui';
+import { MatchExplanation } from '../components/MatchExplanation';
+import { Icons, ScoreRing } from '../design';
 
 export default function JobManage(): JSX.Element {
   const { t } = useTranslation();
@@ -38,15 +42,85 @@ export default function JobManage(): JSX.Element {
 
   if (job.isLoading) return <Loading />;
   if (job.error) return <ErrorState error={job.error} onRetry={() => job.refetch()} />;
+  const j = job.data!;
+  const knownSkills = [...j.requiredSkills, ...j.preferredSkills];
 
   return (
     <section className="stack">
+      <Link to={`/console/companies/${j.companyId}`} className="meta-item">
+        <Icons.ChevronLeft size={16} aria-hidden="true" />
+        {t('job.backToList')}
+      </Link>
+      <PageHeader
+        title={j.title}
+        desc={t('pageDesc.jobManage')}
+        actions={
+          <>
+            <Badge>{t(`job.status.${j.status}`)}</Badge>
+            <Badge>{t(`job.visibilityValue.${j.visibility}`)}</Badge>
+          </>
+        }
+      />
+
       <div className="card">
-        <h1>{job.data!.title}</h1>
-        <span className="row">
-          <Badge>{t(`job.status.${job.data!.status}`)}</Badge>
-          <Badge>{t(`job.visibilityValue.${job.data!.visibility}`)}</Badge>
-        </span>
+        <h2>{t('application.applicants')}</h2>
+        {applications.isLoading ? (
+          <Loading />
+        ) : (applications.data?.length ?? 0) === 0 ? (
+          <EmptyState message={t('application.emptyCompany')} />
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>{t('application.applicant')}</th>
+                  <th>{t('match.score')}</th>
+                  <th>{t('application.stageLabel')}</th>
+                  <th>{t('interview.title')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.data!.map((app) => (
+                  <tr key={app.id}>
+                    <td>
+                      <Link to={`/talent/${app.candidateId}`}>{app.candidateName}</Link>
+                    </td>
+                    <td>{app.matchScore ?? '—'}</td>
+                    <td>
+                      <label htmlFor={`stage-${app.id}`} className="visually-hidden">
+                        {t('application.advance')}
+                      </label>
+                      <select
+                        id={`stage-${app.id}`}
+                        value={app.stage}
+                        onChange={(e) =>
+                          setStage.mutate({
+                            appId: app.id,
+                            stage: e.target.value as RecruitmentStage,
+                          })
+                        }
+                      >
+                        {RECRUITMENT_STAGES.map((s) => (
+                          <option key={s} value={s}>
+                            {t(`application.stage.${s}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <InterviewCell applicationId={app.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {setStage.error ? (
+          <div className="field-error" role="alert">
+            {localizeError(t, setStage.error)}
+          </div>
+        ) : null}
       </div>
 
       <div className="card">
@@ -61,105 +135,107 @@ export default function JobManage(): JSX.Element {
               <li
                 key={c.id}
                 className="row"
-                style={{ justifyContent: 'space-between' }}
+                style={{
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  flexWrap: 'nowrap',
+                  gap: 'var(--space-3)',
+                }}
                 data-testid="ranked-candidate"
               >
-                <span>
-                  <Link to={`/talent/${c.candidateId}`}>{c.candidateName}</Link>
-                  <span className="muted"> — {c.reason}</span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <Link to={`/talent/${c.candidateId}`}>
+                    <strong>{c.candidateName}</strong>
+                  </Link>
+                  {c.candidateHeadline ? (
+                    <span className="muted"> · {c.candidateHeadline}</span>
+                  ) : null}
+                  <div style={{ marginTop: 'var(--space-2)' }}>
+                    <MatchExplanation match={c} knownSkills={knownSkills} maxMissing={3} />
+                  </div>
+                </div>
+                <span aria-label={`${t('match.score')} ${c.score}/100`}>
+                  <ScoreRing value={c.score} size={46} />
                 </span>
-                <span className="score">{c.score}</span>
               </li>
             ))}
           </ul>
         )}
       </div>
-
-      <div className="card">
-        <h2>{t('application.title')}</h2>
-        {applications.isLoading ? (
-          <Loading />
-        ) : (applications.data?.length ?? 0) === 0 ? (
-          <EmptyState message={t('application.empty')} />
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>{t('talent.detail')}</th>
-                <th>{t('match.score')}</th>
-                <th>{t('application.advance')}</th>
-                <th>{t('interview.title')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.data!.map((app) => (
-                <tr key={app.id}>
-                  <td>{app.candidateName}</td>
-                  <td>{app.matchScore ?? '—'}</td>
-                  <td>
-                    <label htmlFor={`stage-${app.id}`} className="visually-hidden">
-                      {t('application.advance')}
-                    </label>
-                    <select
-                      id={`stage-${app.id}`}
-                      value={app.stage}
-                      onChange={(e) =>
-                        setStage.mutate({
-                          appId: app.id,
-                          stage: e.target.value as RecruitmentStage,
-                        })
-                      }
-                    >
-                      {RECRUITMENT_STAGES.map((s) => (
-                        <option key={s} value={s}>
-                          {t(`application.stage.${s}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <InterviewForm applicationId={app.id} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {setStage.error ? (
-          <div className="field-error" role="alert">
-            {localizeError(t, setStage.error)}
-          </div>
-        ) : null}
-      </div>
     </section>
+  );
+}
+
+function InterviewCell({ applicationId }: { applicationId: string }): JSX.Element {
+  const { t, i18n } = useTranslation();
+  const interviews = useQuery({
+    queryKey: ['app-interviews', applicationId],
+    queryFn: () => api.get<Interview[]>(`/applications/${applicationId}/interviews`),
+  });
+  const list = [...(interviews.data ?? [])].sort((a, b) =>
+    a.scheduledAt.localeCompare(b.scheduledAt),
+  );
+  return (
+    <div className="stack" style={{ gap: 'var(--space-2)' }}>
+      {list.map((iv) => (
+        <div key={iv.id} style={{ fontSize: 'var(--text-sm)' }}>
+          <Badge
+            variant={
+              iv.status === 'confirmed'
+                ? 'success'
+                : iv.status === 'proposed'
+                  ? 'warning'
+                  : iv.status === 'declined' || iv.status === 'cancelled'
+                    ? 'danger'
+                    : undefined
+            }
+          >
+            {t(`interview.status.${iv.status}`)}
+          </Badge>{' '}
+          {formatDateTime(iv.scheduledAt, i18n.language)} · {t(`interview.modeValue.${iv.mode}`)}
+          {iv.location ? ` · ${iv.location}` : ''}
+        </div>
+      ))}
+      <InterviewForm applicationId={applicationId} />
+    </div>
   );
 }
 
 function InterviewForm({ applicationId }: { applicationId: string }): JSX.Element {
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [when, setWhen] = useState('');
   const [mode, setMode] = useState<InterviewMode>('online');
+  const [location, setLocation] = useState('');
   const [open, setOpen] = useState(false);
   const propose = useMutation({
     mutationFn: () =>
       api.post(`/applications/${applicationId}/interviews`, {
         scheduledAt: new Date(when).toISOString(),
         mode,
-        durationMinutes: 45,
+        durationMinutes: 60,
+        location: location.trim() || undefined,
       }),
-    onSuccess: () => setOpen(false),
+    onSuccess: () => {
+      setOpen(false);
+      setWhen('');
+      setLocation('');
+      void qc.invalidateQueries({ queryKey: ['app-interviews', applicationId] });
+    },
   });
 
   if (!open) {
     return (
-      <button type="button" className="ghost" onClick={() => setOpen(true)}>
+      <button type="button" className="ghost sm" onClick={() => setOpen(true)}>
+        <Icons.CalendarClock size={15} aria-hidden="true" />
         {t('interview.propose')}
       </button>
     );
   }
   return (
     <form
-      className="row"
+      className="stack"
+      style={{ gap: 'var(--space-2)', minWidth: 240 }}
       onSubmit={(e) => {
         e.preventDefault();
         if (when) propose.mutate();
@@ -186,9 +262,26 @@ function InterviewForm({ applicationId }: { applicationId: string }): JSX.Elemen
           </option>
         ))}
       </select>
-      <button type="submit" disabled={propose.isPending}>
-        {t('common.confirm')}
-      </button>
+      <input
+        aria-label={t('interview.location')}
+        placeholder={t('interview.locationPlaceholder')}
+        value={location}
+        maxLength={300}
+        onChange={(e) => setLocation(e.target.value)}
+      />
+      <div className="row">
+        <button type="submit" className="sm" disabled={propose.isPending}>
+          {t('interview.proposeSubmit')}
+        </button>
+        <button type="button" className="ghost sm" onClick={() => setOpen(false)}>
+          {t('common.cancel')}
+        </button>
+      </div>
+      {propose.error ? (
+        <div className="field-error" role="alert">
+          {localizeError(t, propose.error)}
+        </div>
+      ) : null}
     </form>
   );
 }

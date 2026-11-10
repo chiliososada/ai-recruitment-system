@@ -85,4 +85,39 @@ export const api = {
     if (!res.ok) throw new ApiError(res.status, 'INTERNAL', undefined);
     return URL.createObjectURL(await res.blob());
   },
+  /**
+   * Authenticated download saved under the server's file name (RFC 5987 `filename*`
+   * first, so Japanese names survive), falling back to `fallbackName`.
+   */
+  saveFile: async (path: string, fallbackName: string): Promise<void> => {
+    const res = await fetch(`${BASE}/api${path}`, { headers: authHeaders() });
+    if (!res.ok) throw new ApiError(res.status, 'INTERNAL', undefined);
+    const disposition = res.headers.get('content-disposition') ?? '';
+    let name = fallbackName;
+    const star = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
+    const plain = /filename="([^"]+)"/i.exec(disposition);
+    try {
+      if (star?.[1]) name = decodeURIComponent(star[1]);
+      else if (plain?.[1]) name = plain[1];
+    } catch {
+      /* keep fallback */
+    }
+    const blob = await res.blob();
+    if (!/\.[A-Za-z0-9]{2,5}$/.test(name)) {
+      const ext: Record<string, string> = {
+        'application/pdf': '.pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+      };
+      name += ext[blob.type.split(';')[0]!.trim()] ?? '';
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
 };

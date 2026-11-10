@@ -127,7 +127,7 @@ export async function applyToJob(
         'application_received',
         'New application',
         m.title,
-        `/console/jobs/${input.jobId}/applications`,
+        `/console/jobs/${input.jobId}`,
         {
           jobId: input.jobId,
           applicationId: application.id,

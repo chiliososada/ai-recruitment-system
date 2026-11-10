@@ -45,9 +45,14 @@ void i18n
   .then(() => ensureBundle(i18n.language));
 
 if (typeof document !== 'undefined') {
-  i18n.on('languageChanged', (lng) => {
+  const syncDocument = (lng: string): void => {
     document.documentElement.lang = lng;
-  });
+    const title = i18n.t('meta.title');
+    if (title && title !== 'meta.title') document.title = title;
+  };
+  i18n.on('languageChanged', syncDocument);
+  i18n.on('loaded', () => syncDocument(i18n.language));
+  i18n.on('initialized', () => syncDocument(i18n.language));
 }
 
 export async function changeLocale(locale: Locale): Promise<void> {

@@ -12,6 +12,7 @@ import {
   eicarFile,
   makeResumeDocx,
   makeResumePdf,
+  makeResumeXlsx,
 } from '../src/testing/fixtures.js';
 
 let t: TestApp;
@@ -74,6 +75,41 @@ describe('resume upload + parse + analysis (FR-02, FR-03)', () => {
     });
     expect(res.statusCode).toBe(201);
     expect(res.json().parseJob.status).toBe('succeeded');
+  });
+
+  it('accepts an Excel (.xlsx) résumé, even with a generic browser MIME type', async () => {
+    const xlsx = await makeResumeXlsx(SAMPLE_RESUME_TEXT);
+    const res = await uploadResumeFile(t, seeker.headers, {
+      filename: '職務経歴書.xlsx',
+      mime: 'application/octet-stream',
+      buffer: xlsx,
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json().resume.mime).toBe(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    expect(res.json().parseJob.status).toBe('succeeded');
+
+    // Japanese file names download intact (RFC 5987 filename*), not as a 500.
+    const dl = await t.app.inject({
+      method: 'GET',
+      url: `/api/resumes/${res.json().resume.id}/download`,
+      headers: seeker.headers,
+    });
+    expect(dl.statusCode).toBe(200);
+    expect(dl.headers['content-disposition']).toContain(
+      `filename*=UTF-8''${encodeURIComponent('職務経歴書.xlsx')}`,
+    );
+  });
+
+  it('rejects a macro-enabled workbook renamed to .xlsx', async () => {
+    const res = await uploadResumeFile(t, seeker.headers, {
+      filename: 'cv.xlsx',
+      mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      buffer: await makeResumeXlsx('x', { withMacros: true }),
+    });
+    expect(res.statusCode).toBe(415);
+    expect(res.json().error.messageKey).toBe('resume.upload.badContent');
   });
 
   it('lets the owner download their resume', async () => {
