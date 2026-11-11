@@ -1,5 +1,6 @@
 import {
   ALGORITHM_VERSION,
+  MATCH_MIN_SCORE,
   buildMatchReason,
   scoreMatch,
   type MatchBreakdown,
@@ -240,7 +241,10 @@ const MATCH_COLS = `mr.id, mr.job_id, mr.candidate_id, mr.score, mr.breakdown, m
   array_to_string(mr.missing_skills, ',') as missing_skills_text,
   mr.algorithm_version, mr.created_at`;
 
-/** Job recommendations for the signed-in seeker (FR-05.5). */
+/**
+ * Job recommendations for the signed-in seeker (FR-05.5): open public jobs scoring at least
+ * MATCH_MIN_SCORE, so they are always a subset of the public job list.
+ */
 export async function getRecommendationsForSeeker(
   deps: Deps,
   principal: Principal,
@@ -254,14 +258,19 @@ export async function getRecommendationsForSeeker(
        join jobs j on j.id = mr.job_id
        join companies co on co.id = j.company_id
        where mr.candidate_id = $1
+         and j.status = 'open' and j.visibility = 'public'
+         and mr.score >= $3
        order by mr.score desc, mr.created_at desc limit $2`,
-      [candidateId, RECALL_LIMIT],
+      [candidateId, RECALL_LIMIT, MATCH_MIN_SCORE],
     ),
   );
   return res.rows.map(mapMatch);
 }
 
-/** Ranked candidates for a job (company members only, FR-05.5/06). */
+/**
+ * Ranked candidates for a job (company members only, FR-05.5/06): open-to-work people scoring
+ * at least MATCH_MIN_SCORE, so they are always a subset of the talent search list.
+ */
 export async function getCandidatesForJob(
   deps: Deps,
   principal: Principal,
@@ -284,8 +293,10 @@ export async function getCandidatesForJob(
        join candidates cd on cd.id = mr.candidate_id
        join profiles p on p.id = cd.user_id
        where mr.job_id = $1
+         and cd.open_to_work = true
+         and mr.score >= $3
        order by mr.score desc, mr.created_at desc limit $2`,
-      [jobId, RECALL_LIMIT],
+      [jobId, RECALL_LIMIT, MATCH_MIN_SCORE],
     ),
   );
   return res.rows.map(mapMatch);

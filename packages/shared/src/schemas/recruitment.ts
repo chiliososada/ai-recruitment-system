@@ -51,6 +51,8 @@ export const ShortlistEntrySchema = z.object({
   createdAt: z.string(),
   candidateName: z.string().optional(),
   candidateHeadline: z.string().nullable().optional(),
+  /** Title of the job the person was shortlisted for (null when added without a job). */
+  jobTitle: z.string().nullable().optional(),
 });
 export type ShortlistEntry = z.infer<typeof ShortlistEntrySchema>;
 

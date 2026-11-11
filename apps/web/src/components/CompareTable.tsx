@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 export function CompareTable({ result }: { result: ComparisonResult }): JSX.Element {
   const { t } = useTranslation();
+  // Scores only exist when the comparison is against one job; otherwise drop the row.
+  const hasScores = result.candidates.some((c) => c.matchScore != null);
   return (
     <div className="card" data-testid="compare-table" style={{ overflowX: 'auto' }}>
       <h2>{t('compare.title')}</h2>
@@ -18,14 +20,16 @@ export function CompareTable({ result }: { result: ComparisonResult }): JSX.Elem
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">{t('compare.matchScore')}</th>
-            {result.candidates.map((c) => (
-              <td key={c.candidateId} className="score">
-                {c.matchScore ?? '—'}
-              </td>
-            ))}
-          </tr>
+          {hasScores ? (
+            <tr>
+              <th scope="row">{t('compare.matchScore')}</th>
+              {result.candidates.map((c) => (
+                <td key={c.candidateId} className="score">
+                  {c.matchScore ?? '—'}
+                </td>
+              ))}
+            </tr>
+          ) : null}
           <tr>
             <th scope="row">{t('compare.years')}</th>
             {result.candidates.map((c) => (

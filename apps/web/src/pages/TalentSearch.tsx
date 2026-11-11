@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import type { ComparisonResult, Paginated, TalentSummary } from '@ars/shared';
+import {
+  MATCH_MIN_SCORE,
+  type Company,
+  type ComparisonResult,
+  type Job,
+  type Paginated,
+  type TalentSummary,
+} from '@ars/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -13,7 +20,7 @@ import { Pagination } from './JobsBrowse';
 export default function TalentSearch(): JSX.Element {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const jobId = params.get('job') ?? undefined;
   const [q, setQ] = useState('');
   const [minYears, setMinYears] = useState('');
@@ -21,6 +28,20 @@ export default function TalentSearch(): JSX.Element {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
   const [comparison, setComparison] = useState<ComparisonResult | null>(null);
+  // "jobId:candidateId" pairs added to the shortlist on this page.
+  const [added, setAdded] = useState<string[]>([]);
+
+  // The company's open jobs, for scoring the list against one of them.
+  const jobs = useQuery({
+    queryKey: ['talent-job-options'],
+    queryFn: async () => {
+      const companies = await api.get<Company[]>('/companies/mine');
+      const lists = await Promise.all(
+        companies.map((c) => api.get<Job[]>(`/companies/${c.id}/manage/jobs`)),
+      );
+      return lists.flat().filter((j) => j.status === 'open');
+    },
+  });
 
   const talent = useQuery({
     queryKey: ['talent', q, minYears, skills, page, jobId],
@@ -32,8 +53,19 @@ export default function TalentSearch(): JSX.Element {
 
   const shortlist = useMutation({
     mutationFn: (candidateId: string) => api.post('/shortlists', { candidateId, jobId }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['shortlist'] }),
+    onSuccess: (_res, candidateId) => {
+      setAdded((prev) => [...prev, `${jobId ?? ''}:${candidateId}`]);
+      void qc.invalidateQueries({ queryKey: ['shortlist'] });
+    },
   });
+
+  function chooseJob(next: string): void {
+    setParams(next ? { job: next } : {});
+    setPage(1);
+    // A comparison is scored against one job; start over when the job changes.
+    setSelected([]);
+    setComparison(null);
+  }
 
   const compare = useMutation({
     mutationFn: () => api.post<ComparisonResult>('/compare', { candidateIds: selected, jobId }),
@@ -57,6 +89,19 @@ export default function TalentSearch(): JSX.Element {
           void talent.refetch();
         }}
       >
+        {/* Wider than the other filters so long job titles stay readable. */}
+        <div style={{ flex: '2 1 300px', minWidth: 0 }}>
+          <Field label={t('talent.job')} htmlFor="job">
+            <select id="job" value={jobId ?? ''} onChange={(e) => chooseJob(e.target.value)}>
+              <option value="">{t('talent.jobNone')}</option>
+              {(jobs.data ?? []).map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.title}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
         <Field label={t('talent.keyword')} htmlFor="q">
           <input
             id="q"
@@ -88,6 +133,10 @@ export default function TalentSearch(): JSX.Element {
         </button>
       </form>
 
+      <p className="muted" style={{ margin: 0, fontSize: 'var(--text-sm)' }} data-testid="job-hint">
+        {t(jobId ? 'talent.jobHintActive' : 'talent.jobHint', { min: MATCH_MIN_SCORE })}
+      </p>
+
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <span className="muted">{t('talent.count', { count: talent.data?.total ?? 0 })}</span>
         <button type="button" disabled={selected.length < 2} onClick={() => compare.mutate()}>
@@ -114,7 +163,9 @@ export default function TalentSearch(): JSX.Element {
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div className="row" style={{ gap: 'var(--space-2)' }}>
                       <h2 style={{ margin: 0, fontSize: 'var(--text-lg)' }}>
-                        <Link to={`/talent/${c.id}`}>{c.displayName}</Link>
+                        <Link to={`/talent/${c.id}${jobId ? `?job=${jobId}` : ''}`}>
+                          {c.displayName}
+                        </Link>
                       </h2>
                       {c.recommended ? (
                         <Badge variant="rec">{t('talent.recommended')}</Badge>
@@ -149,13 +200,21 @@ export default function TalentSearch(): JSX.Element {
                     />
                     {t('talent.compareToggle')}
                   </label>
-                  <button
-                    type="button"
-                    className="secondary"
-                    onClick={() => shortlist.mutate(c.id)}
-                  >
-                    {t('shortlist.add')}
-                  </button>
+                  {added.includes(`${jobId ?? ''}:${c.id}`) ? (
+                    <button type="button" className="secondary" disabled>
+                      <Icons.Check size={16} aria-hidden="true" />
+                      {t('shortlist.added')}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={shortlist.isPending && shortlist.variables === c.id}
+                      onClick={() => shortlist.mutate(c.id)}
+                    >
+                      {t('shortlist.add')}
+                    </button>
+                  )}
                 </div>
               </article>
             ))}

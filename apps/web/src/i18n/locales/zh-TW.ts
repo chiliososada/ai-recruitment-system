@@ -61,7 +61,7 @@ const zhTW: Dict = {
   },
   pageDesc: {
     resume: '上傳履歷後，AI 會分析你的技能、年資與優勢。完善個人資料可以提高推薦的準確度。',
-    recommendations: 'AI 根據你的技能與經驗，依媒合度由高到低推薦適合你的職缺。',
+    recommendations: 'AI 根據你的技能與經驗，推薦媒合度 {{min}} 以上的職缺，依媒合度由高到低排列。',
     applications: '查看已應徵職缺的進度，並回覆企業寄來的面試邀請。',
     jobs: '依關鍵字、工作型態與技能尋找公開的職缺。',
     companies: '查看正在徵才的公司。',
@@ -346,9 +346,15 @@ const zhTW: Dict = {
     breakdown: '技能符合 {{skill}}% · 年資 {{exp}}% · 經歷相似度 {{sim}}%',
     recommendations: {
       title: 'AI 推薦職缺',
-      empty: '目前沒有推薦。在「履歷與 AI 分析」上傳履歷後，AI 會為你推薦職缺',
+      empty:
+        '目前沒有媒合度 {{min}} 以上的職缺。上傳履歷後會顯示適合你的職缺，所有職缺可在「找職缺」中查看',
     },
-    candidates: { title: 'AI 推薦的候選人', empty: '目前尚未找到適合此職缺的候選人' },
+    candidates: {
+      title: 'AI 推薦的候選人',
+      empty: '目前沒有媒合度 {{min}} 以上的候選人。所有求職者可在「人才搜尋」中查看',
+      note: '顯示媒合度 {{min}} 以上的人，依媒合度由高到低排列',
+      viewAll: '在人才搜尋中查看全部',
+    },
   },
   talent: {
     title: '人才搜尋',
@@ -362,6 +368,10 @@ const zhTW: Dict = {
     detail: '候選人詳情',
     count: '找到 {{count}} 位候選人',
     compareToggle: '加入比較',
+    job: '職缺',
+    jobNone: '不選擇',
+    jobHint: '選擇職缺後，會顯示每個人與該職缺的媒合度，並為 {{min}} 分以上的人標示「AI 推薦」。',
+    jobHintActive: '依與該職缺的媒合度由高到低顯示，{{min}} 分以上的人會標示「AI 推薦」。',
     contact: '聯絡信箱',
     downloadResume: '下載履歷檔案',
     noAccess: '將此候選人加入候選名單，或收到其應徵後，即可查看履歷與聯絡方式',
@@ -463,6 +473,8 @@ const zhTW: Dict = {
     empty: '候選名單還是空的。在「人才搜尋」中點擊「加入候選名單」後會顯示在這裡',
     compare: '比較所選候選人',
     selectAtLeastTwo: '請至少選擇 2 位候選人進行比較',
+    forJob: '對應職缺：{{title}}',
+    compareHint: '比較同一職缺下加入候選的人時，也會顯示媒合度。',
   },
   compare: {
     title: '候選人比較',

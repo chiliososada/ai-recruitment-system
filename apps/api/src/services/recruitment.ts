@@ -354,10 +354,13 @@ export async function listShortlist(deps: Deps, principal: Principal): Promise<S
       created_at: unknown;
       candidate_name: string;
       candidate_headline: string | null;
+      job_title: string | null;
     }>(
       `select s.id, s.company_id, s.candidate_id, s.job_id, s.note, s.created_at,
-              p.display_name as candidate_name, cd.headline as candidate_headline
+              p.display_name as candidate_name, cd.headline as candidate_headline,
+              j.title as job_title
        from shortlists s join candidates cd on cd.id = s.candidate_id join profiles p on p.id = cd.user_id
+       left join jobs j on j.id = s.job_id
        where s.company_id in (select company_id from company_members where user_id = $1)
        order by s.created_at desc`,
       [principal.userId],
@@ -372,6 +375,7 @@ export async function listShortlist(deps: Deps, principal: Principal): Promise<S
     createdAt: toIso(r.created_at),
     candidateName: r.candidate_name,
     candidateHeadline: r.candidate_headline,
+    jobTitle: r.job_title,
   }));
 }
 

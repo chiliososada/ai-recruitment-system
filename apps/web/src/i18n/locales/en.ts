@@ -67,7 +67,7 @@ const en = {
     resume:
       'Upload your resume and the AI analyses your skills, experience and strengths. Filling in your profile improves your matches.',
     recommendations:
-      'Jobs the AI picked for you from your skills and experience, best match first.',
+      'Jobs that fit your skills and experience (match score {{min}} or higher), best match first.',
     applications: 'Track the status of your applications and answer interview requests.',
     jobs: 'Browse open jobs by keyword, work style and skills.',
     companies: 'Browse companies that are hiring.',
@@ -356,9 +356,16 @@ const en = {
     breakdown: 'Skills {{skill}}% · Experience {{exp}}% · Profile similarity {{sim}}%',
     recommendations: {
       title: 'Recommended jobs',
-      empty: 'No recommendations yet — upload a resume first',
+      empty:
+        'No jobs with a match score of {{min}} or higher yet. Upload a resume to see jobs that fit you, or browse every job under Find jobs.',
     },
-    candidates: { title: 'AI-recommended candidates', empty: 'No matching candidates yet' },
+    candidates: {
+      title: 'AI-recommended candidates',
+      empty:
+        'No candidates with a match score of {{min}} or higher yet. Browse everyone under Talent search.',
+      note: 'Showing people with a match score of {{min}} or higher, best first',
+      viewAll: 'See everyone in Talent search',
+    },
   },
   talent: {
     title: 'Talent search',
@@ -372,6 +379,12 @@ const en = {
     detail: 'Candidate detail',
     count: '{{count}} candidate(s) found',
     compareToggle: 'Add to comparison',
+    job: 'Job',
+    jobNone: 'Not selected',
+    jobHint:
+      'Pick a job to see how well each person matches it. People scoring {{min}} or more are marked AI recommended.',
+    jobHintActive:
+      'Sorted by match with this job. People scoring {{min}} or more are marked AI recommended.',
     contact: 'Contact email',
     downloadResume: 'Download resume',
     noAccess:
@@ -474,6 +487,8 @@ const en = {
     empty: 'Your shortlist is empty',
     compare: 'Compare selected',
     selectAtLeastTwo: 'Select at least 2 candidates to compare',
+    forJob: 'For: {{title}}',
+    compareHint: 'Match scores appear when everyone you compare was shortlisted for the same job.',
   },
   compare: {
     title: 'Compare candidates',

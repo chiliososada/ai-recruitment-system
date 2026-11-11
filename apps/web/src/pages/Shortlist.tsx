@@ -61,6 +61,11 @@ export default function Shortlist(): JSX.Element {
         }
       />
       {selected.length === 1 ? <p className="muted">{t('shortlist.selectAtLeastTwo')}</p> : null}
+      {items.length > 1 ? (
+        <p className="muted" style={{ margin: 0, fontSize: 'var(--text-sm)' }}>
+          {t('shortlist.compareHint')}
+        </p>
+      ) : null}
 
       {items.length === 0 ? (
         <EmptyState message={t('shortlist.empty')} />
@@ -87,6 +92,15 @@ export default function Shortlist(): JSX.Element {
                       style={{ display: 'block', fontSize: 'var(--text-sm)' }}
                     >
                       {s.candidateHeadline}
+                    </span>
+                  ) : null}
+                  {s.jobTitle ? (
+                    <span
+                      className="muted"
+                      style={{ display: 'block', fontSize: 'var(--text-sm)' }}
+                      data-testid="shortlist-job"
+                    >
+                      {t('shortlist.forJob', { title: s.jobTitle })}
                     </span>
                   ) : null}
                 </span>

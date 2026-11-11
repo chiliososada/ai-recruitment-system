@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { MATCH_MIN_SCORE } from '@ars/shared';
 import {
   createCompanyAndJob,
   createTestApp,
@@ -69,6 +70,61 @@ describe('talent search + detail (FR-06)', () => {
     const found = res.json().items.find((c: { id: string }) => c.id === candidateId);
     expect(found.recommended).toBe(true);
     expect(found.matchScore).toBeGreaterThan(0);
+  });
+
+  it('only marks people at or above the match threshold as recommended, but lists everyone', async () => {
+    const weak = await createUser(t, { role: 'job_seeker', displayName: 'Ren Mobile' });
+    await uploadSampleResume(
+      t,
+      weak,
+      'Mobile developer. 2 years of Swift for iOS and Kotlin for Android apps.',
+    );
+    const all = await t.app.inject({ method: 'GET', url: '/api/talent', headers: company.headers });
+    const scoped = await t.app.inject({
+      method: 'GET',
+      url: `/api/talent?recommendedForJobId=${jobId}`,
+      headers: company.headers,
+    });
+    const items = scoped.json().items as {
+      displayName: string;
+      recommended: boolean;
+      matchScore: number | null;
+    }[];
+    // Selecting a job never hides anyone: same total as the plain list.
+    expect(scoped.json().total).toBe(all.json().total);
+    for (const c of items) {
+      expect(c.recommended).toBe(c.matchScore !== null && c.matchScore >= MATCH_MIN_SCORE);
+    }
+    const ren = items.find((c) => c.displayName === 'Ren Mobile');
+    expect(ren?.recommended).toBe(false);
+  });
+
+  it('shows the job each shortlisted person was added for', async () => {
+    // A separate person, so the "not yet linked" checks below stay valid for `candidateId`.
+    const other = await createUser(t, { role: 'job_seeker', displayName: 'Mio Sato' });
+    await uploadSampleResume(t, other);
+    const me = await t.app.inject({
+      method: 'GET',
+      url: '/api/candidates/me',
+      headers: other.headers,
+    });
+    const otherId = (me.json() as { id: string }).id;
+    const add = await t.app.inject({
+      method: 'POST',
+      url: '/api/shortlists',
+      headers: company.headers,
+      payload: { candidateId: otherId, jobId },
+    });
+    expect(add.statusCode).toBe(201);
+    const list = await t.app.inject({
+      method: 'GET',
+      url: '/api/shortlists',
+      headers: company.headers,
+    });
+    const entry = (list.json() as { candidateId: string; jobTitle: string | null }[]).find(
+      (s) => s.candidateId === otherId,
+    );
+    expect(entry?.jobTitle).toBe('Full-Stack Engineer');
   });
 
   it('gates sensitive fields on candidate detail until the company is linked (FR-06.3)', async () => {

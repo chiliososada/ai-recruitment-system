@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   INTERVIEW_MODES,
+  MATCH_MIN_SCORE,
   RECRUITMENT_STAGES,
   type Application,
   type Interview,
@@ -83,7 +84,7 @@ export default function JobManage(): JSX.Element {
                 {applications.data!.map((app) => (
                   <tr key={app.id}>
                     <td>
-                      <Link to={`/talent/${app.candidateId}`}>{app.candidateName}</Link>
+                      <Link to={`/talent/${app.candidateId}?job=${id}`}>{app.candidateName}</Link>
                     </td>
                     <td>{app.matchScore ?? '—'}</td>
                     <td>
@@ -124,11 +125,23 @@ export default function JobManage(): JSX.Element {
       </div>
 
       <div className="card">
-        <h2>{t('match.candidates.title')}</h2>
+        <div
+          className="row"
+          style={{ justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--space-3)' }}
+        >
+          <h2 style={{ margin: 0 }}>{t('match.candidates.title')}</h2>
+          <Link to={`/talent?job=${id}`}>{t('match.candidates.viewAll')}</Link>
+        </div>
+        <p
+          className="muted"
+          style={{ margin: 'var(--space-1) 0 var(--space-3)', fontSize: 'var(--text-sm)' }}
+        >
+          {t('match.candidates.note', { min: MATCH_MIN_SCORE })}
+        </p>
         {candidates.isLoading ? (
           <Loading />
         ) : (candidates.data?.length ?? 0) === 0 ? (
-          <EmptyState message={t('match.candidates.empty')} />
+          <EmptyState message={t('match.candidates.empty', { min: MATCH_MIN_SCORE })} />
         ) : (
           <ul className="list-reset stack">
             {candidates.data!.map((c) => (
@@ -144,7 +157,7 @@ export default function JobManage(): JSX.Element {
                 data-testid="ranked-candidate"
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <Link to={`/talent/${c.candidateId}`}>
+                  <Link to={`/talent/${c.candidateId}?job=${id}`}>
                     <strong>{c.candidateName}</strong>
                   </Link>
                   {c.candidateHeadline ? (

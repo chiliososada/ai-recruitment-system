@@ -1,4 +1,4 @@
-import type { MatchResult } from '@ars/shared';
+import { MATCH_MIN_SCORE, type MatchResult } from '@ars/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -20,9 +20,12 @@ export default function Recommendations(): JSX.Element {
 
   return (
     <section className="stack">
-      <PageHeader title={t('match.recommendations.title')} desc={t('pageDesc.recommendations')} />
+      <PageHeader
+        title={t('match.recommendations.title')}
+        desc={t('pageDesc.recommendations', { min: MATCH_MIN_SCORE })}
+      />
       {items.length === 0 ? (
-        <EmptyState message={t('match.recommendations.empty')} />
+        <EmptyState message={t('match.recommendations.empty', { min: MATCH_MIN_SCORE })} />
       ) : (
         <div className="grid cols-2">
           {items.map((m) => (

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { MATCH_MIN_SCORE } from '@ars/shared';
 import {
   createCompanyAndJob,
   createTestApp,
@@ -97,6 +98,73 @@ describe('AI matching (FR-05)', () => {
       headers: companyB.headers,
     });
     expect(res.statusCode).toBe(403);
+  });
+
+  it('keeps weak matches out of recommendations while the job list stays complete', async () => {
+    const { jobId: weakJobId } = await createCompanyAndJob(t, companyB, {
+      title: 'iOS / Android Engineer',
+      category: 'Mobile',
+      description: 'Native mobile apps in Swift and Kotlin for retail customers.',
+      requiredSkills: ['Swift', 'Kotlin'],
+      preferredSkills: ['Firebase'],
+      minYears: 12,
+      salaryMin: 4000000,
+      salaryMax: 5000000,
+      workStyle: 'onsite',
+      location: 'Sapporo',
+    });
+    const recs = await t.app.inject({
+      method: 'GET',
+      url: '/api/candidates/me/recommendations',
+      headers: seeker.headers,
+    });
+    const items = recs.json() as { jobId: string; score: number }[];
+    expect(items.every((m) => m.score >= MATCH_MIN_SCORE)).toBe(true);
+    expect(items.some((m) => m.jobId === weakJobId)).toBe(false);
+
+    const list = await t.app.inject({ method: 'GET', url: '/api/jobs?pageSize=50' });
+    const listed = (list.json() as { items: { id: string }[] }).items.map((j) => j.id);
+    expect(listed).toContain(weakJobId);
+    for (const m of items) expect(listed).toContain(m.jobId);
+  });
+
+  it('lists only open-to-work people scoring at least the match threshold for a job', async () => {
+    const res = await t.app.inject({
+      method: 'GET',
+      url: `/api/jobs/${jobId}/candidates`,
+      headers: company.headers,
+    });
+    const before = res.json() as { candidateId: string; score: number }[];
+    expect(before.length).toBeGreaterThan(0);
+    expect(before.every((m) => m.score >= MATCH_MIN_SCORE)).toBe(true);
+
+    // The seeker stops looking for work: they drop out of the job's matches.
+    await t.app.inject({
+      method: 'PATCH',
+      url: '/api/candidates/me',
+      headers: seeker.headers,
+      payload: { openToWork: false },
+    });
+    const after = await t.app.inject({
+      method: 'GET',
+      url: `/api/jobs/${jobId}/candidates`,
+      headers: company.headers,
+    });
+    const me = await t.app.inject({
+      method: 'GET',
+      url: '/api/candidates/me',
+      headers: seeker.headers,
+    });
+    const myId = (me.json() as { id: string }).id;
+    expect((after.json() as { candidateId: string }[]).some((m) => m.candidateId === myId)).toBe(
+      false,
+    );
+    await t.app.inject({
+      method: 'PATCH',
+      url: '/api/candidates/me',
+      headers: seeker.headers,
+      payload: { openToWork: true },
+    });
   });
 
   it('requires a seeker role for recommendations', async () => {

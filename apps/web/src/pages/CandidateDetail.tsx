@@ -1,7 +1,7 @@
 import type { CandidateDetail as CandidateDetailDto, Conversation } from '@ars/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { localizeError } from '../lib/errors';
 import { ErrorState, Loading } from '../components/ui';
@@ -10,6 +10,8 @@ import { Icons, InitialAvatar } from '../design';
 export default function CandidateDetail(): JSX.Element {
   const { t } = useTranslation();
   const { id = '' } = useParams();
+  // Set when the page was opened from a job (job page or job-scoped 求職者一覧).
+  const jobId = useSearchParams()[0].get('job') ?? undefined;
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -25,7 +27,7 @@ export default function CandidateDetail(): JSX.Element {
   });
 
   const shortlist = useMutation({
-    mutationFn: () => api.post('/shortlists', { candidateId: id }),
+    mutationFn: () => api.post('/shortlists', { candidateId: id, jobId }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['shortlist'] });
       // Shortlisting grants access to the résumé and contact details — refresh them.

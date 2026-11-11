@@ -11,6 +11,13 @@ import type { MatchBreakdown } from './schemas/match.js';
  */
 export const ALGORITHM_VERSION = 'match-v1';
 
+/**
+ * Lowest fit score that counts as a match: 「おすすめ企業」, 「この求人に合う求職者」 and the
+ * おすすめ badge only show pairs at or above it. Full lists (求人一覧, 求職者一覧) stay complete,
+ * so matches are always a subset of them.
+ */
+export const MATCH_MIN_SCORE = 60;
+
 export const SCORING_WEIGHTS = {
   vector: 0.3,
   skill: 0.35,

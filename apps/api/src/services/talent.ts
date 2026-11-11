@@ -1,4 +1,5 @@
 import {
+  MATCH_MIN_SCORE,
   buildPaginated,
   normalizeSkill,
   toLimitOffset,
@@ -77,7 +78,9 @@ function mapSummary(row: TalentRow, skills: string[], jobScoped: boolean): Talen
     hasResume: row.has_resume,
     hasAnalysis: row.has_analysis,
     updatedAt: toIso(row.updated_at),
-    recommended: jobScoped && row.match_score !== null,
+    // Same bar as 「この求人に合う求職者」, so the badge marks exactly the people listed there.
+    recommended:
+      jobScoped && row.match_score !== null && Number(row.match_score) >= MATCH_MIN_SCORE,
     matchScore: row.match_score === null ? null : Number(row.match_score),
   };
 }

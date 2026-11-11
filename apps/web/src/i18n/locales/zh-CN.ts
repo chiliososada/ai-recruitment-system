@@ -61,7 +61,7 @@ const zhCN: Dict = {
   },
   pageDesc: {
     resume: '上传简历后，AI 会分析你的技能、工作年限和优势。完善个人资料可以提高推荐的准确度。',
-    recommendations: 'AI 根据你的技能和经验，按匹配度从高到低推荐适合你的职位。',
+    recommendations: 'AI 根据你的技能和经验，推荐匹配度 {{min}} 以上的职位，按匹配度从高到低排列。',
     applications: '查看已申请职位的进度，并回复企业发来的面试邀请。',
     jobs: '按关键词、工作方式和技能查找公开的职位。',
     companies: '查看正在招聘的公司。',
@@ -346,9 +346,15 @@ const zhCN: Dict = {
     breakdown: '技能匹配 {{skill}}% · 工作年限 {{exp}}% · 经历相似度 {{sim}}%',
     recommendations: {
       title: 'AI 推荐职位',
-      empty: '暂无推荐。在「简历与 AI 分析」上传简历后，AI 会为你推荐职位',
+      empty:
+        '暂无匹配度 {{min}} 以上的职位。上传简历后会显示适合你的职位，全部职位可在「找职位」中查看',
     },
-    candidates: { title: 'AI 推荐的候选人', empty: '暂未找到适合该职位的候选人' },
+    candidates: {
+      title: 'AI 推荐的候选人',
+      empty: '暂无匹配度 {{min}} 以上的候选人。全部求职者可在「人才搜索」中查看',
+      note: '显示匹配度 {{min}} 以上的人，按匹配度从高到低排列',
+      viewAll: '在人才搜索中查看全部',
+    },
   },
   talent: {
     title: '人才搜索',
@@ -362,6 +368,10 @@ const zhCN: Dict = {
     detail: '候选人详情',
     count: '找到 {{count}} 名候选人',
     compareToggle: '加入比较',
+    job: '职位',
+    jobNone: '不选择',
+    jobHint: '选择职位后，会显示每个人与该职位的匹配度，并为 {{min}} 分以上的人标注「AI 推荐」。',
+    jobHintActive: '按与该职位的匹配度从高到低显示，{{min}} 分以上的人会标注「AI 推荐」。',
     contact: '联系邮箱',
     downloadResume: '下载简历文件',
     noAccess: '将该候选人加入候选名单，或收到其申请后，即可查看简历和联系方式',
@@ -463,6 +473,8 @@ const zhCN: Dict = {
     empty: '候选名单还是空的。在「人才搜索」中点击「加入候选名单」后会显示在这里',
     compare: '比较所选候选人',
     selectAtLeastTwo: '请至少选择 2 名候选人进行比较',
+    forJob: '对应职位：{{title}}',
+    compareHint: '比较同一职位下加入候选的人时，也会显示匹配度。',
   },
   compare: {
     title: '候选人比较',
