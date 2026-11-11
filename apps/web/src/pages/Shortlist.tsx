@@ -23,7 +23,19 @@ export default function Shortlist(): JSX.Element {
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['shortlist'] }),
   });
   const compare = useMutation({
-    mutationFn: () => api.post<ComparisonResult>('/compare', { candidateIds: selected }),
+    mutationFn: () => {
+      // When every selected entry was shortlisted for the same job, compare against that job so
+      // the table can show each person's match score.
+      const jobIds = new Set(
+        (list.data ?? []).filter((s) => selected.includes(s.candidateId)).map((s) => s.jobId),
+      );
+      const [only] = jobIds;
+      const jobId = jobIds.size === 1 && only ? only : undefined;
+      return api.post<ComparisonResult>('/compare', {
+        candidateIds: selected,
+        ...(jobId ? { jobId } : {}),
+      });
+    },
     onSuccess: setComparison,
   });
 

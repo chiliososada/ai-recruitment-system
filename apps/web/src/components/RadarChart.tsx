@@ -13,14 +13,18 @@ export interface RadarPoint {
  */
 export function RadarChart({ points }: { points: RadarPoint[] }): JSX.Element {
   const { t } = useTranslation();
-  const size = 240;
-  const center = size / 2;
-  const radius = center - 28;
+  // Wider than tall so the skill names fit beside the left/right corners.
+  const width = 380;
+  const height = 270;
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = 92;
   const n = Math.max(points.length, 3);
 
+  const angleOf = (i: number): number => (Math.PI * 2 * i) / n - Math.PI / 2;
   const coord = (i: number, r: number): [number, number] => {
-    const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-    return [center + r * Math.cos(angle) * (r === radius ? 1 : 1), center + r * Math.sin(angle)];
+    const angle = angleOf(i);
+    return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
   };
   const polygon = points
     .map((p, i) => {
@@ -32,11 +36,18 @@ export function RadarChart({ points }: { points: RadarPoint[] }): JSX.Element {
   return (
     <div>
       <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={t('analysis.radarTitle')}
+        style={{
+          display: 'block',
+          margin: '0 auto',
+          maxWidth: '100%',
+          height: 'auto',
+          overflow: 'visible',
+        }}
       >
         {[0.25, 0.5, 0.75, 1].map((ring) => (
           <polygon
@@ -53,11 +64,30 @@ export function RadarChart({ points }: { points: RadarPoint[] }): JSX.Element {
         ))}
         {points.map((p, i) => {
           const [x, y] = coord(i, radius);
-          return <line key={p.label} x1={center} y1={center} x2={x} y2={y} stroke="#e1e6ee" />;
+          return <line key={p.label} x1={cx} y1={cy} x2={x} y2={y} stroke="#e1e6ee" />;
         })}
         {points.length >= 3 && (
           <polygon points={polygon} fill="rgba(31,95,219,0.25)" stroke="#1f5fdb" strokeWidth={2} />
         )}
+        {points.map((p, i) => {
+          const cos = Math.cos(angleOf(i));
+          const sin = Math.sin(angleOf(i));
+          const [x, y] = coord(i, radius + 12);
+          const anchor = cos > 0.25 ? 'start' : cos < -0.25 ? 'end' : 'middle';
+          const dy = sin > 0.25 ? '0.9em' : sin < -0.25 ? '-0.25em' : '0.35em';
+          return (
+            <text
+              key={`label-${p.label}`}
+              x={x}
+              y={y}
+              dy={dy}
+              textAnchor={anchor}
+              style={{ fill: 'var(--color-text-muted, #475569)', fontSize: 12 }}
+            >
+              {p.label}
+            </text>
+          );
+        })}
       </svg>
       <p className="visually-hidden">{t('analysis.radarTextAlt')}</p>
       <ul className="list-reset" data-testid="radar-text">

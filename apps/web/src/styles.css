@@ -821,6 +821,16 @@ table th {
 table tbody tr:hover {
   background: var(--color-surface-2);
 }
+/* Candidate comparison: keep the row labels on one line (narrow Japanese labels otherwise
+   wrap one character per line) and align long cells from the top. */
+.compare-table th:first-child {
+  white-space: nowrap;
+  width: 1%;
+}
+.compare-table th,
+.compare-table td {
+  vertical-align: top;
+}
 .ui-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--color-border);
